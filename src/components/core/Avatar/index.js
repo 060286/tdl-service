@@ -1,19 +1,18 @@
 import React from "react";
 import "./style.css";
 
-import { Button } from "react-bootstrap";
-
 export default function Avatar() {
   return (
-    <>
+    <div className="avatar">
       <img
         src="https://www.w3schools.com/howto/img_avatar.png"
-        alt="avatar_img"
-        className="tdl__avatar"
+        alt="avatar__img"
+        className="avatar__img"
       />
-      <p>Name User</p>
-      <p>Workspace Account</p>
-      <Button>React Button</Button>
-    </>
+      <div className="avatar__info">
+        <p className="avatar__user-name">Name User</p>
+        <p className="avatar__acount-type">Workspace Account</p>
+      </div>
+    </div>
   );
 }

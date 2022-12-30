@@ -1,5 +1,27 @@
-.tdl__avatar {
-    height: 50px;
+.avatar__img {
+    height: auto;
     width: 50px;
     border-radius: 50%;
+}
+
+.avatar {
+    max-width: 240px;
+    max-height: 40px;
+    display: flex;
+    justify-content: space-around;
+}
+
+.avatar__user-name , .avatar__acount-type{
+    font-size: 12px;
+    height: 15px;
+    padding-left: 15px;
+}
+
+.avatar__user-name {
+    font-weight: 700;
+}
+
+.avatar__acount-type {
+    color: gray;
+    margin-top: -10px;
 }
