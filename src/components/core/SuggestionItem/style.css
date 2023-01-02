@@ -1,0 +1,14 @@
+.SuggestionItem {
+  height: 100px;
+  width: 330px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 20px;
+  padding-top: 10px;
+}
+
+.SuggestionItem:hover {
+  background-color: gray;
+  cursor: pointer;
+}

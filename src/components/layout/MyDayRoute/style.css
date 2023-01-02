@@ -26,5 +26,10 @@
 
 .MyDayEntries {
   margin-top: 20px;
-  border: 1px solid red;
+}
+
+.AppHeader {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
 }
