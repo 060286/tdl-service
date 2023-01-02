@@ -2,20 +2,20 @@ import { Row, Col } from "react-bootstrap";
 
 import "./style.css";
 
-export default function TaskItem() {
+export default function TaskItem({ id, breadcrumb, task }) {
   return (
-    <div style={{ backgroundColor: "red", marginTop: "20px" }}>
-      <Row>
+    <div>
+      <Row style={{ marginTop: 20 }}>
         <Col xs={1}>
           <input
             type="checkbox"
             className="TaskItemInput"
-            onClick={() => console.log("clicked")}
+            onClick={() => console.log(id)}
           />
         </Col>
         <Col xs={10}>
-          <div className="TaskItemBreadcrumb">Đây là Breadcrumb</div>
-          <div className="TaskItemTitle">Đây là Nội dung task</div>
+          <div className="TaskItemBreadcrumb">{breadcrumb}</div>
+          <div className="TaskItemTitle">{task}</div>
         </Col>
       </Row>
     </div>
