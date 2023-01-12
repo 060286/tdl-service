@@ -1,0 +1,12 @@
+.top_content {
+  height: 90vh;
+}
+
+.bottom_content {
+}
+
+.AddTaskInput_Block {
+  margin: 0 auto;
+  height: auto;
+  width: 50%;
+}
