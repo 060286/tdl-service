@@ -1,39 +1,49 @@
 import React, { useState, useEffect } from "react";
 
+import { useDispatch, useSelector } from "react-redux";
+
 import InputGroup from "react-bootstrap/InputGroup";
 import Form from "react-bootstrap/Form";
+import { PlusCircle } from "react-bootstrap-icons";
 
-import { getTodo } from "../../../adapters/myDayPageAdapter";
+import { createTodo } from "../../../adapters/myDayPageAdapter";
+import { addNewTodo } from "../../../features/todoSlice";
+
+import { VARIABLE_STATUS } from "../../../constants/appStatusConstant";
 
 import "./style.css";
 
 export default function AddTask() {
   const [taskTitle, setTaskTitle] = useState("");
-  const [todoList, setTodoList] = useState([]);
+  const [addRequestStatus, setAddRequestStatus] = useState("idle");
 
-  const todos = async () => {
-    const response = await getTodo();
+  const dispatch = useDispatch();
 
-    if (response.isSuccess && response.statusCode === 200) {
-      setTodoList(response.data);
-    } else {
-      console.warn(response.messageDetail);
+  const onKeyPressHandler = async (e, title) => {
+    const enterKey = "Enter";
+    // debugger;
+
+    if (e.key === enterKey) {
+      try {
+        setAddRequestStatus(VARIABLE_STATUS.LOADING);
+        await dispatch(addNewTodo({ title: taskTitle })).unwrap();
+      } catch (err) {
+        console.log("Failed to save the post", err);
+      } finally {
+        setAddRequestStatus(VARIABLE_STATUS.IDLE);
+      }
     }
   };
-
-  useEffect(() => {
-    todos();
-  }, []);
-
-  console.log(taskTitle);
 
   return (
     <>
       <InputGroup className="mb-3">
         <InputGroup.Text id="inputGroup-sizing-default">
-          Add Task
+          <PlusCircle />
         </InputGroup.Text>
         <Form.Control
+          onKeyUp={(e) => onKeyPressHandler(e, taskTitle)}
+          placeholder="Please fill and press enter to save task..."
           onChange={(e) => setTaskTitle(e.target.value)}
           aria-label="Default"
           aria-describedby="inputGroup-sizing-default"

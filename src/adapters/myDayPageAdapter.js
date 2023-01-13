@@ -1,12 +1,32 @@
 import axios from "axios";
 
+import { PATH_API, MY_DAY_PAGE_CONTROLLER } from "../constants/pathApiConstant";
+
 const getTodo = async () => {
-  const response = await axios
-    .get("https://localhost:44334/api/v1/myday-page/todos")
+  const url = `${PATH_API}${MY_DAY_PAGE_CONTROLLER}todos`;
+
+  const response = await axios({
+    method: "get",
+    url: url,
+  })
     .then((res) => res.data)
     .catch((err) => console.log(err));
 
   return response;
 };
 
-export { getTodo };
+const createTodo = async (title) => {
+  const url = `${PATH_API}${MY_DAY_PAGE_CONTROLLER}simple-todo`;
+
+  const response = await axios({
+    url: url,
+    method: "post",
+    data: {
+      title: title,
+    },
+  });
+
+  return response.data;
+};
+
+export { getTodo, createTodo };

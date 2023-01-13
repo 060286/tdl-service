@@ -26,6 +26,8 @@
 
 .MyDayEntries {
   margin-top: 20px;
+  height: 400px;
+  overflow: auto;
 }
 
 .AppHeader {

@@ -1,5 +1,5 @@
-const PATH_API = "http://localhost:8820/api/v1/";
+const PATH_API = "https://localhost:44334/api/v1/";
 
-const MYDAYPAGE = "myday-page";
+const MY_DAY_PAGE_CONTROLLER = "myday-page/";
 
-export { PATH_API, MYDAYPAGE };
+export { PATH_API, MY_DAY_PAGE_CONTROLLER };

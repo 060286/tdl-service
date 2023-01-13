@@ -10,7 +10,7 @@ import { Lightbulb, Search } from "react-bootstrap-icons";
 import "./style.css";
 
 export default function MyDayRoute(props) {
-  const { userName } = props;
+  const { userName, todos } = props;
   const [quotes, setQuotes] = useState("");
   const [author, setAuthor] = useState("");
   const [dayOfWeek, setDayOfWeek] = useState("");
@@ -119,8 +119,16 @@ export default function MyDayRoute(props) {
             </Col>
           </Row>
           <Row className="MyDayEntries">
-            <TaskItem id={1} task="rửa chén đi" breadcrumb="Thúi" />
-            <TaskItem id={2} task="xem tv đi" breadcrumb="Thúi" />
+            {todos.map((todo) => {
+              return (
+                <TaskItem
+                  key={todo.id}
+                  id={todo.id}
+                  task={todo.title}
+                  breadcrumb=""
+                ></TaskItem>
+              );
+            })}
           </Row>
         </Col>
         <Col xs={4}>
