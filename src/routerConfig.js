@@ -1,7 +1,7 @@
 import { createBrowserRouter } from "react-router-dom";
-import AllTaskPage from "./pages/AllTaskPage";
-import MyDayPage from "./pages/MyDayPage";
-import NextSevenDay from "./pages/NextSevenDay";
+import AllTaskPage from "./pages/AllTaskPage/AllTaskPage.jsx";
+import MyDayPage from "./pages/MyDayPage/MyDayPage.jsx";
+import NextSevenDay from "./pages/NextSevenDay/NextSevenDay.jsx";
 
 const router = createBrowserRouter([
   {
