@@ -26,10 +26,18 @@
 
 .MyDayEntries {
   margin-top: 20px;
+  height: 400px;
+  overflow: auto;
 }
 
 .AppHeader {
   display: flex;
   width: 100%;
   justify-content: space-between;
+}
+
+.AppSuggestionList {
+  margin-top: 20px;
+  height: 800px;
+  overflow: auto;
 }

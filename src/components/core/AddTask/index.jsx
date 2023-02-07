@@ -1,39 +1,62 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
+
+import { useDispatch } from "react-redux";
 
 import InputGroup from "react-bootstrap/InputGroup";
 import Form from "react-bootstrap/Form";
+import { PlusCircle } from "react-bootstrap-icons";
 
-import { getTodo } from "../../../adapters/myDayPageAdapter";
+import { addNewTodo } from "../../../slices/todoSlice";
+
+import { VARIABLE_STATUS } from "../../../constants/appStatusConstant";
 
 import "./style.css";
 
 export default function AddTask() {
-  const [taskTitle, setTaskTitle] = useState("");
-  const [todoList, setTodoList] = useState([]);
+  const [taskTitle, setTaskTitle] = useState(
+    "Please fill and press enter to save task..."
+  );
+  const [addRequestStatus, setAddRequestStatus] = useState("idle");
 
-  const todos = async () => {
-    const response = await getTodo();
+  const dispatch = useDispatch();
 
-    if (response.isSuccess && response.statusCode === 200) {
-      setTodoList(response.data);
-    } else {
-      console.warn(response.messageDetail);
+  const cansave =
+    addRequestStatus === VARIABLE_STATUS.IDLE &&
+    taskTitle.length > 0 &&
+    taskTitle !== "Please fill and press enter to save task...";
+
+  const onKeyPressHandler = async (e) => {
+    const enterKey = "Enter";
+
+    if (e.key === enterKey) {
+      try {
+        if (!cansave) {
+          alert("Please fill the task!");
+          return;
+        }
+
+        setAddRequestStatus(VARIABLE_STATUS.LOADING);
+        await dispatch(addNewTodo({ title: taskTitle })).unwrap();
+
+        setTaskTitle("Please fill and press enter to save task...");
+      } catch (err) {
+        console.log("Failed to save the post", err);
+      } finally {
+        setAddRequestStatus(VARIABLE_STATUS.IDLE);
+      }
     }
   };
-
-  useEffect(() => {
-    todos();
-  }, []);
-
-  console.log(taskTitle);
 
   return (
     <>
       <InputGroup className="mb-3">
         <InputGroup.Text id="inputGroup-sizing-default">
-          Add Task
+          <PlusCircle />
         </InputGroup.Text>
         <Form.Control
+          onKeyUp={(e) => onKeyPressHandler(e)}
+          value={taskTitle}
+          placeholder="Please fill and press enter to save task..."
           onChange={(e) => setTaskTitle(e.target.value)}
           aria-label="Default"
           aria-describedby="inputGroup-sizing-default"
