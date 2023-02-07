@@ -1,29 +1,34 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 
 import SideBar from "../../components/layout/SideBar";
 import MyDayRoute from "../../components/layout/MyDayRoute";
 import AddTask from "../../components/core/AddTask";
-import ListTodoItem from "../../components/core/ListTodoItem";
+
+import { useSelector, useDispatch } from "react-redux";
+import { getCurrentTodoList, selectAllTodos } from "../../slices/todoSlice";
+import { VARIABLE_STATUS } from "../../constants/appStatusConstant";
 
 import { Col, Container, Row } from "react-bootstrap";
-import { getTodo } from "../../adapters/myDayPageAdapter";
+
+import { getTokenFromLocalStorage } from "../../extensions/tokenExtension";
 
 import "./style.css";
 
 const MyDayPage = () => {
-  const [todolist, setTodoList] = useState([]);
-
-  const getTodoList = async () => {
-    const data = await getTodo();
-
-    setTodoList(data.data);
-  };
+  const dispatch = useDispatch();
+  const todos = useSelector(selectAllTodos);
+  const todoStatus = useSelector(
+    (state) => state.todoReducer.getCurrentTodo.status
+  );
+  const todoError = useSelector(
+    (state) => state.todoReducer.getCurrentTodo.error
+  );
 
   useEffect(() => {
-    getTodoList();
-  }, []);
-
-  console.log(todolist, "todo");
+    if (todoStatus === VARIABLE_STATUS.IDLE) {
+      dispatch(getCurrentTodoList(todos));
+    }
+  }, [todoStatus, dispatch]);
 
   return (
     <Container fluid className="mydaypage">
@@ -32,7 +37,7 @@ const MyDayPage = () => {
           <SideBar />
         </Col>
         <Col>
-          <MyDayRoute userName="Tâm Lê Văn" todos={todolist} />
+          <MyDayRoute userName="Tâm Lê Văn" todos={todos.todos} />
         </Col>
       </Row>
       <Row className="bottom_content">

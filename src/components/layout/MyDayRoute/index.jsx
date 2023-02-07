@@ -7,6 +7,13 @@ import SuggestionItem from "../../core/SuggestionItem";
 import { Row, Col, Container } from "react-bootstrap";
 import { Lightbulb, Search } from "react-bootstrap-icons";
 
+import { useDispatch, useSelector } from "react-redux";
+import { VARIABLE_STATUS } from "../../../constants/appStatusConstant";
+import {
+  getSuggestionTodo,
+  selectAllSuggestionTodo,
+} from "../../../slices/todoSlice";
+
 import "./style.css";
 
 export default function MyDayRoute(props) {
@@ -17,16 +24,13 @@ export default function MyDayRoute(props) {
   const [dayOfMonth, setDateOfMonth] = useState(0);
   const [monthOfYear, setMonthOfYear] = useState(0);
 
-  const suggestions = [
-    {
-      id: 1,
-      title: "Xem tivi",
-      time: "From 2 days ago",
-      breadcrumb: "My lists > Personal",
-    },
-  ];
+  const dispatch = useDispatch();
+  const suggestionTodos = useSelector(selectAllSuggestionTodo);
+  const suggestionStatus = useSelector(
+    (state) => state.todoReducer.getSuggestionTodo.status
+  );
 
-  useEffect(() => {
+  const hanleQuotes = () => {
     axios
       .get("https://type.fit/api/quotes")
       .then(function (response) {
@@ -42,11 +46,17 @@ export default function MyDayRoute(props) {
     const dateNumber = date.getDay();
     const monthNumber = date.getMonth();
 
-    console.log(date.getMonth());
-
     setDayOfWeek(dateFormatted(dateNumber));
     setDateOfMonth(date.getDate());
     setMonthOfYear(monthFormatted(monthNumber));
+  };
+
+  useEffect(() => {
+    hanleQuotes();
+
+    if (suggestionStatus === VARIABLE_STATUS.IDLE) {
+      dispatch(getSuggestionTodo());
+    }
   }, []);
 
   const monthFormatted = (monthNumber) => {
@@ -143,15 +153,8 @@ export default function MyDayRoute(props) {
           </div>
           <div>Filter</div>
           <div className="AppSuggestionList">
-            {suggestions.map((suggestion) => {
-              return (
-                <SuggestionItem
-                  key={suggestion.id}
-                  breadcrumb={suggestion.breadcrumb}
-                  title={suggestion.title}
-                  timeline={suggestion.time}
-                />
-              );
+            {suggestionTodos.todos.map((suggestion) => {
+              return <SuggestionItem key={suggestion.id} data={suggestion} />;
             })}
           </div>
         </Col>

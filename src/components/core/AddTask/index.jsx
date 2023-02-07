@@ -1,32 +1,44 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 
 import InputGroup from "react-bootstrap/InputGroup";
 import Form from "react-bootstrap/Form";
 import { PlusCircle } from "react-bootstrap-icons";
 
-import { createTodo } from "../../../adapters/myDayPageAdapter";
-import { addNewTodo } from "../../../features/todoSlice";
+import { addNewTodo } from "../../../slices/todoSlice";
 
 import { VARIABLE_STATUS } from "../../../constants/appStatusConstant";
 
 import "./style.css";
 
 export default function AddTask() {
-  const [taskTitle, setTaskTitle] = useState("");
+  const [taskTitle, setTaskTitle] = useState(
+    "Please fill and press enter to save task..."
+  );
   const [addRequestStatus, setAddRequestStatus] = useState("idle");
 
   const dispatch = useDispatch();
 
-  const onKeyPressHandler = async (e, title) => {
+  const cansave =
+    addRequestStatus === VARIABLE_STATUS.IDLE &&
+    taskTitle.length > 0 &&
+    taskTitle !== "Please fill and press enter to save task...";
+
+  const onKeyPressHandler = async (e) => {
     const enterKey = "Enter";
-    // debugger;
 
     if (e.key === enterKey) {
       try {
+        if (!cansave) {
+          alert("Please fill the task!");
+          return;
+        }
+
         setAddRequestStatus(VARIABLE_STATUS.LOADING);
         await dispatch(addNewTodo({ title: taskTitle })).unwrap();
+
+        setTaskTitle("Please fill and press enter to save task...");
       } catch (err) {
         console.log("Failed to save the post", err);
       } finally {
@@ -42,7 +54,8 @@ export default function AddTask() {
           <PlusCircle />
         </InputGroup.Text>
         <Form.Control
-          onKeyUp={(e) => onKeyPressHandler(e, taskTitle)}
+          onKeyUp={(e) => onKeyPressHandler(e)}
+          value={taskTitle}
           placeholder="Please fill and press enter to save task..."
           onChange={(e) => setTaskTitle(e.target.value)}
           aria-label="Default"
