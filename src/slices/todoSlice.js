@@ -23,12 +23,25 @@ const initialState = {
     status: VARIABLE_STATUS.IDLE,
     error: null,
   },
+  getDetailTo: {
+    todo: {},
+    status: VARIABLE_STATUS.IDLE,
+    error: null,
+  },
 };
+
+export const getTodoById = createAsyncThunk(
+  "todo/getTodoById",
+  async (initialState) => {}
+  // Mai làm tiếp
+);
 
 export const getCurrentTodoList = createAsyncThunk(
   "todo/getCurrentTodoList",
   async (initialState) => {
     const response = await getTodayJobList();
+
+    // console.log("getCurrentTodoList");
 
     return {
       ...initialState,

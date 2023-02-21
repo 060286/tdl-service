@@ -5,6 +5,8 @@ const USER_PAGE = "/user";
 
 const LOGIN_METHOD = "/login";
 const REGISTER_METHOD = "/register";
+const TODO = "/todo";
+const USERINFO = "/user-info";
 
 export {
   PATH_API,
@@ -12,4 +14,6 @@ export {
   USER_PAGE,
   LOGIN_METHOD,
   REGISTER_METHOD,
+  TODO,
+  USERINFO,
 };

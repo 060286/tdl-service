@@ -24,6 +24,9 @@ export default function SuggestionItem({ data }) {
   return (
     <div
       className="SuggestionItem"
+      style={{
+        boxSizing: "border-box",
+      }}
       onClick={() => handleSuggestionItemClick(data)}
     >
       <div className="Suggestion__Breadcrumb">

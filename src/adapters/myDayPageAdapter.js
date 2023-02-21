@@ -59,6 +59,7 @@ const createTodo = async (title) => {
     },
     data: {
       title: title,
+      categoryId: null,
     },
   });
 

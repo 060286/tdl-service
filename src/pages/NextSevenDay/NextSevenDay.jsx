@@ -5,14 +5,11 @@ import { Col, Container, Row } from "react-bootstrap";
 
 const NextSevenDay = () => {
   return (
-    <Container fluid className="nextsevenday">
+    <div>
       <Row>
-        <Col xs={3}>
-          <SideBar />
-        </Col>
         <Col>Đây là Content</Col>
       </Row>
-    </Container>
+    </div>
   );
 };
 

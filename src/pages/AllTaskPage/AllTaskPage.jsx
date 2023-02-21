@@ -1,5 +1,4 @@
 import React, { useEffect } from "react";
-import SideBar from "../../components/layout/SideBar";
 import { useSelector, useDispatch } from "react-redux";
 import {
   getAllTask,
@@ -27,12 +26,11 @@ const AllTaskPage = () => {
     }
   }, [tasksStatus, dispatch]);
 
+  console.log({ tasks });
+
   return (
-    <Container fluid className="alltaskpage">
+    <Container className="alltaskpage">
       <Row>
-        <Col xs={3}>
-          <SideBar />
-        </Col>
         <Col>
           <Row>
             <h3>All My Task</h3>

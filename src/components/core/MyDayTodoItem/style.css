@@ -1,0 +1,53 @@
+.MyDayTodoItemBlock:hover {
+    background: rgb(251, 249, 249);
+}
+
+.MyDayTodoItemBlock { 
+    display: flex;
+    border: 1px solid gainsboro;
+}
+
+.TodoItemEntriesBlock {
+    width: 10%;
+    height: 100%;
+}
+
+.MyDayTodoItemBock {
+    background: rgb(255, 255, 255);
+    width: 100%;
+}
+
+.TodoItemEntriesBlock input {
+    margin: 45%;
+}
+
+.TaskItemCheckBoxDone {
+    background: gray;
+}
+
+.TaskItemCheckBoxNotDone {
+    border-radius: 1px solid rgb(91, 91, 237);
+}
+
+.MyDayTodoCategoryRoute {
+    color: rgb(69, 67, 67);
+    font-weight: bold;
+}
+
+.MyDayTodoCategoryRoute {
+    text-decoration: none;
+}
+
+.MyDayTodoCategoryRoute:hover {
+    text-decoration: dashed;
+    color: rgb(112, 111, 111);
+}
+
+.MyDayTodoLockIcon {
+    margin-bottom: 5px;
+}
+
+.MyDayTodoLockIcon,
+.MyDayTodoCategoryRoute {
+    font-size: 16px;
+}

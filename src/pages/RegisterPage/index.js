@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 
 import { registerAccount } from "../../slices/accountSlice";
 
@@ -8,6 +8,7 @@ import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router";
 
 import { timeout } from "../../extensions/delayExtension";
+import { getTokenFromLocalStorage } from "../../extensions/tokenExtension";
 
 import "./style.css";
 
@@ -15,6 +16,8 @@ export default function RegisterPage() {
   const { register, handleSubmit } = useForm();
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  const isAuth = getTokenFromLocalStorage() != null;
 
   const handleRegister = async (user) => {
     const response = await dispatch(registerAccount(user)).unwrap();
@@ -24,6 +27,12 @@ export default function RegisterPage() {
       navigate("/login");
     }
   };
+
+  useEffect(() => {
+    if (isAuth) {
+      navigate("/myday");
+    }
+  }, [isAuth, navigate]);
 
   return (
     <div className="registerblock">

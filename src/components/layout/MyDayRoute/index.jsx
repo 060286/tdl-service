@@ -97,8 +97,8 @@ export default function MyDayRoute(props) {
   };
 
   return (
-    <Container className="MyDayRoute">
-      <Row className="">
+    <div className="MyDayRouteTop">
+      <Row>
         <Col xs={8}>
           <Row className="MyDayRoute__title">
             <p className="MyDayRouteTitle">Good Evening, {userName}</p>
@@ -159,6 +159,6 @@ export default function MyDayRoute(props) {
           </div>
         </Col>
       </Row>
-    </Container>
+    </div>
   );
 }

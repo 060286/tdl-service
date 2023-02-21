@@ -4,8 +4,8 @@ import { useForm } from "react-hook-form";
 
 import { useDispatch, useSelector } from "react-redux";
 
-import { loginAccount } from "../../../slices/accountSlice";
-import { setToken } from "../../../slices/accountSlice";
+import { loginAccount, getUserInfo } from "../../../slices/accountSlice";
+import { setToken, setUserInfo } from "../../../slices/accountSlice";
 import { useNavigate } from "react-router";
 import { timeout } from "../../../extensions/delayExtension";
 
@@ -16,16 +16,16 @@ export default function LoginForm() {
 
   const handleLoginClick = async (data) => {
     const res = await dispath(loginAccount(data)).unwrap();
+    const userInfo = await dispath(getUserInfo(res.data.token)).unwrap();
 
     if (res.statusCode === 200 || res.isSuccess === true) {
       const { token } = res.data;
 
-      dispath(setToken(token));
-
       localStorage.setItem("token", JSON.stringify(token));
 
-      await timeout(1000);
-      navigate("/");
+      console.log("navigate");
+
+      navigate("/myday");
     } else {
       if (res.statusCode === 401) {
         alert("Please input a correct username/password");

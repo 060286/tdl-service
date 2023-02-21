@@ -1,5 +1,9 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { login, register } from "../adapters/accountTaskAdapter";
+import {
+  login,
+  register,
+  getUserInfoAdapter,
+} from "../adapters/accountTaskAdapter";
 import { getTargetOfProxy } from "../extensions/proxyExtension";
 
 import { VARIABLE_STATUS } from "../constants/appStatusConstant";
@@ -17,6 +21,7 @@ const initialState = {
     error: "",
   },
   token: null,
+  userInfo: null,
 };
 
 export const loginAccount = createAsyncThunk("account/login", async (data) => {
@@ -34,21 +39,42 @@ export const registerAccount = createAsyncThunk(
   }
 );
 
+export const getUserInfo = createAsyncThunk(
+  "account/getUserInfo",
+  async (token) => {
+    const response = await getUserInfoAdapter(token);
+
+    return response.data;
+  }
+);
+
 const accountSlice = createSlice({
   name: SLICE_NAMES.ACCOUNT_SLICE,
   initialState,
   reducers: {
     setToken(state, action) {
       state.token = action.payload;
-
-      console.log(getTargetOfProxy(state));
+    },
+    setUserInfo(state, action) {
+      const userInfo = action.payload;
+      state.userInfo = userInfo;
     },
   },
-  extraReducers() {},
+  extraReducers(builder) {
+    builder
+      .addCase(loginAccount.fulfilled, (state, action) => {
+        state.token = action.payload.data;
+      })
+      .addCase(getUserInfo.fulfilled, (state, action) => {
+        const userInfo = action.payload;
+
+        state.userInfo = userInfo;
+      });
+  },
 });
 
 export const {
-  actions: { setToken },
+  actions: { setToken, setUserInfo },
   reducer: accountReducer,
 } = accountSlice;
 

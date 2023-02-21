@@ -1,9 +1,10 @@
 .loginblock {
-margin: 0;
+    margin: 0;
     padding: 0;
     background: linear-gradient(120deg, #2980b0, #8e44ad);
     height: 100vh;
     overflow: hidden;
+    width: 100%;
 }
 
 .center {

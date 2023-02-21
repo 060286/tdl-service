@@ -13,9 +13,7 @@ import { VARIABLE_STATUS } from "../../../constants/appStatusConstant";
 import "./style.css";
 
 export default function AddTask() {
-  const [taskTitle, setTaskTitle] = useState(
-    "Please fill and press enter to save task..."
-  );
+  const [taskTitle, setTaskTitle] = useState("Add Task");
   const [addRequestStatus, setAddRequestStatus] = useState("idle");
 
   const dispatch = useDispatch();
@@ -23,7 +21,7 @@ export default function AddTask() {
   const cansave =
     addRequestStatus === VARIABLE_STATUS.IDLE &&
     taskTitle.length > 0 &&
-    taskTitle !== "Please fill and press enter to save task...";
+    taskTitle !== "Add Task";
 
   const onKeyPressHandler = async (e) => {
     const enterKey = "Enter";
@@ -38,7 +36,7 @@ export default function AddTask() {
         setAddRequestStatus(VARIABLE_STATUS.LOADING);
         await dispatch(addNewTodo({ title: taskTitle })).unwrap();
 
-        setTaskTitle("Please fill and press enter to save task...");
+        setTaskTitle("Add Task");
       } catch (err) {
         console.log("Failed to save the post", err);
       } finally {
@@ -49,19 +47,30 @@ export default function AddTask() {
 
   return (
     <>
-      <InputGroup className="mb-3">
-        <InputGroup.Text id="inputGroup-sizing-default">
-          <PlusCircle />
-        </InputGroup.Text>
-        <Form.Control
-          onKeyUp={(e) => onKeyPressHandler(e)}
-          value={taskTitle}
-          placeholder="Please fill and press enter to save task..."
-          onChange={(e) => setTaskTitle(e.target.value)}
-          aria-label="Default"
-          aria-describedby="inputGroup-sizing-default"
-        />
-      </InputGroup>
+      <div className="AddTask" style={{ height: "100px", display: "relative" }}>
+        <InputGroup
+          className="mb-3 InputTask AddIcon"
+          style={{
+            display: "absolute",
+            left: "50%",
+            top: "50%",
+            width: "80%",
+            transform: "translate(-50%, -50%)",
+          }}
+        >
+          {/* <InputGroup.Text className="InputTask" id="inputGroup-sizing-default">
+            <PlusCircle />
+          </InputGroup.Text> */}
+          <Form.Control
+            onKeyUp={(e) => onKeyPressHandler(e)}
+            value={taskTitle}
+            placeholder="Add Task"
+            onChange={(e) => setTaskTitle(e.target.value)}
+            aria-label="Default"
+            aria-describedby="inputGroup-sizing-default"
+          />
+        </InputGroup>
+      </div>
     </>
   );
 }

@@ -4,6 +4,7 @@ import {
   PATH_API,
   USER_PAGE,
   REGISTER_METHOD,
+  USERINFO,
 } from "../constants/pathApiConstant";
 
 import { getUserName } from "../extensions/stringExtention";
@@ -21,11 +22,27 @@ export const login = async ({ username, password }) => {
       },
     });
 
-    console.log({ response });
-
     return response.data;
   } catch (error) {
     return error.response.data;
+  }
+};
+
+export const getUserInfoAdapter = async (token) => {
+  const url = `${PATH_API}${USER_PAGE}${USERINFO}`;
+
+  try {
+    const response = await axios({
+      method: "get",
+      url: url,
+      headers: {
+        authorization: `Bearer ${token}`,
+      },
+    });
+
+    return response.data;
+  } catch (exeption) {
+    console.log(exeption);
   }
 };
 
@@ -41,17 +58,6 @@ export const register = async ({
   try {
     const url = `${PATH_API}${USER_PAGE}${REGISTER_METHOD}`;
     username = getUserName(email);
-
-    console.log({
-      email,
-      firstname,
-      lastname,
-      username,
-      password,
-      confirmpassword,
-      phoneNumber,
-      temp: "temp",
-    });
 
     const response = await axios({
       url: url,
