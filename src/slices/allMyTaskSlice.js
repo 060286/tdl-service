@@ -18,9 +18,8 @@ const initialState = {
 
 export const getTaskById = createAsyncThunk(
   "allMyTask/getTaskById",
-  async (id, todo) => {
+  async (id) => {
     try {
-      console.log({ todo });
       const response = await getTaskDetail(id);
 
       const data = response.data;

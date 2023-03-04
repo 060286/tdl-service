@@ -16,16 +16,17 @@ export default function LoginForm() {
 
   const handleLoginClick = async (data) => {
     const res = await dispath(loginAccount(data)).unwrap();
-    const userInfo = await dispath(getUserInfo(res.data.token)).unwrap();
 
     if (res.statusCode === 200 || res.isSuccess === true) {
       const { token } = res.data;
 
+      const userInfo = await dispath(getUserInfo(res.data.token)).unwrap();
+
       localStorage.setItem("token", JSON.stringify(token));
 
-      console.log("navigate");
+      console.log({ res });
 
-      navigate("/myday");
+      navigate("myday");
     } else {
       if (res.statusCode === 401) {
         alert("Please input a correct username/password");

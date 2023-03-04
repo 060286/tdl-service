@@ -73,8 +73,6 @@ export const register = async ({
       },
     });
 
-    console.log({ response, step: "adapter" });
-
     return response.data;
   } catch (err) {
     console.log(err);

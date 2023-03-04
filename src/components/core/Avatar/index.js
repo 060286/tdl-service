@@ -8,8 +8,6 @@ export default function Avatar() {
     return state.accountReducer.userInfo;
   });
 
-  console.log({ userInfo });
-
   return (
     <div className="avatar">
       <img

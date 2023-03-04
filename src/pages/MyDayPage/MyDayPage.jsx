@@ -12,6 +12,9 @@ import {
   selectAllSuggestionTodo,
 } from "../../slices/todoSlice";
 
+import { getUserInfo } from "../../slices/accountSlice";
+import { getTokenFromLocalStorage } from "../../extensions/tokenExtension";
+
 import { useSelector, useDispatch } from "react-redux";
 import { getCurrentTodoList, selectAllTodos } from "../../slices/todoSlice";
 import { VARIABLE_STATUS } from "../../constants/appStatusConstant";
@@ -34,11 +37,6 @@ const MyDayPage = () => {
   );
   const todoState = useSelector((state) => state.todoReducer.getDetailTo);
   const userInfo = useSelector((state) => state.accountReducer.userInfo);
-
-  console.log({ userInfo });
-
-  console.log({ userInfo });
-
   const suggestionTodos = useSelector(selectAllSuggestionTodo);
   const suggestionStatus = useSelector(
     (state) => state.todoReducer.getSuggestionTodo.status
@@ -75,6 +73,12 @@ const MyDayPage = () => {
 
     if (todoStatus === VARIABLE_STATUS.IDLE) {
       dispatch(getCurrentTodoList(todos));
+    }
+
+    if (userInfo.status === VARIABLE_STATUS.IDLE) {
+      const token = getTokenFromLocalStorage();
+
+      dispatch(getUserInfo(token));
     }
 
     if (suggestionStatus === VARIABLE_STATUS.IDLE) {
@@ -179,6 +183,7 @@ const MyDayPage = () => {
                         category={task.todoCategory}
                         id={task.id}
                         key={task.id}
+                        isCompleted={task.isCompleted}
                         handleOpenPopup={handleOpenPopup}
                       />
                     );

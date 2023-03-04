@@ -14,8 +14,6 @@ const SideBar = ({ username }) => {
       : // ? userInfo.img
         "https://www.w3schools.com/howto/img_avatar.png";
 
-  console.log({ userInfo });
-
   const routeItem = {
     task: "tasks",
     nextsevenday: "nextsevenday",

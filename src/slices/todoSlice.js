@@ -5,6 +5,8 @@ import {
   getTodayJobList,
   getSuggestionTodoList,
 } from "../adapters/myDayPageAdapter";
+
+import { getTaskById, createSubTaskInTodo } from "../adapters/taskAdapter";
 import { VARIABLE_STATUS } from "../constants/appStatusConstant";
 
 const initialState = {
@@ -23,25 +25,40 @@ const initialState = {
     status: VARIABLE_STATUS.IDLE,
     error: null,
   },
-  getDetailTo: {
+  getDetailTodo: {
     todo: {},
     status: VARIABLE_STATUS.IDLE,
     error: null,
   },
 };
 
-export const getTodoById = createAsyncThunk(
-  "todo/getTodoById",
-  async (initialState) => {}
-  // Mai làm tiếp
+export const createSubTodo = createAsyncThunk(
+  "todo/createSubTodo",
+  async (subtask) => {
+    try {
+      const response = await createSubTaskInTodo(subtask);
+
+      return response;
+    } catch (err) {
+      console.log(err);
+    }
+  }
 );
+
+export const getTodoById = createAsyncThunk("todo/getTodoById", async (id) => {
+  try {
+    const response = await getTaskById(id);
+
+    return response.data;
+  } catch (err) {
+    console.log(err);
+  }
+});
 
 export const getCurrentTodoList = createAsyncThunk(
   "todo/getCurrentTodoList",
   async (initialState) => {
     const response = await getTodayJobList();
-
-    // console.log("getCurrentTodoList");
 
     return {
       ...initialState,
@@ -92,14 +109,32 @@ const todoSlice = createSlice({
         (el) => el.id !== action.payload
       );
     },
+    removeDetailTodo(state) {
+      state.getDetailTodo.todo = {};
+      state.getDetailTodo.error = null;
+      state.getDetailTodo.status = VARIABLE_STATUS.IDLE;
+    },
+    changeTitleByDetail(state, action) {
+      state.getDetailTodo.todo.title = action.payload;
+    },
+    addSubTaskToDetailTodo(state, action) {
+      state.getDetailTodo.todo.subTasks.unshift(action.payload);
+    },
   },
   extraReducers: (builder) => {
     builder
+      .addCase(createSubTodo.pending, (state, action) => {
+        // state.getDetailTodo.status = VARIABLE_STATUS.LOADING;
+      })
+      .addCase(createSubTodo.fulfilled, (state, action) => {
+        // state.getDetailTodo.todo.subTasks.unshift(action.payload.data.data);
+      })
+      .addCase(createSubTodo.rejected, (state, action) => {})
       .addCase(addNewTodo.fulfilled, (state, action) => {
         state.getCurrentTodo.todos.push(action.payload);
       })
       .addCase(getCurrentTodoList.pending, (state) => {
-        state.status = VARIABLE_STATUS.LOADING;
+        state.getCurrentTodo.status = VARIABLE_STATUS.LOADING;
       })
       .addCase(getCurrentTodoList.fulfilled, (state, action) => {
         state.getCurrentTodo.todos = action.payload.getCurrentTodo.todo;
@@ -116,7 +151,17 @@ const todoSlice = createSlice({
         state.getSuggestionTodo.todos = action.payload;
       })
       .addCase(getSuggestionTodo.rejected, (state, action) => {})
-      .addCase(addSuggestionToCurrentTodoList.fulfilled, (state, action) => {});
+      .addCase(addSuggestionToCurrentTodoList.fulfilled, (state, action) => {})
+      .addCase(getTodoById.pending, (state, action) => {
+        state.getDetailTodo.status = VARIABLE_STATUS.LOADING;
+      })
+      .addCase(getTodoById.fulfilled, (state, action) => {
+        state.getDetailTodo.status = VARIABLE_STATUS.SUCCEEDED;
+        state.getDetailTodo.todo = action.payload;
+      })
+      .addCase(getTodoById.rejected, (state, action) => {
+        state.getDetailTodo.status = VARIABLE_STATUS.FAILED;
+      });
   },
 });
 
@@ -136,7 +181,12 @@ export const selectAllSuggestion = (state) => {
 };
 
 export const {
-  actions: { removeSuggestion },
+  actions: {
+    removeSuggestion,
+    removeDetailTodo,
+    changeTitleByDetail,
+    addSubTaskToDetailTodo,
+  },
   reducer: todoReducer,
 } = todoSlice;
 

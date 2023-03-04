@@ -26,8 +26,6 @@ const AllTaskPage = () => {
     }
   }, [tasksStatus, dispatch]);
 
-  console.log({ tasks });
-
   return (
     <Container className="alltaskpage">
       <Row>

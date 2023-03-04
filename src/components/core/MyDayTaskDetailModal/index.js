@@ -3,29 +3,52 @@ import React, { useState, useEffect } from "react";
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
 
-import { VARIABLE_STATUS } from "../../../constants/appStatusConstant";
+import { Circle, CheckCircleFill, CircleFill } from "react-bootstrap-icons";
 
+import { VARIABLE_STATUS } from "../../../constants/appStatusConstant";
 import { useDispatch, useSelector } from "react-redux";
-import { getTaskById } from "../../../slices/allMyTaskSlice";
+import { getTodoById } from "../../../slices/todoSlice";
+import {
+  removeDetailTodo,
+  changeTitleByDetail,
+  createSubTodo,
+  addSubTaskToDetailTodo,
+} from "../../../slices/todoSlice";
 
 import "./style.css";
+import { Row, Col } from "react-bootstrap";
 
 const MyDayTaskDetailModal = (props) => {
-  const id = props.id;
+  const [subtaskText, setSubtaskText] = useState("");
+  let isShow = props.show;
 
   const dispatch = useDispatch();
-  const todo = useSelector((state) => state.todoReducer.getDetailTo);
-  const todoStatus = useSelector(
-    (state) => state.todoReducer.getDetailTo.status
-  );
+  const todo = useSelector((state) => state.todoReducer.getDetailTodo);
+  const subtaskPlaceHolder = "Add a new subtask";
 
   useEffect(() => {
-    if (todoStatus === VARIABLE_STATUS.IDLE && id !== null) {
-      const response = dispatch(getTaskById(props.id, todo));
-
-      console.log({ response });
+    if (todo.status === VARIABLE_STATUS.IDLE && props.id !== null) {
+      dispatch(getTodoById(props.id));
     }
-  }, [dispatch, todoStatus, id]);
+  }, [isShow]);
+
+  const handleCreateSubtask = async (e, id, tod) => {
+    if (e.key === "Enter") {
+      await dispatch(
+        createSubTodo({ todoId: id, name: e.target.value })
+      ).unwrap();
+
+      setSubtaskText("");
+      dispatch(
+        addSubTaskToDetailTodo({
+          todoId: id,
+          name: e.target.value,
+          isCompleted: false,
+        })
+      );
+      e.target.value = "";
+    }
+  };
 
   return (
     <Modal
@@ -33,21 +56,94 @@ const MyDayTaskDetailModal = (props) => {
       size="lg"
       aria-labelledby="contained-modal-title-vcenter"
       centered
+      onExit={() => dispatch(removeDetailTodo())}
     >
       <Modal.Header closeButton>
         <Modal.Title id="contained-modal-title-vcenter">
-          Modal heading
+          {todo.status === VARIABLE_STATUS.SUCCEEDED ? todo.todo.title : ""}
         </Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <h4>Centered Modal</h4>
-        <p>
-          Cras mattis consectetur purus sit amet fermentum. Cras justo odio,
-          dapibus ac facilisis in, egestas eget quam. Morbi leo risus, porta ac
-          consectetur ac, vestibulum at eros.
-        </p>
+        <div className="TitleInputBlock">
+          {todo.status === VARIABLE_STATUS.SUCCEEDED ? (
+            <input
+              onChange={(e) => dispatch(changeTitleByDetail(e.target.value))}
+              maxLength={250}
+              placeholder={todo.todo.title}
+              type="text"
+              className="InputPlace"
+            />
+          ) : (
+            <></>
+          )}
+        </div>
+        <Row className="MyDayTaskFunction">
+          <Button variant="secondary" className="MDT_TopButton">
+            Remind
+          </Button>
+          <Button variant="secondary" className="MDT_TopButton">
+            Work
+          </Button>
+          <Button variant="secondary" className="MDT_TopButton">
+            Tags
+          </Button>
+        </Row>
+        <Row className="MDT_NoteTitle">
+          <p>Notes</p>
+        </Row>
+        <Row>
+          <input
+            className="MDT_InputNoteTitle"
+            type="text"
+            placeholder="Insert your notes here"
+          />
+        </Row>
+        <Row className="MDT_SubTask">Sub Task Here</Row>
+        <Row>
+          <div className="MDT_SubTaskItem">
+            <Row>
+              <Col xs={2}>
+                <Circle />
+              </Col>
+              <Col xs={10}>
+                <input
+                  type="text"
+                  placeholder={subtaskPlaceHolder}
+                  defaultValue={subtaskText}
+                  onKeyDown={(e) => handleCreateSubtask(e, todo.todo.id)}
+                />
+              </Col>
+            </Row>
+          </div>
+        </Row>
+        <Row className="MDT_SubTaskItemBlock">
+          {todo.status === VARIABLE_STATUS.SUCCEEDED ? (
+            todo.todo.subTasks.map((todo) => (
+              <div key={todo.id} className="MDT_SubTaskItem">
+                <Row>
+                  <Col xs={2}>
+                    {todo.isCompleted ? (
+                      <CircleFill onClick={() => console.log(todo.id)} />
+                    ) : (
+                      <Circle onClick={() => console.log(todo.id)} />
+                    )}
+                  </Col>
+                  <Col xs={10}>
+                    <input type="text" defaultValue={todo.name} />
+                  </Col>
+                </Row>
+              </div>
+            ))
+          ) : (
+            <></>
+          )}
+        </Row>
+        <Row>
+          <p className="MDT_InputAttachmentTitle">ATTACHMENTS</p>
+        </Row>
       </Modal.Body>
       <Modal.Footer>
+        <Button>Update</Button>
         <Button onClick={props.onHide}>Close</Button>
       </Modal.Footer>
     </Modal>

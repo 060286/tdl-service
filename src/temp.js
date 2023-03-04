@@ -30,8 +30,6 @@ export default function Register() {
   } = useForm();
 
   const handleSubmitForm = async (data) => {
-    console.log({ data, text: "register" });
-
     const response = await dispatch(registerAccount(data)).unwrap();
   };
 

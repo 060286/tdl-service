@@ -21,7 +21,11 @@ const initialState = {
     error: "",
   },
   token: null,
-  userInfo: null,
+  userInfo: {
+    data: {},
+    status: VARIABLE_STATUS.IDLE,
+    error: null,
+  },
 };
 
 export const loginAccount = createAsyncThunk("account/login", async (data) => {
@@ -65,10 +69,18 @@ const accountSlice = createSlice({
       .addCase(loginAccount.fulfilled, (state, action) => {
         state.token = action.payload.data;
       })
+      .addCase(getUserInfo.pending, (state, action) => {
+        state.userInfo.status = VARIABLE_STATUS.IDLE;
+        state.userInfo.error = null;
+      })
       .addCase(getUserInfo.fulfilled, (state, action) => {
-        const userInfo = action.payload;
-
-        state.userInfo = userInfo;
+        state.userInfo.status = VARIABLE_STATUS.SUCCEEDED;
+        state.userInfo = action.payload;
+        state.userInfo.error = null;
+      })
+      .addCase(getUserInfo.rejected, (state, action) => {
+        state.userInfo.status = VARIABLE_STATUS.FAILED;
+        state.userInfo.error = action.payload;
       });
   },
 });
