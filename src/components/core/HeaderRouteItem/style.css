@@ -1,0 +1,21 @@
+.HeaderRouteItemBlock {
+    height: 40px;
+    width: 454px;
+    background: #3f3737;
+    color: white;
+    border-radius: 25px;
+    padding: 6px;
+}
+
+.CalendarHeader {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.RouteBtn {
+    width: auto;
+    margin-left: 10px;
+    height: 25px;
+    font-size: 10px;
+    background-color: #3f3737;
+}

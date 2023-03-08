@@ -13,6 +13,7 @@ import {
   changeTitleByDetail,
   createSubTodo,
   addSubTaskToDetailTodo,
+  changeCompletedStatusOfSubtaskById,
 } from "../../../slices/todoSlice";
 
 import "./style.css";
@@ -48,6 +49,10 @@ const MyDayTaskDetailModal = (props) => {
       );
       e.target.value = "";
     }
+  };
+
+  const handleSubtaskIconClick = (id, name, isCompleted) => {
+    dispatch(changeCompletedStatusOfSubtaskById({ id, name, isCompleted }));
   };
 
   return (
@@ -123,13 +128,33 @@ const MyDayTaskDetailModal = (props) => {
                 <Row>
                   <Col xs={2}>
                     {todo.isCompleted ? (
-                      <CircleFill onClick={() => console.log(todo.id)} />
+                      <CircleFill
+                        onClick={() =>
+                          handleSubtaskIconClick(
+                            todo.id,
+                            todo.name,
+                            todo.isCompleted
+                          )
+                        }
+                      />
                     ) : (
-                      <Circle onClick={() => console.log(todo.id)} />
+                      <Circle
+                        onClick={() =>
+                          handleSubtaskIconClick(
+                            todo.id,
+                            todo.name,
+                            todo.isCompleted
+                          )
+                        }
+                      />
                     )}
                   </Col>
                   <Col xs={10}>
-                    <input type="text" defaultValue={todo.name} />
+                    <input
+                      type="text"
+                      defaultValue={todo.name}
+                      disabled={todo.isCompleted}
+                    />
                   </Col>
                 </Row>
               </div>

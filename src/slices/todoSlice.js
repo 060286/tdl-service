@@ -95,6 +95,11 @@ export const getSuggestionTodo = createAsyncThunk(
   }
 );
 
+export const changeStatusOfSubtaskById = createAsyncThunk(
+  "todo/changeStatusOfSubtaskById",
+  async () => {}
+);
+
 export const addSuggestionToCurrentTodoList = createAsyncThunk(
   "todo/addSuggestionToCurrentTodoList",
   async (data) => data
@@ -119,6 +124,19 @@ const todoSlice = createSlice({
     },
     addSubTaskToDetailTodo(state, action) {
       state.getDetailTodo.todo.subTasks.unshift(action.payload);
+    },
+    changeCompletedStatusOfSubtaskById(state, action) {
+      const { id, name, isCompleted } = action.payload;
+
+      state.getDetailTodo.todo.subTasks.forEach((subtask, index) => {
+        if (subtask.id === id) {
+          state.getDetailTodo.todo.subTasks[index] = {
+            id: id,
+            name: name,
+            isCompleted: !isCompleted,
+          };
+        }
+      });
     },
   },
   extraReducers: (builder) => {
@@ -186,6 +204,7 @@ export const {
     removeDetailTodo,
     changeTitleByDetail,
     addSubTaskToDetailTodo,
+    changeCompletedStatusOfSubtaskById,
   },
   reducer: todoReducer,
 } = todoSlice;

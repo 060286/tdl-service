@@ -1,10 +1,10 @@
 .TitleInputBlock {
-    width: 100%;
+    width: auto;
     height: 50px;
 }
 
 .TitleInputBlock input {
-    width: 100%;
+    width: auto;
     height: 50px;
 }
 
@@ -32,10 +32,6 @@
 .MyDayTaskFunction {
     display: flex;
     justify-content: start;
-}
-
-MDT_TopButton:hover {
-    
 }
 
 .MDT_TopButton {
@@ -91,7 +87,7 @@ MDT_TopButton:hover {
 }
 
 .MDT_SubTaskItem input {
-    width: 100%;
+    width: 500px;
     border: none;
     padding: 10px;
     caret-color: #0083ff;
