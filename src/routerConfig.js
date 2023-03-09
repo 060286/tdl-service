@@ -17,7 +17,6 @@ import ProtectedRoute from "./ProtectedRoute.js";
 const router = createBrowserRouter(
   createRoutesFromElements(
     <>
-      <Route path="/" element={<LoginPage />} />
       <Route element={<ProtectedRoute />}>
         <Route path="/" element={<LayoutPage />}>
           <Route path="myday" element={<MyDayPage />}></Route>
@@ -26,6 +25,7 @@ const router = createBrowserRouter(
         </Route>
         <Route path="/register" element={<RegisterPage />}></Route>
       </Route>
+      <Route path="/" element={<LoginPage />} />
     </>
   )
 );

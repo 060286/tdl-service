@@ -168,6 +168,9 @@ const MyDayTaskDetailModal = (props) => {
         </Row>
       </Modal.Body>
       <Modal.Footer>
+        <Button onClick={(e) => props.handleArchivedTodo(todo.todo.id)}>
+          Archived
+        </Button>
         <Button>Update</Button>
         <Button onClick={props.onHide}>Close</Button>
       </Modal.Footer>

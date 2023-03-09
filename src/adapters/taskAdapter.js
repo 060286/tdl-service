@@ -8,6 +8,8 @@ import {
   TODO,
   ALL_LIST_PAGE,
   CREATE_SUB_TASK,
+  ARCHIVE_TODO,
+  TODOS,
 } from "../constants/pathApiConstant";
 
 const createSubTaskInTodo = async ({ name, todoId }) => {
@@ -52,4 +54,24 @@ const getTaskById = async (id) => {
   }
 };
 
-export { getTaskById, createSubTaskInTodo };
+const archiveTodoById = async (id) => {
+  try {
+    const url = `${PATH_API}${TODOS}/${id}${ARCHIVE_TODO}`;
+
+    const token = getTokenFromLocalStorage();
+
+    const response = await axios({
+      method: "PUT",
+      url: url,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    return response.data;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+export { getTaskById, createSubTaskInTodo, archiveTodoById };

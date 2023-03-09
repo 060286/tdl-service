@@ -16,7 +16,12 @@ import { getUserInfo } from "../../slices/accountSlice";
 import { getTokenFromLocalStorage } from "../../extensions/tokenExtension";
 
 import { useSelector, useDispatch } from "react-redux";
-import { getCurrentTodoList, selectAllTodos } from "../../slices/todoSlice";
+import {
+  getCurrentTodoList,
+  selectAllTodos,
+  removeTodoFromList,
+  archiveTodo,
+} from "../../slices/todoSlice";
 import { VARIABLE_STATUS } from "../../constants/appStatusConstant";
 import { Col, Row, Modal } from "react-bootstrap";
 import "./style.css";
@@ -123,6 +128,15 @@ const MyDayPage = () => {
     }
   };
 
+  const handleArchivedTodo = (id) => {
+    setIsOpenPopup(false);
+    console.log({ id });
+
+    // remove item from todo list
+    dispatch(removeTodoFromList(id));
+    dispatch(archiveTodo(id));
+  };
+
   return (
     <div className="MyDayPage" style={{ boxSizing: "border-box" }}>
       <MyDayTaskDetailModal
@@ -132,6 +146,7 @@ const MyDayPage = () => {
           setIsOpenPopup(false);
           setTaskId(null);
         }}
+        handleArchivedTodo={handleArchivedTodo}
       />
       {isOpenPopup ? <Modal /> : null}
       <Row style={{ height: "100%" }}>
@@ -209,7 +224,7 @@ const MyDayPage = () => {
           <div
             className="AppSuggestionList"
             style={{
-              height: "95%",
+              height: "700px",
               overflow: "scroll",
               boxSizing: "border-box",
             }}

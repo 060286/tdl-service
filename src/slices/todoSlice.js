@@ -6,7 +6,11 @@ import {
   getSuggestionTodoList,
 } from "../adapters/myDayPageAdapter";
 
-import { getTaskById, createSubTaskInTodo } from "../adapters/taskAdapter";
+import {
+  getTaskById,
+  createSubTaskInTodo,
+  archiveTodoById,
+} from "../adapters/taskAdapter";
 import { VARIABLE_STATUS } from "../constants/appStatusConstant";
 
 const initialState = {
@@ -105,6 +109,10 @@ export const addSuggestionToCurrentTodoList = createAsyncThunk(
   async (data) => data
 );
 
+export const archiveTodo = createAsyncThunk("todo/archiveTodo", async (id) => {
+  await archiveTodoById(id);
+});
+
 const todoSlice = createSlice({
   name: "todo",
   initialState,
@@ -124,6 +132,13 @@ const todoSlice = createSlice({
     },
     addSubTaskToDetailTodo(state, action) {
       state.getDetailTodo.todo.subTasks.unshift(action.payload);
+    },
+    removeTodoFromList(state, action) {
+      console.log(action.payload);
+
+      state.getCurrentTodo.todos = state.getCurrentTodo.todos.filter(
+        (todo) => todo.id !== action.payload
+      );
     },
     changeCompletedStatusOfSubtaskById(state, action) {
       const { id, name, isCompleted } = action.payload;
@@ -146,6 +161,9 @@ const todoSlice = createSlice({
       })
       .addCase(createSubTodo.fulfilled, (state, action) => {
         // state.getDetailTodo.todo.subTasks.unshift(action.payload.data.data);
+      })
+      .addCase(archiveTodo.fulfilled, (state, action) => {
+        console.log("archived completed");
       })
       .addCase(createSubTodo.rejected, (state, action) => {})
       .addCase(addNewTodo.fulfilled, (state, action) => {
@@ -204,6 +222,7 @@ export const {
     removeDetailTodo,
     changeTitleByDetail,
     addSubTaskToDetailTodo,
+    removeTodoFromList,
     changeCompletedStatusOfSubtaskById,
   },
   reducer: todoReducer,
