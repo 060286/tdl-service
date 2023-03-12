@@ -10,7 +10,7 @@ import "./style.css";
 
 export default function SuggestionItem({ data }) {
   const dispatch = useDispatch();
-
+  console.log(data)
   const handleSuggestionItemClick = async (todoItem) => {
     try {
       const { id, title } = todoItem;

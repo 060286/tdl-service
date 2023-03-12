@@ -150,7 +150,7 @@ const MyDayPage = () => {
       />
       {isOpenPopup ? <Modal /> : null}
       <Row style={{ height: "100%" }}>
-        <Col xs={9} style={{ maxHeight: "90vh" }}>
+        <Col xs={9} style={{ borderLeft: "1px solid #ccc", borderRight: "1px solid #ccc"}}>
           <div className="MyDayContentWelCome" style={{ padding: "2rem 5rem" }}>
             <MyDayWelcomeName
               username={userInfo.fullName}

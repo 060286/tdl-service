@@ -6,7 +6,7 @@ import "./style.css";
 const NextSevenDayListItem = ({ todos }) => {
   console.log(todos);
 
-  const items = todos.map((todo) => {
+  const items = todos?.map((todo) => {
     return <NextSevenDayItem title={todo.title} />;
   });
 

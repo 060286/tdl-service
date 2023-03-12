@@ -4,7 +4,7 @@ import PropTypes from "prop-types";
 
 const MyDayWelcomeName = ({ username, qoutes, author }) => {
   return (
-    <div className="MyDayWelComeName" style={{ width: "100%", height: "100%" }}>
+    <div className="MyDayWelComeName">
       <p
         style={{
           fontSize: "26px",
