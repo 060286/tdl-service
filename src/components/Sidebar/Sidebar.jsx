@@ -1,70 +1,83 @@
-import { Avatar, Divider, Drawer, IconButton, List, ListItem, ListItemButton, Button, ListItemIcon, ListItemText, Typography } from "@mui/material";
-import SettingsIcon from '@mui/icons-material/Settings';
-import HomeIcon from '@mui/icons-material/Home';
-import UpcomingIcon from '@mui/icons-material/Upcoming';
-import ListAltIcon from '@mui/icons-material/ListAlt';
+import {
+  Avatar,
+  Divider,
+  Drawer,
+  IconButton,
+  List,
+  ListItem,
+  ListItemButton,
+  Button,
+  ListItemIcon,
+  ListItemText,
+  Typography,
+} from "@mui/material";
+import SettingsIcon from "@mui/icons-material/Settings";
+import HomeIcon from "@mui/icons-material/Home";
+import UpcomingIcon from "@mui/icons-material/Upcoming";
+import ListAltIcon from "@mui/icons-material/ListAlt";
 import { useState } from "react";
-import { makeStyles } from '@mui/styles/';
+import { makeStyles } from "@mui/styles/";
 import { useSelector } from "react-redux";
 import { Box } from "@mui/system";
 import { useNavigate } from "react-router-dom";
-import CloseIcon from '@mui/icons-material/Close';
+import CloseIcon from "@mui/icons-material/Close";
+
 const items = [
   {
     text: "My Day",
     Icon: HomeIcon,
-    href: "/myday"
+    href: "/myday",
   },
   {
     text: "Next 7 Day",
     Icon: UpcomingIcon,
-    href: "/nextsevenday"
+    href: "/nextsevenday",
   },
   {
     text: "All My Task",
     Icon: ListAltIcon,
-    href: "/tasks"
-  }
-]
+    href: "/tasks",
+  },
+];
 const useStyle = makeStyles(() => {
   return {
     sideBar: {
-      width: "240px"
+      width: "240px",
     },
     list: {
-      padding: "16px 0"
+      padding: "16px 0",
     },
     listItemAvatar: {
       display: "flex",
       alignItems: "center",
       paddingLeft: "16px",
       marginBottom: "8px",
-      justifyContent: "space-between"
+      justifyContent: "space-between",
     },
     displayName: {
-      marginLeft: "16px"
+      marginLeft: "16px",
     },
     iconButton: {
-      margin: "8px"
+      margin: "8px",
     },
     icon: {
-      fontSize: "32px"
+      fontSize: "32px",
     },
     temp: {
       display: "flex",
       alignItems: "center",
-
     },
     logoutButton: {
       display: "flex",
-      justifyContent: "flex-end"
-    }
-  }
-})
+      justifyContent: "flex-end",
+    },
+  };
+});
+const loginHref = "/login";
 export default function Sidebar() {
   const classes = useStyle();
   const navigate = useNavigate();
-  const [isOpen, setIsOpen] = useState(false)
+  const [isOpen, setIsOpen] = useState(false);
   const userInfo = useSelector((state) => state.accountReducer.userInfo);
   const img =
     userInfo !== null
@@ -72,25 +85,43 @@ export default function Sidebar() {
       : // ? userInfo.img
         "https://www.w3schools.com/howto/img_avatar.png";
 
-  const onNavigate = ({ href }) => 
+  const onNavigate =
+    ({ href }) =>
     () => {
-      navigate(href)
-    }
-  
+      console.log({ href });
+      navigate(href);
+    };
+
+  const handleLogout = () => {
+    // Remove token
+    localStorage.removeItem("token");
+
+    navigate(loginHref);
+  };
+
   return (
     <Box className={classes.sideBar}>
       <Box disablePadding className={classes.listItemAvatar}>
         <Box className={classes.temp}>
           <Avatar className={{ width: 42, height: 42 }} src={img} />
-          <Typography className={classes.displayName}>{userInfo.fullName}</Typography>
+          <Typography className={classes.displayName}>
+            {userInfo.fullName}
+          </Typography>
         </Box>
-        <IconButton color="default" size="large" onClick={() => { setIsOpen(true)}} className={classes.iconButton}>
-          <SettingsIcon className={classes.icon } />
+        <IconButton
+          color="default"
+          size="large"
+          onClick={() => {
+            setIsOpen(true);
+          }}
+          className={classes.iconButton}
+        >
+          <SettingsIcon className={classes.icon} />
         </IconButton>
       </Box>
       <Box disablePadding className={classes.listItemAvatar}>
         <Button
-          onClick={() => { }}
+          onClick={() => handleLogout()}
           variant="contained"
           color="error"
           size="small"
@@ -99,37 +130,47 @@ export default function Sidebar() {
         </Button>
       </Box>
       <Drawer
-        SlideProps={{className: classes.sideBar}}
+        SlideProps={{ className: classes.sideBar }}
         anchor="left"
         open={isOpen}
-        onClose={() => setIsOpen(preIsOpen => !preIsOpen)}
+        onClose={() => setIsOpen((preIsOpen) => !preIsOpen)}
       >
         <List className={classes.list}>
           <ListItem disablePadding className={classes.listItemAvatar}>
             <Box className={classes.temp}>
               <Avatar className={{ width: 42, height: 42 }} src={img} />
-              <Typography className={classes.displayName}>{userInfo.fullName}</Typography>
+              <Typography className={classes.displayName}>
+                {userInfo.fullName}
+              </Typography>
             </Box>
-            <IconButton onClick={() => { setIsOpen(false)}} className={classes.closeIcon}>
-              <CloseIcon /> 
+            <IconButton
+              onClick={() => {
+                setIsOpen(false);
+              }}
+              className={classes.closeIcon}
+            >
+              <CloseIcon />
             </IconButton>
           </ListItem>
           <Divider />
           {items.map(({ text, Icon, href }) => {
             return (
-            <ListItem key={text} disablePadding onClick={onNavigate({href})}>
-              <ListItemButton>
-                <ListItemIcon>
-                  <Icon/>
-                </ListItemIcon>
-                <ListItemText primary={text} />
-              </ListItemButton>
-            </ListItem>
-            )
+              <ListItem
+                key={text}
+                disablePadding
+                onClick={onNavigate({ href })}
+              >
+                <ListItemButton>
+                  <ListItemIcon>
+                    <Icon />
+                  </ListItemIcon>
+                  <ListItemText primary={text} />
+                </ListItemButton>
+              </ListItem>
+            );
           })}
-       
         </List>
       </Drawer>
-      </Box>
-  )
+    </Box>
+  );
 }

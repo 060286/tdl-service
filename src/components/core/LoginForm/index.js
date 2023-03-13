@@ -26,7 +26,7 @@ export default function LoginForm() {
 
       console.log({ res });
 
-      navigate("myday");
+      navigate("/myday");
     } else {
       if (res.statusCode === 401) {
         alert("Please input a correct username/password");
