@@ -1,4 +1,4 @@
-import { Grid, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Radio, RadioGroup, TextField } from "@mui/material";
+import { Button, Dialog, DialogActions, DialogTitle, Grid, IconButton, Input, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Radio, RadioGroup, TextField, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import { makeStyles } from '@mui/styles/';
 import MyDayWelcomeName from "../../components/core/MyDayWelcomeName";
@@ -9,6 +9,9 @@ import { getUserInfo } from "../../slices/accountSlice";
 import AddIcon from '@mui/icons-material/Add';
 import LockIcon from '@mui/icons-material/Lock';
 import { getTokenFromLocalStorage } from "../../extensions/tokenExtension";
+import DeleteIcon from '@mui/icons-material/Delete';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import CloseIcon from '@mui/icons-material/Close';
 import {
   getCurrentTodoList,
   selectAllTodos,
@@ -17,11 +20,19 @@ import {
   getSuggestionTodo,
   selectAllSuggestionTodo,
   addNewTodo,
-  removeSuggestion
+  createSubTodo,
+  removeSuggestion,
+  addSubTaskToDetailTodo,
+  removeDetailTodo
 } from "../../slices/todoSlice";
 import { VARIABLE_STATUS } from "../../constants/appStatusConstant";
 import MyDayCalendar from "../../components/core/MyDayCalendar";
-
+import ArticleIcon from '@mui/icons-material/Article';
+import AssignmentIcon from '@mui/icons-material/Assignment';
+import TagIcon from '@mui/icons-material/Tag';
+import clsx from "clsx";
+import TodoDialog from "../../components/TodoDetail/TodoDetail";
+import TodoDetail from "../../components/TodoDetail/TodoDetail";
 const useStyle = makeStyles(() => ({
   list: {
     overflowY: "scroll",
@@ -68,7 +79,6 @@ const useStyle = makeStyles(() => ({
     alignItems: "center",
     fontSize: "12px",
     color: "#aaa"
-
   },
   suggestionItemBoxTitle: {
     display: "flex",
@@ -88,11 +98,24 @@ const useStyle = makeStyles(() => ({
   LockIcon: {
     fontSize: "14px"
   },
+  LockIconDialog: {
+    fontSize: "18px",
+    marginRight: "8px"
+  },
   todoItemButton: {
     display: "flex",
     flexDirection: "column",
     justifyContent: "center",
     alignItems: "flex-start"
+  },
+  suggestionItemBoxDialog: {
+    display: "flex",
+    justifyContent: "flex-start",
+    alignItems: "center",
+    fontSize: "16px",
+  },
+  iconDialog: {
+    margin: "0 4px"
   },
   suggestionItemBoxTodoIcon: {
     display: "flex",
@@ -101,6 +124,33 @@ const useStyle = makeStyles(() => ({
     fontSize: "12px",
     color: "#aaa",
     marginLeft: "10px"
+  },
+  dialogTodo: {
+    "& .MuiDialog-paper": {
+      padding: "16px 16px 48px 16px"
+    }
+  },
+  titleContainer: {
+    display: "flex",
+    justifyContent: "space-between"
+  },
+  titleIconContainer: {
+    fontSize: "14px"
+  },
+  dialogContainer: {
+    margin: "12px 0"
+  },
+  marginRight: {
+    marginRight: "8px"
+  },
+  dialogButton: {
+    borderRadius: "8px"
+  },
+  todoDialogContainer: {
+    display: "flex"
+  },
+  radioDialog: { 
+    marginRight: "8px"
   }
 }))
 export default function MyDayPage2() {
@@ -119,10 +169,14 @@ export default function MyDayPage2() {
   const [author, setAuthor] = useState("");
   const [dayOfWeek, setDayOfWeek] = useState("");
   const [dayOfMonth, setDateOfMonth] = useState(0);
+  const [subtaskText, setSubtaskText] = useState("");
   const [monthOfYear, setMonthOfYear] = useState(0);
   const [taskTitle, setTaskTitle] = useState("");
   const [addRequestStatus, setAddRequestStatus] = useState("idle");
-   const cansave =
+  const [open, setOpen] = useState(false);
+  const [selectedTodo, setSelectedTodo] = useState(undefined);
+  
+  const cansave =
     addRequestStatus === VARIABLE_STATUS.IDLE &&
     taskTitle.length > 0 &&
     taskTitle !== "Add Task";
@@ -147,6 +201,7 @@ export default function MyDayPage2() {
       }
     }
   };
+  
   const handleSuggestionItemClick = async (todoItem) => {
     try {
       const { id, title } = todoItem;
@@ -231,13 +286,56 @@ export default function MyDayPage2() {
         return "Error";
     }
   };
+  const handleClickOpen = ({ todo }) => 
+    () => {
+      setOpen(true);
+      setSelectedTodo(todo)
+    }
 
+  const handleClose = () => {
+    setOpen(false);
+    setSelectedTodo(undefined);
+  };
   const onRadioButtonChange = (e) => 
     (preTodo) => {
       // TODO: send request to be to update isCompleted of this todo
     }
-  
-  console.log(todos.todos)
+  const handleArchivedTodo = ({id}) => {
+    handleClose();
+
+    // remove item from todo list
+    dispatch(removeTodoFromList(id));
+    dispatch(archiveTodo(id));
+  };
+  const handleCreateSubtask = async (e, id, tod) => {
+    if (e.key === "Enter") {
+      await dispatch(
+        createSubTodo({ todoId: id, name: e.target.value })
+      ).unwrap();
+
+      setSubtaskText("");
+      dispatch(
+        addSubTaskToDetailTodo({
+          todoId: id,
+          name: e.target.value,
+          isCompleted: false,
+        })
+      );
+      e.target.value = "";
+    }
+  };
+  const onSubTaskChange = (todo, e) => {
+    // TODO: send request to BE to update subtask text
+  }
+  const onSubTaskIsCompletedChange = (todo, e) => {
+    // TODO: send request to BE to update isCompleted subtask
+
+  }
+  const onSubTaskDelete = (todo) => {
+    // TODO: send request to be to delete subtask
+  }
+
+  console.log(selectedTodo)
   return (
     <Box  className={classes.conatiner}>
         <Box className={classes.mydayPage} spacing={2}>
@@ -254,7 +352,13 @@ export default function MyDayPage2() {
           <List className={classes.list}>
             {todos?.todos.map(todo => {
               return (
-                <ListItem disablePadding className={classes.todoItem}> 
+                <ListItem disablePadding className={classes.todoItem}
+                  secondaryAction={
+                    <IconButton edge="end" aria-label="delete" onClick={handleClickOpen({todo})}>
+                      <ArticleIcon />
+                    </IconButton>
+                  }
+                  > 
                   <ListItemButton className={classes.todoItemButton}>
                     {
                       todo.todoCategory &&
@@ -323,7 +427,87 @@ export default function MyDayPage2() {
               )
             })}
           </List>
-        </Box>
       </Box>
+      {
+        selectedTodo && (
+          <Dialog onClose={handleClose} open={open} fullWidth={true} maxWidth="md" className={classes.dialogTodo}>
+            <TodoDetail 
+              selectedTodo={selectedTodo}
+              handleArchivedTodo={handleArchivedTodo}
+              handleClose={handleClose}
+              setSelectedTodo={setSelectedTodo}
+              onSubTaskIsCompletedChange={onSubTaskIsCompletedChange}
+              onSubTaskChange={onSubTaskChange}
+              handleCreateSubtask={handleCreateSubtask}
+            />
+          </Dialog>
+        )
+      }
+    </Box>
   )
 }
+
+//children of dialog before reuse 
+{/* <Box className={classes.titleContainer}> 
+              <Box className={classes.suggestionItemBoxDialog}>
+                <LockIcon className={classes.LockIconDialog} />
+                {"My List > "}
+                {selectedTodo.todoCategory}
+              </Box>
+              <Box>
+                <IconButton size="small" className={classes.iconDialog} onClick={() =>
+                  // TODO: This action dont work
+                  removeTodoFromList(selectedTodo.id)}>
+                  <DeleteIcon />
+                </IconButton>
+                
+                <IconButton size="small" className={classes.iconDialog} onClick={() => handleArchivedTodo({id: selectedTodo.id})}>
+                  <CheckCircleIcon />
+                </IconButton>
+                
+                <IconButton size="small" className={classes.iconDialog} onClick={handleClose} >
+                  <CloseIcon />
+                </IconButton>
+              </Box>
+            </Box>
+            <Box className={classes.dialogContainer}>
+              <Input autoFocus={true} fullWidth={true} 
+                placeholder={"content of todo"}
+                value={selectedTodo.title}
+                onChange={(e) => setSelectedTodo(preSelectedTodo => ({...preSelectedTodo, title: e.target.value}))}
+              />
+            </Box>
+            <Box className={classes.dialogContainer}>
+              <Button className={clsx(classes.marginRight, classes.dialogButton)} size="small" variant="contained" startIcon={<AssignmentIcon />}>{selectedTodo.todoCategory}</Button>
+              <Button size="small" variant="contained" className={classes.dialogButton} startIcon={<TagIcon />}>Tags</Button>
+            </Box>
+            <Box className={classes.dialogContainer}>
+              <Typography variant="subtitle2">NOTES</Typography>
+              <Input fullWidth={true}  placeholder={"Notes"} value={selectedTodo.description || ""}
+                onChange={(e) => setSelectedTodo(preSelectedTodo => ({...preSelectedTodo, description: e.target.value}))} />
+            </Box>
+             <Box className={classes.dialogContainer}>
+              <Typography variant="subtitle2">SUBTASKS</Typography>
+              {selectedTodo?.subTasks?.map(todo => {
+                <Box className={classes.todoDialogContainer}>
+                <Radio
+                  className={classes.radioDialog}
+                  checked={false}
+                  onChange={(e) => onSubTaskIsCompletedChange(todo, e)}
+                    
+                  value="b"
+                  name="radio-buttons"
+              />
+                  <Input fullWidth={true} placeholder={"Content of todo"} onChange={(e) => {onSubTaskChange(todo, e) }} />
+              </Box>
+              })}
+              <Box className={classes.todoDialogContainer}>
+                <Radio
+                  className={classes.radioDialog}
+                  checked={false}
+                  name="radio-buttons"
+                  disabled={true}
+              />
+              <Input fullWidth={true}  placeholder={"Content of todo"} onKeyDown={e => handleCreateSubtask(e, selectedTodo.id)} />
+              </Box>
+            </Box> */}
