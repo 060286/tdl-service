@@ -10,6 +10,7 @@ import {
   CREATE_SUB_TASK,
   ARCHIVE_TODO,
   TODOS,
+  SUBTASK_COMPLETE_STATUS,
 } from "../constants/pathApiConstant";
 
 const createSubTaskInTodo = async ({ name, todoId }) => {
@@ -74,4 +75,33 @@ const archiveTodoById = async (id) => {
   }
 };
 
-export { getTaskById, createSubTaskInTodo, archiveTodoById };
+const updateSubTaskStatus = async (id) => {
+  try {
+    const url = `${PATH_API}${MY_DAY_PAGE_CONTROLLER}/${id}${SUBTASK_COMPLETE_STATUS}`;
+
+    const token = getTokenFromLocalStorage();
+
+    const response = await axios({
+      method: "PUT",
+      url: url,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (response.data.statusCode !== 200) {
+      console.log("Update subtask status failed");
+    }
+
+    return id;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+export {
+  getTaskById,
+  createSubTaskInTodo,
+  archiveTodoById,
+  updateSubTaskStatus,
+};

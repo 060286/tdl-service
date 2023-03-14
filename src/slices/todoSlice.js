@@ -10,6 +10,7 @@ import {
   getTaskById,
   createSubTaskInTodo,
   archiveTodoById,
+  updateSubTaskStatus,
 } from "../adapters/taskAdapter";
 import { VARIABLE_STATUS } from "../constants/appStatusConstant";
 
@@ -113,6 +114,15 @@ export const archiveTodo = createAsyncThunk("todo/archiveTodo", async (id) => {
   await archiveTodoById(id);
 });
 
+export const updateSubTaskStatusSlice = createAsyncThunk(
+  "todo/updateSubTaskStatusSlice",
+  async (id) => {
+    const response = await updateSubTaskStatus(id);
+
+    return response;
+  }
+);
+
 const todoSlice = createSlice({
   name: "todo",
   initialState,
@@ -131,7 +141,9 @@ const todoSlice = createSlice({
       state.getDetailTodo.todo.title = action.payload;
     },
     addSubTaskToDetailTodo(state, action) {
-      state.getDetailTodo.todo.subTasks.unshift(action.payload);
+      console.log(action);
+
+      // state.getDetailTodo.todo.subTasks.push(action.payload);
     },
     removeTodoFromList(state, action) {
       console.log(action.payload);
@@ -197,6 +209,23 @@ const todoSlice = createSlice({
       })
       .addCase(getTodoById.rejected, (state, action) => {
         state.getDetailTodo.status = VARIABLE_STATUS.FAILED;
+      })
+      .addCase(updateSubTaskStatusSlice.fulfilled, (state, action) => {
+        // update isCompleted by Id
+        const todos = state.getDetailTodo?.todo;
+        const { id } = action.payload;
+
+        if (todos?.subTasks && todos?.subTasks.length > 0) {
+          todos.subTasks.forEach((item) => {
+            if (item.id === id) {
+              item.isCompleted = !item.isCompleted;
+            }
+          });
+        }
+      })
+      .addCase(updateSubTaskStatusSlice.rejected, (state, action) => {
+        // do sth
+        console.log(action.payload);
       });
   },
 });

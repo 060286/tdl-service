@@ -1,17 +1,34 @@
-import { Button, Dialog, DialogActions, DialogTitle, Grid, IconButton, Input, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Radio, RadioGroup, TextField, Typography } from "@mui/material";
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogTitle,
+  Grid,
+  IconButton,
+  Input,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Radio,
+  RadioGroup,
+  TextField,
+  Typography,
+} from "@mui/material";
 import { Box } from "@mui/system";
-import { makeStyles } from '@mui/styles/';
+import { makeStyles } from "@mui/styles/";
 import MyDayWelcomeName from "../../components/core/MyDayWelcomeName";
 import { useSelector, useDispatch } from "react-redux";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { getUserInfo } from "../../slices/accountSlice";
-import AddIcon from '@mui/icons-material/Add';
-import LockIcon from '@mui/icons-material/Lock';
+import AddIcon from "@mui/icons-material/Add";
+import LockIcon from "@mui/icons-material/Lock";
 import { getTokenFromLocalStorage } from "../../extensions/tokenExtension";
-import DeleteIcon from '@mui/icons-material/Delete';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import CloseIcon from '@mui/icons-material/Close';
+import DeleteIcon from "@mui/icons-material/Delete";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import CloseIcon from "@mui/icons-material/Close";
 import {
   getCurrentTodoList,
   selectAllTodos,
@@ -23,32 +40,32 @@ import {
   createSubTodo,
   removeSuggestion,
   addSubTaskToDetailTodo,
-  removeDetailTodo
+  removeDetailTodo,
 } from "../../slices/todoSlice";
 import { VARIABLE_STATUS } from "../../constants/appStatusConstant";
 import MyDayCalendar from "../../components/core/MyDayCalendar";
-import ArticleIcon from '@mui/icons-material/Article';
-import AssignmentIcon from '@mui/icons-material/Assignment';
-import TagIcon from '@mui/icons-material/Tag';
+import ArticleIcon from "@mui/icons-material/Article";
+import AssignmentIcon from "@mui/icons-material/Assignment";
+import TagIcon from "@mui/icons-material/Tag";
 import clsx from "clsx";
 import TodoDialog from "../../components/TodoDetail/TodoDetail";
 import TodoDetail from "../../components/TodoDetail/TodoDetail";
 const useStyle = makeStyles(() => ({
   list: {
     overflowY: "scroll",
-    maxHeight: "100%"
+    maxHeight: "100%",
   },
   suggestionList: {
     overflowY: "scroll",
     maxHeight: "100%",
-    width: "100%"
+    width: "100%",
   },
   mydayPage: {
     height: "calc(100vh - 24px)",
     display: "flex",
     flexDirection: "column",
     marginRight: "8px",
-    width: "75%"
+    width: "75%",
   },
   suggestionListPage: {
     height: "calc(100vh - 24px)",
@@ -56,14 +73,14 @@ const useStyle = makeStyles(() => ({
     display: "flex",
     flexGrow: 1,
     marginLeft: "8px",
-    width: "25%"
+    width: "25%",
   },
   input: {
-    marginTop: "16px"
+    marginTop: "16px",
   },
   conatiner: {
     display: "flex",
-    marginBottom: "24px"
+    marginBottom: "24px",
   },
   suggestionItem: {
     border: "1px solid #ccc",
@@ -71,21 +88,21 @@ const useStyle = makeStyles(() => ({
     margin: "8px 0",
     "&:hover": {
       border: "1px solid #0b52d0",
-    }
+    },
   },
   suggestionItemBox: {
     display: "flex",
     justifyContent: "flex-start",
     alignItems: "center",
     fontSize: "12px",
-    color: "#aaa"
+    color: "#aaa",
   },
   suggestionItemBoxTitle: {
     display: "flex",
     justifyContent: "flex-start",
     alignItems: "center",
     fontSize: "20px",
-    fontWeight: "bold"
+    fontWeight: "bold",
   },
   todoItem: {
     border: "1px solid #CCC",
@@ -93,20 +110,20 @@ const useStyle = makeStyles(() => ({
     borderRadius: "8px",
     "&:hover": {
       border: "1px solid #0b52d0",
-    }
+    },
   },
   LockIcon: {
-    fontSize: "14px"
+    fontSize: "14px",
   },
   LockIconDialog: {
     fontSize: "18px",
-    marginRight: "8px"
+    marginRight: "8px",
   },
   todoItemButton: {
     display: "flex",
     flexDirection: "column",
     justifyContent: "center",
-    alignItems: "flex-start"
+    alignItems: "flex-start",
   },
   suggestionItemBoxDialog: {
     display: "flex",
@@ -115,7 +132,7 @@ const useStyle = makeStyles(() => ({
     fontSize: "16px",
   },
   iconDialog: {
-    margin: "0 4px"
+    margin: "0 4px",
   },
   suggestionItemBoxTodoIcon: {
     display: "flex",
@@ -123,39 +140,39 @@ const useStyle = makeStyles(() => ({
     alignItems: "center",
     fontSize: "12px",
     color: "#aaa",
-    marginLeft: "10px"
+    marginLeft: "10px",
   },
   dialogTodo: {
     "& .MuiDialog-paper": {
-      padding: "16px 16px 48px 16px"
-    }
+      padding: "16px 16px 48px 16px",
+    },
   },
   titleContainer: {
     display: "flex",
-    justifyContent: "space-between"
+    justifyContent: "space-between",
   },
   titleIconContainer: {
-    fontSize: "14px"
+    fontSize: "14px",
   },
   dialogContainer: {
-    margin: "12px 0"
+    margin: "12px 0",
   },
   marginRight: {
-    marginRight: "8px"
+    marginRight: "8px",
   },
   dialogButton: {
-    borderRadius: "8px"
+    borderRadius: "8px",
   },
   todoDialogContainer: {
-    display: "flex"
+    display: "flex",
   },
-  radioDialog: { 
-    marginRight: "8px"
-  }
-}))
+  radioDialog: {
+    marginRight: "8px",
+  },
+}));
 export default function MyDayPage2() {
   const classes = useStyle();
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
   const userInfo = useSelector((state) => state.accountReducer.userInfo);
   const todoStatus = useSelector(
     (state) => state.todoReducer.getCurrentTodo.status
@@ -175,7 +192,7 @@ export default function MyDayPage2() {
   const [addRequestStatus, setAddRequestStatus] = useState("idle");
   const [open, setOpen] = useState(false);
   const [selectedTodo, setSelectedTodo] = useState(undefined);
-  
+
   const cansave =
     addRequestStatus === VARIABLE_STATUS.IDLE &&
     taskTitle.length > 0 &&
@@ -201,7 +218,7 @@ export default function MyDayPage2() {
       }
     }
   };
-  
+
   const handleSuggestionItemClick = async (todoItem) => {
     try {
       const { id, title } = todoItem;
@@ -286,21 +303,23 @@ export default function MyDayPage2() {
         return "Error";
     }
   };
-  const handleClickOpen = ({ todo }) => 
+  const handleClickOpen =
+    ({ todo }) =>
     () => {
       setOpen(true);
-      setSelectedTodo(todo)
-    }
+      setSelectedTodo(todo);
+    };
 
   const handleClose = () => {
     setOpen(false);
     setSelectedTodo(undefined);
   };
-  const onRadioButtonChange = (e) => 
-    (preTodo) => {
-      // TODO: send request to be to update isCompleted of this todo
-    }
-  const handleArchivedTodo = ({id}) => {
+  const onRadioButtonChange = (e) => (preTodo) => {
+    // TODO: send request to be to update isCompleted of this todo
+    // ? Intergate với function này nhé updateSubTaskStatusSlice
+    // ? Ông truyền cái id xuống là được.
+  };
+  const handleArchivedTodo = ({ id }) => {
     handleClose();
 
     // remove item from todo list
@@ -326,129 +345,146 @@ export default function MyDayPage2() {
   };
   const onSubTaskChange = (todo, e) => {
     // TODO: send request to BE to update subtask text
-  }
+    // ? Tui nghĩ cái này mình sẽ send id + title của subtask
+    // ?
+  };
   const onSubTaskIsCompletedChange = (todo, e) => {
     // TODO: send request to BE to update isCompleted subtask
-
-  }
+    // ? Tui nghĩ cái này bị duplicate với onRadioButtonChange á.
+  };
   const onSubTaskDelete = (todo) => {
     // TODO: send request to be to delete subtask
-  }
+  };
 
-  console.log(selectedTodo)
+  console.log({ selectedTodo });
   return (
-    <Box  className={classes.conatiner}>
-        <Box className={classes.mydayPage} spacing={2}>
-          <MyDayWelcomeName
-            username={userInfo.fullName}
-            qoutes={quotes}
-            author={author}
-          />
-          <MyDayCalendar
-            weekday={dayOfWeek}
-            day={dayOfMonth}
-            month={monthOfYear}
-          />
-          <List className={classes.list}>
-            {todos?.todos.map(todo => {
-              return (
-                <ListItem disablePadding className={classes.todoItem}
-                  secondaryAction={
-                    <IconButton edge="end" aria-label="delete" onClick={handleClickOpen({todo})}>
-                      <ArticleIcon />
-                    </IconButton>
-                  }
-                  > 
-                  <ListItemButton className={classes.todoItemButton}>
-                    {
-                      todo.todoCategory &&
+    <Box className={classes.conatiner}>
+      <Box className={classes.mydayPage} spacing={2}>
+        <MyDayWelcomeName
+          username={userInfo.fullName}
+          qoutes={quotes}
+          author={author}
+        />
+        <MyDayCalendar
+          weekday={dayOfWeek}
+          day={dayOfMonth}
+          month={monthOfYear}
+        />
+        <List className={classes.list}>
+          {todos?.todos.map((todo) => {
+            return (
+              <ListItem
+                disablePadding
+                className={classes.todoItem}
+                secondaryAction={
+                  <IconButton
+                    edge="end"
+                    aria-label="delete"
+                    onClick={handleClickOpen({ todo })}
+                  >
+                    <ArticleIcon />
+                  </IconButton>
+                }
+              >
+                <ListItemButton className={classes.todoItemButton}>
+                  {todo.todoCategory && (
                     <Box className={classes.suggestionItemBoxTodoIcon}>
-                      <LockIcon className={classes.LockIcon}/>
+                      <LockIcon className={classes.LockIcon} />
                       {" > "}
                       {todo.todoCategory}
                     </Box>
-                    }
-                    <Box className={classes.suggestionItemBoxTitle}>
-                      <ListItemIcon>
-                        <RadioGroup
-                          value={todo.isCompleted}
-                          name={todo.id}
-                          onChange={onRadioButtonChange(todo)}
-                        >
-                          <Radio />
-                        </RadioGroup>
-                      </ListItemIcon>
-                      <ListItemText id={todo.id} primary={todo.title} />
-                    </Box>
-                  </ListItemButton>
-                </ListItem>
-              )
-            })}
-          </List>
-          <Box className={classes.input}>
-            <TextField
-              label="Enter todo content"
-              placeholder="Enter todo content"
-              color="primary"
-              fullWidth
-              focused
-              value={taskTitle}
-              onKeyUp={(e) => onKeyPressHandler(e)}
-              onChange={(e) => setTaskTitle(e.target.value)}
-            />
-          </Box>
-        </Box>
-        <Box  className={classes.suggestionListPage}>
-          <List className={classes.suggestionList}>
-            {suggestionTodos?.todos.map(todo => {
-              return (
-                <ListItem disablePadding className={classes.suggestionItem}> 
-                  <ListItemButton onClick={() => {handleSuggestionItemClick(todo)}} dense>
+                  )}
+                  <Box className={classes.suggestionItemBoxTitle}>
                     <ListItemIcon>
-                      <IconButton>
-                        <AddIcon />
-                      </IconButton>
+                      <RadioGroup
+                        value={todo.isCompleted}
+                        name={todo.id}
+                        onChange={onRadioButtonChange(todo)}
+                      >
+                        <Radio />
+                      </RadioGroup>
                     </ListItemIcon>
-                    <Box>
-                      <Box className={classes.suggestionItemBox}>
-                        <LockIcon className={classes.LockIcon}/>
-                        {" > "}
-                        {todo.categoryName}
-                      </Box>
-                      <Box className={classes.suggestionItemBoxTitle}>
-                        {todo.title}                      
-                      </Box>
-                      <Box className={classes.suggestionItemBox}>
-                        {todo.dateRemind}                      
-                      </Box>
-                    </Box>
-                  </ListItemButton>
-                </ListItem>
-              )
-            })}
-          </List>
+                    <ListItemText id={todo.id} primary={todo.title} />
+                  </Box>
+                </ListItemButton>
+              </ListItem>
+            );
+          })}
+        </List>
+        <Box className={classes.input}>
+          <TextField
+            label="Enter todo content"
+            placeholder="Enter todo content"
+            color="primary"
+            fullWidth
+            focused
+            value={taskTitle}
+            onKeyUp={(e) => onKeyPressHandler(e)}
+            onChange={(e) => setTaskTitle(e.target.value)}
+          />
+        </Box>
       </Box>
-      {
-        selectedTodo && (
-          <Dialog onClose={handleClose} open={open} fullWidth={true} maxWidth="md" className={classes.dialogTodo}>
-            <TodoDetail 
-              selectedTodo={selectedTodo}
-              handleArchivedTodo={handleArchivedTodo}
-              handleClose={handleClose}
-              setSelectedTodo={setSelectedTodo}
-              onSubTaskIsCompletedChange={onSubTaskIsCompletedChange}
-              onSubTaskChange={onSubTaskChange}
-              handleCreateSubtask={handleCreateSubtask}
-            />
-          </Dialog>
-        )
-      }
+      <Box className={classes.suggestionListPage}>
+        <List className={classes.suggestionList}>
+          {suggestionTodos?.todos.map((todo) => {
+            return (
+              <ListItem disablePadding className={classes.suggestionItem}>
+                <ListItemButton
+                  onClick={() => {
+                    handleSuggestionItemClick(todo);
+                  }}
+                  dense
+                >
+                  <ListItemIcon>
+                    <IconButton>
+                      <AddIcon />
+                    </IconButton>
+                  </ListItemIcon>
+                  <Box>
+                    <Box className={classes.suggestionItemBox}>
+                      <LockIcon className={classes.LockIcon} />
+                      {" > "}
+                      {todo.categoryName}
+                    </Box>
+                    <Box className={classes.suggestionItemBoxTitle}>
+                      {todo.title}
+                    </Box>
+                    <Box className={classes.suggestionItemBox}>
+                      {todo.dateRemind}
+                    </Box>
+                  </Box>
+                </ListItemButton>
+              </ListItem>
+            );
+          })}
+        </List>
+      </Box>
+      {selectedTodo && (
+        <Dialog
+          onClose={handleClose}
+          open={open}
+          fullWidth={true}
+          maxWidth="md"
+          className={classes.dialogTodo}
+        >
+          <TodoDetail
+            selectedTodo={selectedTodo}
+            handleArchivedTodo={handleArchivedTodo}
+            handleClose={handleClose}
+            setSelectedTodo={setSelectedTodo}
+            onSubTaskIsCompletedChange={onSubTaskIsCompletedChange}
+            onSubTaskChange={onSubTaskChange}
+            handleCreateSubtask={handleCreateSubtask}
+          />
+        </Dialog>
+      )}
     </Box>
-  )
+  );
 }
 
-//children of dialog before reuse 
-{/* <Box className={classes.titleContainer}> 
+//children of dialog before reuse
+{
+  /* <Box className={classes.titleContainer}> 
               <Box className={classes.suggestionItemBoxDialog}>
                 <LockIcon className={classes.LockIconDialog} />
                 {"My List > "}
@@ -510,4 +546,5 @@ export default function MyDayPage2() {
               />
               <Input fullWidth={true}  placeholder={"Content of todo"} onKeyDown={e => handleCreateSubtask(e, selectedTodo.id)} />
               </Box>
-            </Box> */}
+            </Box> */
+}

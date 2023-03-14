@@ -13,6 +13,7 @@ const USERINFO = "/user-info";
 const CREATE_SUB_TASK = "/create-subtask";
 const GET_DATA_NEXT_SEVEN_DAY_MY_LIST = "/next-seven-day";
 const ARCHIVE_TODO = "/archive-todo";
+const SUBTASK_COMPLETE_STATUS = "/subtask-complete-status";
 
 export {
   PATH_API,
@@ -28,4 +29,5 @@ export {
   USERINFO,
   GET_DATA_NEXT_SEVEN_DAY_MY_LIST,
   ARCHIVE_TODO,
+  SUBTASK_COMPLETE_STATUS,
 };
