@@ -31,6 +31,8 @@ import ArticleIcon from '@mui/icons-material/Article';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import TagIcon from '@mui/icons-material/Tag';
 import clsx from "clsx";
+import TodoDialog from "../../components/TodoDetail/TodoDetail";
+import TodoDetail from "../../components/TodoDetail/TodoDetail";
 const useStyle = makeStyles(() => ({
   list: {
     overflowY: "scroll",
@@ -429,7 +431,24 @@ export default function MyDayPage2() {
       {
         selectedTodo && (
           <Dialog onClose={handleClose} open={open} fullWidth={true} maxWidth="md" className={classes.dialogTodo}>
-            <Box className={classes.titleContainer}> 
+            <TodoDetail 
+              selectedTodo={selectedTodo}
+              handleArchivedTodo={handleArchivedTodo}
+              handleClose={handleClose}
+              setSelectedTodo={setSelectedTodo}
+              onSubTaskIsCompletedChange={onSubTaskIsCompletedChange}
+              onSubTaskChange={onSubTaskChange}
+              handleCreateSubtask={handleCreateSubtask}
+            />
+          </Dialog>
+        )
+      }
+    </Box>
+  )
+}
+
+//children of dialog before reuse 
+{/* <Box className={classes.titleContainer}> 
               <Box className={classes.suggestionItemBoxDialog}>
                 <LockIcon className={classes.LockIconDialog} />
                 {"My List > "}
@@ -491,10 +510,4 @@ export default function MyDayPage2() {
               />
               <Input fullWidth={true}  placeholder={"Content of todo"} onKeyDown={e => handleCreateSubtask(e, selectedTodo.id)} />
               </Box>
-            </Box>
-          </Dialog>
-        )
-      }
-    </Box>
-  )
-}
+            </Box> */}
