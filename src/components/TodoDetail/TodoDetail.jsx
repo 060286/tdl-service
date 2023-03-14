@@ -150,12 +150,13 @@ export default function TodoDetail({
   setSelectedTodo,
   onSubTaskIsCompletedChange,
   onSubTaskChange,
-  handleCreateSubtask
+  handleCreateSubtask,
+  className
 }) {
   const classes = useStyle();
 
   return (
-    <>
+    <Box className={className}>
       <Box className={classes.titleContainer}> 
         <Box className={classes.suggestionItemBoxDialog}>
           <LockIcon className={classes.LockIconDialog} />
@@ -219,6 +220,6 @@ export default function TodoDetail({
         <Input fullWidth={true}  placeholder={"Content of todo"} onKeyDown={e => handleCreateSubtask(e, selectedTodo.id)} />
         </Box>
       </Box>
-    </>
+    </Box>
   )
 }
