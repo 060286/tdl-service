@@ -32,7 +32,6 @@ import {
   addNewTodo,
   createSubTodo,
   removeSuggestion,
-  addSubTaskToDetailTodo,
   removeDetailTodo,
 } from "../../slices/todoSlice";
 import LockIcon from "@mui/icons-material/Lock";
@@ -169,6 +168,8 @@ export default function TodoDetail({
   onSubTaskChange,
   handleCreateSubtask,
   className,
+  handleUpdateSubTaskStatus,
+  handleClickTag,
 }) {
   const classes = useStyle();
 
@@ -240,12 +241,15 @@ export default function TodoDetail({
           variant="contained"
           className={classes.dialogButton}
           startIcon={<TagIcon />}
+          // ? Hiển thị tag khi click btn.
+          onClick={() => handleClickTag()}
         >
           Tags
         </Button>
       </Box>
       <Box className={classes.dialogContainer}>
         <Typography variant="subtitle2">NOTES</Typography>
+        {/* // TODO : Đoạn này ông cho description nó dài ra xíu nhé */}
         <Input
           fullWidth={true}
           placeholder={"Notes"}
@@ -292,6 +296,25 @@ export default function TodoDetail({
           />
         </Box>
       </Box>
+      {/*// ? Ông chỉnh lại css phần này nhé */}
+      <p>Subtask da duoc tao truoc do hien thi ben duoi day</p>
+      {selectedTodo?.subTasks?.map((item) => {
+        return (
+          <div key={item.id} onClick={() => item.id}>
+            {/* handleUpdateSubTaskStatus : thay doi isCompleted moi lan user click */}
+            <span
+              onClick={() =>
+                handleUpdateSubTaskStatus({
+                  id: item.id,
+                  isCompleted: item.isCompleted,
+                })
+              }
+            >
+              title : {item.name} - {item.isCompleted.toString()}
+            </span>
+          </div>
+        );
+      })}
     </Box>
   );
 }

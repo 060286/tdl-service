@@ -75,7 +75,8 @@ const archiveTodoById = async (id) => {
   }
 };
 
-const updateSubTaskStatus = async (id) => {
+// ? Đổi params
+const updateSubTaskStatus = async ({ id, isCompleted }) => {
   try {
     const url = `${PATH_API}${MY_DAY_PAGE_CONTROLLER}/${id}${SUBTASK_COMPLETE_STATUS}`;
 
@@ -89,13 +90,30 @@ const updateSubTaskStatus = async (id) => {
       },
     });
 
-    if (response.data.statusCode !== 200) {
-      console.log("Update subtask status failed");
-    }
-
-    return id;
+    return response?.status === 200 ? { id, isCompleted } : null;
   } catch (error) {
     console.log(error);
+  }
+};
+
+// ? Api lấy danh sách tag
+const getTagListAdapter = async () => {
+  try {
+    const url = `https://localhost:44334/api/v1/todos/tags-list`;
+
+    const token = getTokenFromLocalStorage();
+
+    const response = await axios({
+      method: "GET",
+      url: url,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    return response;
+  } catch (err) {
+    // do sth
   }
 };
 
@@ -104,4 +122,5 @@ export {
   createSubTaskInTodo,
   archiveTodoById,
   updateSubTaskStatus,
+  getTagListAdapter,
 };

@@ -39,8 +39,10 @@ import {
   addNewTodo,
   createSubTodo,
   removeSuggestion,
-  addSubTaskToDetailTodo,
   removeDetailTodo,
+  getTodoById,
+  getTagListSlice,
+  updateSubTaskStatusSlice,
 } from "../../slices/todoSlice";
 import { VARIABLE_STATUS } from "../../constants/appStatusConstant";
 import MyDayCalendar from "../../components/core/MyDayCalendar";
@@ -192,6 +194,7 @@ export default function MyDayPage2() {
   const [addRequestStatus, setAddRequestStatus] = useState("idle");
   const [open, setOpen] = useState(false);
   const [selectedTodo, setSelectedTodo] = useState(undefined);
+  const [tags, setTags] = useState(undefined);
 
   const cansave =
     addRequestStatus === VARIABLE_STATUS.IDLE &&
@@ -305,19 +308,21 @@ export default function MyDayPage2() {
   };
   const handleClickOpen =
     ({ todo }) =>
-    () => {
+    async () => {
       setOpen(true);
-      setSelectedTodo(todo);
+      const response = await dispatch(getTodoById(todo.id));
+
+      // ? Call api lấy detail todo
+      setSelectedTodo(response.payload);
     };
 
   const handleClose = () => {
     setOpen(false);
     setSelectedTodo(undefined);
+    setTags(undefined);
   };
   const onRadioButtonChange = (e) => (preTodo) => {
     // TODO: send request to be to update isCompleted of this todo
-    // ? Intergate với function này nhé updateSubTaskStatusSlice
-    // ? Ông truyền cái id xuống là được.
   };
   const handleArchivedTodo = ({ id }) => {
     handleClose();
@@ -328,18 +333,13 @@ export default function MyDayPage2() {
   };
   const handleCreateSubtask = async (e, id, tod) => {
     if (e.key === "Enter") {
+      // ! Đoạn này chạy dispatch đã tạo được subtask mới, nhưng tui thấy component nó k re-render lại.
+      // ! Check lại giúp tui nhé.
       await dispatch(
         createSubTodo({ todoId: id, name: e.target.value })
       ).unwrap();
 
       setSubtaskText("");
-      dispatch(
-        addSubTaskToDetailTodo({
-          todoId: id,
-          name: e.target.value,
-          isCompleted: false,
-        })
-      );
       e.target.value = "";
     }
   };
@@ -348,15 +348,28 @@ export default function MyDayPage2() {
     // ? Tui nghĩ cái này mình sẽ send id + title của subtask
     // ?
   };
-  const onSubTaskIsCompletedChange = (todo, e) => {
+  const onSubTaskIsCompletedChange = async (todo, e) => {
     // TODO: send request to BE to update isCompleted subtask
-    // ? Tui nghĩ cái này bị duplicate với onRadioButtonChange á.
   };
   const onSubTaskDelete = (todo) => {
     // TODO: send request to be to delete subtask
   };
 
-  console.log({ selectedTodo });
+  // ? Function này dùng để cập nhật lại isCompleted của subtask
+  const handleUpdateSubTaskStatus = async (data) => {
+    await dispatch(updateSubTaskStatusSlice(data));
+
+    const newTodo = dispatch(getTodoById(data.id));
+    setSelectedTodo(newTodo);
+  };
+
+  const handleClickTag = async () => {
+    const response = await dispatch(getTagListSlice());
+
+    // ? Đoạn này tui lấy tag về rồi nhé.
+    setTags(response.payload.data.data);
+  };
+
   return (
     <Box className={classes.conatiner}>
       <Box className={classes.mydayPage} spacing={2}>
@@ -475,6 +488,8 @@ export default function MyDayPage2() {
             onSubTaskIsCompletedChange={onSubTaskIsCompletedChange}
             onSubTaskChange={onSubTaskChange}
             handleCreateSubtask={handleCreateSubtask}
+            handleClickTag={handleClickTag}
+            handleUpdateSubTaskStatus={handleUpdateSubTaskStatus}
           />
         </Dialog>
       )}

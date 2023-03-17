@@ -7,12 +7,21 @@ import {
 } from "../../slices/allMyTaskSlice";
 import { VARIABLE_STATUS } from "../../constants/appStatusConstant";
 import AllMyTask from "../../components/core/AllMyTask";
-import { Box, Grid, Item, List, ListItem, ListItemButton, Radio, TextField } from "@mui/material"
-import Typography from '@mui/material/Typography';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import {
+  Box,
+  Grid,
+  Item,
+  List,
+  ListItem,
+  ListItemButton,
+  Radio,
+  TextField,
+} from "@mui/material";
+import Typography from "@mui/material/Typography";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
-import clsx from "clsx"
-import { makeStyles } from '@mui/styles/';
+import clsx from "clsx";
+import { makeStyles } from "@mui/styles/";
 import Accordition from "../../components/Accordition/Accordition";
 import TodoDetail from "../../components/TodoDetail/TodoDetail";
 import {
@@ -26,12 +35,15 @@ import {
   createSubTodo,
   removeSuggestion,
   addSubTaskToDetailTodo,
-  removeDetailTodo
+  removeDetailTodo,
+  selectTodoById,
+  getTodoById,
+  updateSubTaskStatusSlice,
 } from "../../slices/todoSlice";
 const useStyle = makeStyles(() => ({
   listItem: {
     borderRadius: "16px",
-    padding: "4px"
+    padding: "4px",
   },
   container: {
     marginTop: "16px",
@@ -39,19 +51,19 @@ const useStyle = makeStyles(() => ({
   },
   gridContainer: {
     marginTop: "16px",
-    height: "100%"
+    height: "100%",
   },
   rightContainer: {
-    overflow: "scroll"
+    overflow: "scroll",
   },
   item: {
     height: "calc(100% - 32px)",
-    overflow: "scroll"
+    overflow: "scroll",
   },
   todoDetail: {
     border: "1px solid #ccc",
     borderRadius: "16px",
-    padding: "16px"
+    padding: "16px",
   },
   containerAcc: {
     border: "1px solid #ccc",
@@ -59,7 +71,7 @@ const useStyle = makeStyles(() => ({
     padding: "16px",
     display: "flex",
     flexDirection: "column",
-    justifyContent: "space-between"
+    justifyContent: "space-between",
   },
   accordition: {
     marginBottom: "32px",
@@ -67,14 +79,14 @@ const useStyle = makeStyles(() => ({
     overflow: "scroll",
     display: "flex",
     flexDirection: "column",
-    justifyContent: "flex-start"
-  }
-}))
+    justifyContent: "flex-start",
+  },
+}));
 const AllTaskPage = () => {
   const dispatch = useDispatch();
-  const classes = useStyle()
+  const classes = useStyle();
   const tasks = useSelector(selectAllTasks);
-  const [selectedTodo, setSelectedTodo] = useState(undefined)
+  const [selectedTodo, setSelectedTodo] = useState(undefined);
   const [subtaskText, setSubtaskText] = useState("");
   const [taskTitle, setTaskTitle] = useState("");
   const [addRequestStatus, setAddRequestStatus] = useState("idle");
@@ -85,7 +97,6 @@ const AllTaskPage = () => {
   const tasksError = useSelector(
     (state) => state.allTaskReducer.allTasks.error
   );
-    console.log({tasks})
   useEffect(() => {
     if (tasksStatus === VARIABLE_STATUS.IDLE) {
       dispatch(getAllTask(tasks));
@@ -93,32 +104,42 @@ const AllTaskPage = () => {
   }, [tasksStatus, dispatch]);
   const handleTodoIsCompletedChange = (todo, e) => {
     // TODO: call api to update todo of this todo
-  }
+  };
   const handleArchivedTodo = () => {
-
     // remove item from todo list
     dispatch(removeTodoFromList(selectedTodo.id));
     dispatch(archiveTodo(selectedTodo.id));
-    setSelectedTodo(undefined)
+    setSelectedTodo(undefined);
   };
   const handleClose = () => {
-    setSelectedTodo(undefined)
-  }
-  
+    setSelectedTodo(undefined);
+  };
+
+  // ? Function này dùng để cập nhật lại isCompleted của subtask
+  const handleUpdateSubTaskStatus = async (data) => {
+    await dispatch(updateSubTaskStatusSlice(data));
+
+    const newTodo = dispatch(getTodoById(data.id));
+    setSelectedTodo(newTodo);
+  };
+
   const onSubTaskChange = (todo, e) => {
     // TODO: send request to BE to update subtask text
-  }
+  };
   const onSubTaskIsCompletedChange = (todo, e) => {
     // TODO: send request to BE to update isCompleted subtask
-
-  }
+  };
   const onSubTaskDelete = (todo) => {
     // TODO: send request to be to delete subtask
-  }
-  console.log(selectedTodo)
-  const onTodoClick = (todo) => {
-    setSelectedTodo(todo);
-  }
+  };
+  // ? Click mở popup sẽ call api lấy detail todo.
+  const onTodoClick = async (todo) => {
+    const response = await dispatch(getTodoById(todo.id));
+
+    console.log({ response });
+
+    setSelectedTodo(response.payload);
+  };
   const handleCreateSubtask = async (e, id, tod) => {
     if (e.key === "Enter") {
       await dispatch(
@@ -126,22 +147,15 @@ const AllTaskPage = () => {
       ).unwrap();
 
       setSubtaskText("");
-      dispatch(
-        addSubTaskToDetailTodo({
-          todoId: id,
-          name: e.target.value,
-          isCompleted: false,
-        })
-      );
       e.target.value = "";
     }
   };
   const onKeyPressHandler = async (e) => {
     const enterKey = "Enter";
     const cansave =
-        addRequestStatus === VARIABLE_STATUS.IDLE &&
-        taskTitle.length > 0 &&
-        taskTitle !== "Add Task";
+      addRequestStatus === VARIABLE_STATUS.IDLE &&
+      taskTitle.length > 0 &&
+      taskTitle !== "Add Task";
     if (e.key === enterKey) {
       try {
         if (!cansave) {
@@ -175,14 +189,14 @@ const AllTaskPage = () => {
             <Accordition
               tasks={tasks?.data?.allTaskTomorrow}
               title={"Tomorrow"}
-              handleTodoIsCompletedChange={handleTodoIsCompletedChange} 
+              handleTodoIsCompletedChange={handleTodoIsCompletedChange}
               onClick={onTodoClick}
             />
             <Accordition
               tasks={tasks?.data?.allTaskUpComming}
               title={"Upcoming"}
               onClick={onTodoClick}
-              handleTodoIsCompletedChange={handleTodoIsCompletedChange} 
+              handleTodoIsCompletedChange={handleTodoIsCompletedChange}
             />
           </Box>
           <Box className={classes.input}>
@@ -199,24 +213,23 @@ const AllTaskPage = () => {
           </Box>
         </Grid>
         <Grid item spacing={2} xs={6}>
-          {
-            selectedTodo && (
-              <TodoDetail 
-                className={classes.todoDetail}
-                selectedTodo={selectedTodo}
-                handleArchivedTodo={handleArchivedTodo}
-                handleClose={handleClose}
-                setSelectedTodo={setSelectedTodo}
-                onSubTaskIsCompletedChange={onSubTaskIsCompletedChange}
-                onSubTaskChange={onSubTaskChange}
-                handleCreateSubtask={handleCreateSubtask}
-              />
-            )
-          }
+          {selectedTodo && (
+            <TodoDetail
+              className={classes.todoDetail}
+              selectedTodo={selectedTodo}
+              handleArchivedTodo={handleArchivedTodo}
+              handleClose={handleClose}
+              setSelectedTodo={setSelectedTodo}
+              onSubTaskIsCompletedChange={onSubTaskIsCompletedChange}
+              onSubTaskChange={onSubTaskChange}
+              handleCreateSubtask={handleCreateSubtask}
+              handleUpdateSubTaskStatus={handleUpdateSubTaskStatus}
+            />
+          )}
         </Grid>
       </Grid>
     </Box>
-  )
+  );
 };
 
 export default AllTaskPage;
