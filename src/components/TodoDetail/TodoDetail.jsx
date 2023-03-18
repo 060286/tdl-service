@@ -178,7 +178,7 @@ export default function TodoDetail({
         <Box className={classes.suggestionItemBoxDialog}>
           <LockIcon className={classes.LockIconDialog} />
           {"My List > "}
-          {selectedTodo.todoCategory}
+          {selectedTodo?.todoCategory}
         </Box>
         <Box>
           <IconButton
@@ -233,7 +233,7 @@ export default function TodoDetail({
           variant="contained"
           startIcon={<AssignmentIcon />}
         >
-          {selectedTodo.todoCategory}
+          {selectedTodo?.todoCategory || selectedTodo.category}
         </Button>
         <Button
           size="small"
