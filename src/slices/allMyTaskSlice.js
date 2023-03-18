@@ -1,19 +1,11 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-
-import { getAllMyTask, getTaskDetail } from "../adapters/allMyTaskAdapter";
+import {differenceInBusinessDays} from "date-fns"
+import { getAllMyTask, getTaskDetail, updateTodoTitle } from "../adapters/allMyTaskAdapter";
 import { VARIABLE_STATUS } from "../constants/appStatusConstant";
-
+import INIT_STATE from "./constant";
 const initialState = {
-  allTasks: {
-    data: {},
-    error: null,
-    status: "idle",
-  },
-  infoTask: {
-    data: {},
-    error: null,
-    status: "idle",
-  },
+  allTasks: INIT_STATE.allTasks,
+  infoTask: INIT_STATE.infoTask
 };
 
 export const getTaskById = createAsyncThunk(
@@ -43,6 +35,19 @@ export const getAllTask = createAsyncThunk(
   }
 );
 
+
+export const updateTodoTitleSlice = createAsyncThunk(
+  "allMyTask/updateTodoTitleSlice",
+  async (initialState) => {
+    const response = await updateTodoTitle(initialState);
+
+    return {
+      ...initialState,
+      data: response.data,
+    };
+  }
+);
+
 const tasksSlice = createSlice({
   name: "alltask",
   initialState,
@@ -59,9 +64,24 @@ const tasksSlice = createSlice({
       .addCase(getAllTask.fulfilled, (state, action) => {
         state.allTasks.status = VARIABLE_STATUS.SUCCEEDED;
         state.allTasks.data = action.payload.data;
-      });
+      })
+      .addCase(updateTodoTitleSlice.fulfilled, (state, action) => {
+        state.allTasks.status = VARIABLE_STATUS.SUCCEEDED;
+        const field = 'allTaskUpComming'
+        // TODO: calculate field by todoDate by this function differenceInBusinessDays
+        state.allTasks.data = {
+          ...state.allTasks.data,
+          [field]: state.allTasks.data[field].map(item => {
+          if (item.id === action.payload.data.id) {
+            return action.payload.data;
+          }
+          return item;
+        })
+        }
+      })
   },
 });
+
 
 export const selectAllTasks = (state) => {
   return state.allTaskReducer.allTasks;
