@@ -12,8 +12,6 @@ import {
   removeDetailTodo,
   changeTitleByDetail,
   createSubTodo,
-  addSubTaskToDetailTodo,
-  changeCompletedStatusOfSubtaskById,
 } from "../../../slices/todoSlice";
 
 import "./style.css";
@@ -49,10 +47,6 @@ const MyDayTaskDetailModal = (props) => {
       );
       e.target.value = "";
     }
-  };
-
-  const handleSubtaskIconClick = (id, name, isCompleted) => {
-    dispatch(changeCompletedStatusOfSubtaskById({ id, name, isCompleted }));
   };
 
   return (

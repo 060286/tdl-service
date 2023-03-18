@@ -2,9 +2,11 @@ import axios from "axios";
 
 import { getTokenFromLocalStorage } from "../extensions/tokenExtension";
 
+// ? Lấy thời gian từ local
 const getAllMyTask = async () => {
-  const url =
-    "https://localhost:44334/api/v1/allmytask-page/all-task?dateTime=02%2F16%2F2023";
+  let currentDateTime = new Date();
+
+  const url = `https://localhost:44334/api/v1/allmytask-page/all-task?dateTime=${currentDateTime.toISOString()}`;
   const token = getTokenFromLocalStorage();
 
   const response = await axios({

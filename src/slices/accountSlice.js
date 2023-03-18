@@ -63,7 +63,6 @@ const accountSlice = createSlice({
         
       })
       .addCase(getUserInfo.fulfilled, (state, action) => {
-        console.log({action})
         state.userInfo.status = VARIABLE_STATUS.SUCCEEDED;
         state.userInfo = action.payload;
         state.userInfo.error = null;

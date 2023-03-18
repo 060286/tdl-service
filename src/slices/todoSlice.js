@@ -11,6 +11,7 @@ import {
   createSubTaskInTodo,
   archiveTodoById,
   updateSubTaskStatus,
+  getTagListAdapter,
 } from "../adapters/taskAdapter";
 import { VARIABLE_STATUS } from "../constants/appStatusConstant";
 
@@ -35,7 +36,21 @@ const initialState = {
     status: VARIABLE_STATUS.IDLE,
     error: null,
   },
+  getTagList: {
+    tags: [],
+    status: VARIABLE_STATUS.IDLE,
+    error: null,
+  },
 };
+
+export const getTagListSlice = createAsyncThunk(
+  "todo/getTagListSlice",
+  async () => {
+    const response = await getTagListAdapter();
+
+    return response;
+  }
+);
 
 export const createSubTodo = createAsyncThunk(
   "todo/createSubTodo",
@@ -116,8 +131,8 @@ export const archiveTodo = createAsyncThunk("todo/archiveTodo", async (id) => {
 
 export const updateSubTaskStatusSlice = createAsyncThunk(
   "todo/updateSubTaskStatusSlice",
-  async (id) => {
-    const response = await updateSubTaskStatus(id);
+  async (data) => {
+    const response = await updateSubTaskStatus(data);
 
     return response;
   }
@@ -140,30 +155,10 @@ const todoSlice = createSlice({
     changeTitleByDetail(state, action) {
       state.getDetailTodo.todo.title = action.payload;
     },
-    addSubTaskToDetailTodo(state, action) {
-      console.log(action);
-
-      // state.getDetailTodo.todo.subTasks.push(action.payload);
-    },
     removeTodoFromList(state, action) {
-      console.log(action.payload);
-
       state.getCurrentTodo.todos = state.getCurrentTodo.todos.filter(
         (todo) => todo.id !== action.payload
       );
-    },
-    changeCompletedStatusOfSubtaskById(state, action) {
-      const { id, name, isCompleted } = action.payload;
-
-      state.getDetailTodo.todo.subTasks.forEach((subtask, index) => {
-        if (subtask.id === id) {
-          state.getDetailTodo.todo.subTasks[index] = {
-            id: id,
-            name: name,
-            isCompleted: !isCompleted,
-          };
-        }
-      });
     },
   },
   extraReducers: (builder) => {
@@ -172,7 +167,7 @@ const todoSlice = createSlice({
         // state.getDetailTodo.status = VARIABLE_STATUS.LOADING;
       })
       .addCase(createSubTodo.fulfilled, (state, action) => {
-        // state.getDetailTodo.todo.subTasks.unshift(action.payload.data.data);
+        state.getDetailTodo.todo.subTasks.push(action.payload.data.data);
       })
       .addCase(archiveTodo.fulfilled, (state, action) => {
         console.log("archived completed");
@@ -211,21 +206,15 @@ const todoSlice = createSlice({
         state.getDetailTodo.status = VARIABLE_STATUS.FAILED;
       })
       .addCase(updateSubTaskStatusSlice.fulfilled, (state, action) => {
-        // update isCompleted by Id
-        const todos = state.getDetailTodo?.todo;
-        const { id } = action.payload;
+        const { id, isCompleted } = action.payload;
+        console.log({ id, isCompleted });
 
-        if (todos?.subTasks && todos?.subTasks.length > 0) {
-          todos.subTasks.forEach((item) => {
-            if (item.id === id) {
-              item.isCompleted = !item.isCompleted;
-            }
-          });
-        }
+        // Có id + isCompleted mới
+        // Ông update lại subTasks giúp tui nhé.
       })
-      .addCase(updateSubTaskStatusSlice.rejected, (state, action) => {
-        // do sth
-        console.log(action.payload);
+      .addCase(getTagListSlice.fulfilled, (state, action) => {
+        console.log({ data: action.payload.data.data });
+        state.getTagList.tags = action.payload.data.data;
       });
   },
 });
@@ -250,9 +239,7 @@ export const {
     removeSuggestion,
     removeDetailTodo,
     changeTitleByDetail,
-    addSubTaskToDetailTodo,
     removeTodoFromList,
-    changeCompletedStatusOfSubtaskById,
   },
   reducer: todoReducer,
 } = todoSlice;
