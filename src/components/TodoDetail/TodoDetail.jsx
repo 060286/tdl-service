@@ -168,6 +168,7 @@ export default function TodoDetail({
   onSubTaskIsCompletedChange,
   onSubTaskChange,
   handleCreateSubtask,
+  onTodoTitleChange,
   className,
 }) {
   const classes = useStyle();
@@ -216,10 +217,7 @@ export default function TodoDetail({
           placeholder={"content of todo"}
           value={selectedTodo.title}
           onChange={(e) =>
-            setSelectedTodo((preSelectedTodo) => ({
-              ...preSelectedTodo,
-              title: e.target.value,
-            }))
+            onTodoTitleChange({todo: selectedTodo, e})
           }
           onClick={(e) => {
             console.log("tạo task");

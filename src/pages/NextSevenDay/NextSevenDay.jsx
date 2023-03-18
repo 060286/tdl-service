@@ -5,7 +5,7 @@ import NextSevenDayListItem from "../../components/core/NextSevenDayListItem";
 import {format,addDays} from 'date-fns';
 
 import { Col, Container, Row } from "react-bootstrap";
-import {Box, Button, Dialog, Radio, Typography} from "@mui/material"
+import {Box, Button, Dialog, Radio, Typography, TextField} from "@mui/material"
 import { useDispatch, useSelector } from "react-redux";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 
@@ -59,6 +59,7 @@ const NextSevenDay = ({now = new Date()}) => {
   const nextSevenDayTask = useSelector(
     (state) => state.nextSevenDayReducer.getMyListNextSevenDay
   );
+  const [taskTitle, setTaskTitle] = useState("");
     
   const [state, setState] =  useState([
     nextSevenDayTask?.data?.dayOne || [],
@@ -111,6 +112,7 @@ const reorder = (list, startIndex, endIndex) => {
 
   function onDragEnd(result) {
     const { source, destination } = result;
+    console.log({result})
 
     // dropped outside the list
     if (!destination) {
@@ -126,6 +128,7 @@ const reorder = (list, startIndex, endIndex) => {
       newState[sInd] = items;
       setState(newState);
     } else {
+      console.log({source: source.droppableId, destination: destination.droppableId})
       // TODO: send request to be to update column and priority of todo
       const result = move(state[sInd], state[dInd], source, destination);
       const newState = [...state];
@@ -159,7 +162,6 @@ const reorder = (list, startIndex, endIndex) => {
     setSelectedTodo(undefined);
   };
   const getItemStyle = (isDragging, draggableStyle) => {
-    console.log({ isDragging })
     
     return {
       with: "25%",
@@ -200,8 +202,8 @@ const reorder = (list, startIndex, endIndex) => {
                     <Box className={classes.mini}>
                       {el?.map((item, index) => (
                       <Draggable
-                        key={`${ind}-${index}`}
-                        draggableId={`${ind}-${index}`}
+                        key={item.id}
+                        draggableId={item.id}
                         index={index}
                       >
                         {(provided, snapshot) => (
@@ -227,7 +229,7 @@ const reorder = (list, startIndex, endIndex) => {
                                 // TODO: send request to be to toggle checked button 
                                 onChange={() => { }}
                               />
-                              <Box>
+                                <Box>
                                 <Box className={classes.hello}>
                                   <LockIcon className={classes.LockIconDialog} />
                                   {"My List > "}
@@ -243,6 +245,19 @@ const reorder = (list, startIndex, endIndex) => {
                       </Draggable>
                     ))}
                     </Box>
+                  </Box>
+                  <Box className={classes.input}>
+                    <TextField
+                      label="Enter todo content"
+                      placeholder="Enter todo content"
+                      color="primary"
+                      fullWidth
+                      value={taskTitle}
+                      size={"small"}
+                      // TODO: Same with ALL TASK PAGE row 195 
+                      // onKeyUp={(e) => onKeyPressHandler(e)}
+                      // onChange={(e) => setTaskTitle(e.target.value)}
+                    />
                   </Box>
                 </Box>
               )}

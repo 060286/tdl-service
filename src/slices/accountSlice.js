@@ -8,24 +8,12 @@ import { getTargetOfProxy } from "../extensions/proxyExtension";
 
 import { VARIABLE_STATUS } from "../constants/appStatusConstant";
 import SLICE_NAMES from "../constants/sliceConstant";
-
+import INIT_STATE from "./constant"
 const initialState = {
-  login: {
-    data: {},
-    status: VARIABLE_STATUS.IDLE,
-    error: "",
-  },
-  register: {
-    data: {},
-    status: VARIABLE_STATUS.IDLE,
-    error: "",
-  },
-  token: null,
-  userInfo: {
-    data: {},
-    status: VARIABLE_STATUS.IDLE,
-    error: null,
-  },
+  login: INIT_STATE.login,
+  register: INIT_STATE.register,
+  token: INIT_STATE.token,
+  userInfo: INIT_STATE.userInfo,
 };
 
 export const loginAccount = createAsyncThunk("account/login", async (data) => {
@@ -72,6 +60,7 @@ const accountSlice = createSlice({
       .addCase(getUserInfo.pending, (state, action) => {
         state.userInfo.status = VARIABLE_STATUS.IDLE;
         state.userInfo.error = null;
+        
       })
       .addCase(getUserInfo.fulfilled, (state, action) => {
         console.log({action})
