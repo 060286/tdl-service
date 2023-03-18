@@ -167,6 +167,7 @@ export default function TodoDetail({
   onSubTaskIsCompletedChange,
   onSubTaskChange,
   handleCreateSubtask,
+  onTodoTitleChange,
   className,
   handleUpdateSubTaskStatus,
   handleClickTag,
@@ -179,7 +180,7 @@ export default function TodoDetail({
         <Box className={classes.suggestionItemBoxDialog}>
           <LockIcon className={classes.LockIconDialog} />
           {"My List > "}
-          {selectedTodo.todoCategory}
+          {selectedTodo?.todoCategory}
         </Box>
         <Box>
           <IconButton
@@ -217,10 +218,7 @@ export default function TodoDetail({
           placeholder={"content of todo"}
           value={selectedTodo.title}
           onChange={(e) =>
-            setSelectedTodo((preSelectedTodo) => ({
-              ...preSelectedTodo,
-              title: e.target.value,
-            }))
+            onTodoTitleChange({todo: selectedTodo, e})
           }
           onClick={(e) => {
             console.log("tạo task");
@@ -234,7 +232,7 @@ export default function TodoDetail({
           variant="contained"
           startIcon={<AssignmentIcon />}
         >
-          {selectedTodo.todoCategory}
+          {selectedTodo?.todoCategory || selectedTodo.category}
         </Button>
         <Button
           size="small"

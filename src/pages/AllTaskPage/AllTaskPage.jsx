@@ -4,6 +4,7 @@ import {
   getAllTask,
   selectAllTasks,
   selectTaskDetail,
+  updateTodoTitleSlice,
 } from "../../slices/allMyTaskSlice";
 import { VARIABLE_STATUS } from "../../constants/appStatusConstant";
 import AllMyTask from "../../components/core/AllMyTask";
@@ -24,6 +25,7 @@ import clsx from "clsx";
 import { makeStyles } from "@mui/styles/";
 import Accordition from "../../components/Accordition/Accordition";
 import TodoDetail from "../../components/TodoDetail/TodoDetail";
+import _ from 'lodash';
 import {
   getCurrentTodoList,
   selectAllTodos,
@@ -79,9 +81,12 @@ const useStyle = makeStyles(() => ({
     overflow: "scroll",
     display: "flex",
     flexDirection: "column",
-    justifyContent: "flex-start",
+    justifyContent: "flex-start"
   },
-}));
+  selectedTodoContainer: {
+    paddingTop: "0"
+  }
+}))
 const AllTaskPage = () => {
   const dispatch = useDispatch();
   const classes = useStyle();
@@ -101,15 +106,22 @@ const AllTaskPage = () => {
     if (tasksStatus === VARIABLE_STATUS.IDLE) {
       dispatch(getAllTask(tasks));
     }
-  }, [tasksStatus, dispatch]);
+  }, [tasksStatus, dispatch, tasks]);
+  const onTodoTitleChange = ({ todo, e }) => {
+    console.log({todo, e})
+    setSelectedTodo((preSelectedTodo => ({...preSelectedTodo, title: e.target.value})))
+    _.debounce(dispatch(updateTodoTitleSlice({id: todo.id, title: e.target.value})), 500);
+  }
   const handleTodoIsCompletedChange = (todo, e) => {
     // TODO: call api to update todo of this todo
+
   };
-  const handleArchivedTodo = () => {
-    // remove item from todo list
-    dispatch(removeTodoFromList(selectedTodo.id));
-    dispatch(archiveTodo(selectedTodo.id));
-    setSelectedTodo(undefined);
+  
+  const handleArchivedTodo = async () => {
+    await dispatch(removeTodoFromList(selectedTodo.id));
+    await dispatch(archiveTodo(selectedTodo.id));
+    dispatch(getAllTask())
+    setSelectedTodo(undefined)
   };
   const handleClose = () => {
     setSelectedTodo(undefined);
@@ -212,20 +224,22 @@ const AllTaskPage = () => {
             />
           </Box>
         </Grid>
-        <Grid item spacing={2} xs={6}>
-          {selectedTodo && (
-            <TodoDetail
-              className={classes.todoDetail}
-              selectedTodo={selectedTodo}
-              handleArchivedTodo={handleArchivedTodo}
-              handleClose={handleClose}
-              setSelectedTodo={setSelectedTodo}
-              onSubTaskIsCompletedChange={onSubTaskIsCompletedChange}
-              onSubTaskChange={onSubTaskChange}
-              handleCreateSubtask={handleCreateSubtask}
-              handleUpdateSubTaskStatus={handleUpdateSubTaskStatus}
-            />
-          )}
+        <Grid item spacing={2} xs={6} className={classes.selectedTodoContainer}>
+          {
+            selectedTodo && (
+              <TodoDetail 
+                className={classes.todoDetail}
+                selectedTodo={selectedTodo}
+                handleArchivedTodo={handleArchivedTodo}
+                handleClose={handleClose}
+                setSelectedTodo={setSelectedTodo}
+                onSubTaskIsCompletedChange={onSubTaskIsCompletedChange}
+                onSubTaskChange={onSubTaskChange}
+                onTodoTitleChange={onTodoTitleChange}
+                handleCreateSubtask={handleCreateSubtask}
+              />
+            )
+          }
         </Grid>
       </Grid>
     </Box>

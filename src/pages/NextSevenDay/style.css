@@ -1,11 +1,14 @@
 .NextSevenDay_Page_Block {
     box-sizing: border-box;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: scroll;
 }
 
 .NextSevenDay_Header_Block {
     width: 100%;
     height: 50px;
-    padding: 20px;
 }
 
 .NextSevenDay_Content_Block {
