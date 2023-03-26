@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import HeaderRouteItem from "../../components/core/HeaderRouteItem";
 import NextSevenDayListItem from "../../components/core/NextSevenDayListItem";
@@ -8,8 +8,8 @@ import { Col, Container, Row } from "react-bootstrap";
 import {Box, Button, Dialog, Radio, Typography, TextField} from "@mui/material"
 import { useDispatch, useSelector } from "react-redux";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
-
-import { getMyListNextSevenDay } from "../../slices/nextSevenDaySlice";
+import _ from "lodash"
+import { getMyListNextSevenDay, updateTodoTitleSlice } from "../../slices/nextSevenDaySlice";
 
 import { VARIABLE_STATUS } from "../../constants/appStatusConstant";
 import LockIcon from "@mui/icons-material/Lock";
@@ -47,6 +47,9 @@ const useStyle = makeStyles(() => ({
   },
   mini: {
     marginRight: "16px"
+  },
+  titleTodo: {
+    wordBreak: "break-all",
   }
 }));
 
@@ -161,6 +164,13 @@ const reorder = (list, startIndex, endIndex) => {
     setOpen(false);
     setSelectedTodo(undefined);
   };
+   const debouncedTitle = useRef(_.debounce(({id, title}) => {dispatch(updateTodoTitleSlice({id, title}))}, 500)).current
+  const onTodoTitleChange = async ({ todo, e }) => {
+    setSelectedTodo((preSelectedTodo => ({...preSelectedTodo, title: e.target.value})))
+    debouncedTitle({ id: todo.id, title: e.target.value })
+    
+  }
+
   const getItemStyle = (isDragging, draggableStyle) => {
     
     return {
@@ -176,10 +186,9 @@ const reorder = (list, startIndex, endIndex) => {
 
   useEffect(() => {
     if (nextSevenDayTask.status === VARIABLE_STATUS.IDLE) {
-      dispatch(getMyListNextSevenDay("2023-02-18"));
+      dispatch(getMyListNextSevenDay(new Date().toLocaleDateString()));
     }
   }, []);
-  console.log({nextSevenDayTask, state})
   return (
     <Box className="NextSevenDay_Page_Block" style={{ paddingTop: "20px" }}>
       <Row className="NextSevenDay_Header_Block">
@@ -235,7 +244,7 @@ const reorder = (list, startIndex, endIndex) => {
                                   {"My List > "}
                                   {item.category}
                                 </Box>
-                                <Typography>
+                                <Typography className={classes.titleTodo}>
                                   {item.title}
                                 </Typography>
                               </Box>
@@ -281,6 +290,7 @@ const reorder = (list, startIndex, endIndex) => {
           // handleArchivedTodo={handleArchivedTodo}
           handleClose={handleClose}
           setSelectedTodo={setSelectedTodo}
+          onTodoTitleChange={onTodoTitleChange}
           // onSubTaskIsCompletedChange={onSubTaskIsCompletedChange}
           // onSubTaskChange={onSubTaskChange}
           // handleCreateSubtask={handleCreateSubtask}

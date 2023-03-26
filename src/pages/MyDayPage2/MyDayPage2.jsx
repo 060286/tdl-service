@@ -21,7 +21,7 @@ import { makeStyles } from "@mui/styles/";
 import MyDayWelcomeName from "../../components/core/MyDayWelcomeName";
 import { useSelector, useDispatch } from "react-redux";
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { getUserInfo } from "../../slices/accountSlice";
 import AddIcon from "@mui/icons-material/Add";
 import LockIcon from "@mui/icons-material/Lock";
@@ -29,6 +29,7 @@ import { getTokenFromLocalStorage } from "../../extensions/tokenExtension";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CloseIcon from "@mui/icons-material/Close";
+import _ from "lodash"
 import {
   getCurrentTodoList,
   selectAllTodos,
@@ -41,6 +42,8 @@ import {
   removeSuggestion,
   addSubTaskToDetailTodo,
   removeDetailTodo,
+  updateTodoTitleSlice,
+  updateTodoDescriptionSlice
 } from "../../slices/todoSlice";
 import { VARIABLE_STATUS } from "../../constants/appStatusConstant";
 import MyDayCalendar from "../../components/core/MyDayCalendar";
@@ -169,7 +172,11 @@ const useStyle = makeStyles(() => ({
   radioDialog: {
     marginRight: "8px",
   },
+  todoTitle: {
+    "wordBreak": "break-all"
+  }
 }));
+
 export default function MyDayPage2() {
   const classes = useStyle();
   const dispatch = useDispatch();
@@ -189,6 +196,7 @@ export default function MyDayPage2() {
   const [subtaskText, setSubtaskText] = useState("");
   const [monthOfYear, setMonthOfYear] = useState(0);
   const [taskTitle, setTaskTitle] = useState("");
+  const [taskTitleHelperText, setTaskTitleHelperText] = useState("")
   const [addRequestStatus, setAddRequestStatus] = useState("idle");
   const [open, setOpen] = useState(false);
   const [selectedTodo, setSelectedTodo] = useState(undefined);
@@ -343,6 +351,17 @@ export default function MyDayPage2() {
       e.target.value = "";
     }
   };
+  const debouncedTitle = useRef(_.debounce(({id, title}) => {dispatch(updateTodoTitleSlice({id, title}))}, 500)).current
+  const onTodoTitleChange = ({ todo, e }) => {
+    setSelectedTodo((preSelectedTodo => ({...preSelectedTodo, title: e.target.value})))
+    debouncedTitle({ id: todo.id, title: e.target.value })
+  }
+  
+  const debouncedDescription = useRef(_.debounce(async({id, description}) => {await dispatch(updateTodoDescriptionSlice({id, description}))}, 500)).current
+  const onTodoDescriptionChange = ({ todo, e }) => {
+    setSelectedTodo((preSelectedTodo => ({...preSelectedTodo, description: e.target.value})))
+    debouncedDescription({ id: todo.id, description: e.target.value })
+  }
   const onSubTaskChange = (todo, e) => {
     // TODO: send request to BE to update subtask text
     // ? Tui nghĩ cái này mình sẽ send id + title của subtask
@@ -356,7 +375,6 @@ export default function MyDayPage2() {
     // TODO: send request to be to delete subtask
   };
 
-  console.log({ selectedTodo });
   return (
     <Box className={classes.conatiner}>
       <Box className={classes.mydayPage} spacing={2}>
@@ -404,7 +422,7 @@ export default function MyDayPage2() {
                         <Radio />
                       </RadioGroup>
                     </ListItemIcon>
-                    <ListItemText id={todo.id} primary={todo.title} />
+                    <ListItemText id={todo.id} primary={todo.title} className={classes.todoTitle} />
                   </Box>
                 </ListItemButton>
               </ListItem>
@@ -413,6 +431,7 @@ export default function MyDayPage2() {
         </List>
         <Box className={classes.input}>
           <TextField
+            multiline
             label="Enter todo content"
             placeholder="Enter todo content"
             color="primary"
@@ -420,7 +439,16 @@ export default function MyDayPage2() {
             focused
             value={taskTitle}
             onKeyUp={(e) => onKeyPressHandler(e)}
-            onChange={(e) => setTaskTitle(e.target.value)}
+            onChange={(e) => {
+              if (e.target.value.length > 200) {
+                setTaskTitleHelperText("Max character of title must be less than 200")
+                return;
+              }
+              setTaskTitleHelperText("")
+              setTaskTitle(e.target.value)
+            }}
+            helperText={taskTitleHelperText}
+            error={taskTitleHelperText}
           />
         </Box>
       </Box>
@@ -475,6 +503,8 @@ export default function MyDayPage2() {
             onSubTaskIsCompletedChange={onSubTaskIsCompletedChange}
             onSubTaskChange={onSubTaskChange}
             handleCreateSubtask={handleCreateSubtask}
+            onTodoTitleChange={onTodoTitleChange}
+            onTodoDescriptionChange={onTodoDescriptionChange}
           />
         </Dialog>
       )}

@@ -4,7 +4,7 @@ import { getTokenFromLocalStorage } from "../extensions/tokenExtension";
 
 const getAllMyTask = async () => {
   const url =
-    "https://localhost:44334/api/v1/allmytask-page/all-task?dateTime=02%2F16%2F2023";
+    `https://localhost:44334/api/v1/allmytask-page/all-task?dateTime=${new Date().toLocaleDateString()}`;
   const token = getTokenFromLocalStorage();
 
   const response = await axios({
@@ -62,4 +62,30 @@ const updateTodoTitle = async ({ id, title }) => {
 };
 
 
-export { getAllMyTask, getTaskDetail, updateTodoTitle };
+const updateTodoDescription = async ({ id, description }) => {
+  console.log(1111111111, {id, description})
+  try {
+    const url = `https://localhost:44334/api/v1/todos/${id}/update-todo-description
+`;
+    const token = getTokenFromLocalStorage();
+
+    const response = await axios({
+      url: url,
+      method: "put",
+      data: {
+        description: description,
+      },
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    return response.data;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+
+
+export { getAllMyTask, getTaskDetail, updateTodoTitle, updateTodoDescription };

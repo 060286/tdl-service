@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import {
   getAllTask,
   selectAllTasks,
   selectTaskDetail,
   updateTodoTitleSlice,
+  updateTodoDescriptionSlice
 } from "../../slices/allMyTaskSlice";
 import { VARIABLE_STATUS } from "../../constants/appStatusConstant";
 import AllMyTask from "../../components/core/AllMyTask";
@@ -90,17 +91,23 @@ const AllTaskPage = () => {
   const tasksError = useSelector(
     (state) => state.allTaskReducer.allTasks.error
   );
-    console.log({tasks})
   useEffect(() => {
     if (tasksStatus === VARIABLE_STATUS.IDLE) {
       dispatch(getAllTask(tasks));
     }
   }, [tasksStatus, dispatch, tasks]);
+  const debouncedTitle = useRef(_.debounce(async({id, title}) => {await dispatch(updateTodoTitleSlice({id, title}))}, 500)).current
   const onTodoTitleChange = ({ todo, e }) => {
-    console.log({todo, e})
     setSelectedTodo((preSelectedTodo => ({...preSelectedTodo, title: e.target.value})))
-    _.debounce(dispatch(updateTodoTitleSlice({id: todo.id, title: e.target.value})), 500);
+    debouncedTitle({ id: todo.id, title: e.target.value })
   }
+  
+  const debouncedDescription = useRef(_.debounce(async({id, description}) => {await dispatch(updateTodoDescriptionSlice({id, description}))}, 500)).current
+  const onTodoDescriptionChange = ({ todo, e }) => {
+    setSelectedTodo((preSelectedTodo => ({...preSelectedTodo, description: e.target.value})))
+    debouncedDescription({ id: todo.id, description: e.target.value })
+  }
+
   const handleTodoIsCompletedChange = (todo, e) => {
     // TODO: call api to update todo of this todo
   }
@@ -124,7 +131,6 @@ const AllTaskPage = () => {
   const onSubTaskDelete = (todo) => {
     // TODO: send request to be to delete subtask
   }
-  console.log(selectedTodo)
   const onTodoClick = (todo) => {
     setSelectedTodo(todo);
   }
@@ -220,6 +226,7 @@ const AllTaskPage = () => {
                 onSubTaskChange={onSubTaskChange}
                 onTodoTitleChange={onTodoTitleChange}
                 handleCreateSubtask={handleCreateSubtask}
+                onTodoDescriptionChange={onTodoDescriptionChange}
               />
             )
           }
