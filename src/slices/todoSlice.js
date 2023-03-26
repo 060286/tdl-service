@@ -5,7 +5,7 @@ import {
   getTodayJobList,
   getSuggestionTodoList,
 } from "../adapters/myDayPageAdapter";
-
+import {current } from '@reduxjs/toolkit'
 import {
   getTaskById,
   createSubTaskInTodo,
@@ -14,27 +14,13 @@ import {
 } from "../adapters/taskAdapter";
 import { VARIABLE_STATUS } from "../constants/appStatusConstant";
 
+import INIT_STATE from "./constant"
+import { updateTodoTitle, updateTodoDescription } from "../adapters/allMyTaskAdapter";
 const initialState = {
-  getCurrentTodo: {
-    todos: [],
-    status: VARIABLE_STATUS.IDLE,
-    error: null,
-  },
-  createTodo: {
-    title: "",
-    status: VARIABLE_STATUS.IDLE,
-    error: null,
-  },
-  getSuggestionTodo: {
-    todos: [],
-    status: VARIABLE_STATUS.IDLE,
-    error: null,
-  },
-  getDetailTodo: {
-    todo: {},
-    status: VARIABLE_STATUS.IDLE,
-    error: null,
-  },
+  getCurrentTodo: INIT_STATE.getCurrentTodo,
+  createTodo: INIT_STATE.createTodo,
+  getSuggestionTodo: INIT_STATE.getSuggestionTodo,
+  getDetailTodo: INIT_STATE.getDetailTodo,
 };
 
 export const createSubTodo = createAsyncThunk(
@@ -123,6 +109,33 @@ export const updateSubTaskStatusSlice = createAsyncThunk(
   }
 );
 
+
+export const updateTodoTitleSlice = createAsyncThunk(
+  "myDayPage2/updateTodoTitleSlice",
+  async (initialState) => {
+    console.log("CALL")
+    const response = await updateTodoTitle(initialState);
+
+    return {
+      ...initialState,
+      data: response.data,
+    };
+  }
+);
+
+
+export const updateTodoDescriptionSlice = createAsyncThunk(
+  "myDayPage2/updateTodoDescriptionSlice",
+  async (initialState) => {
+    console.log("CALL")
+    const response = await updateTodoDescription(initialState);
+
+    return {
+      ...initialState,
+      data: response.data,
+    };
+  }
+);
 const todoSlice = createSlice({
   name: "todo",
   initialState,
@@ -226,7 +239,25 @@ const todoSlice = createSlice({
       .addCase(updateSubTaskStatusSlice.rejected, (state, action) => {
         // do sth
         console.log(action.payload);
-      });
+      })
+      .addCase(updateTodoTitleSlice.fulfilled, (state, action) => {
+        state.getCurrentTodo.status = VARIABLE_STATUS.SUCCEEDED;
+        state.getCurrentTodo.todos = current(state.getCurrentTodo.todos).map(item => {
+          if (item.id === action.payload.data.id) {
+            return action.payload.data;
+          }
+          return item;
+        })
+      })
+    .addCase(updateTodoDescriptionSlice.fulfilled, (state, action) => {
+        state.getCurrentTodo.status = VARIABLE_STATUS.SUCCEEDED;
+        state.getCurrentTodo.todos = current(state.getCurrentTodo.todos).map(item => {
+          if (item.id === action.payload.data.id) {
+            return action.payload.data;
+          }
+          return item;
+        })
+      })
   },
 });
 

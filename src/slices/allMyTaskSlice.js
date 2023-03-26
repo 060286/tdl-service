@@ -1,6 +1,6 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import {differenceInBusinessDays} from "date-fns"
-import { getAllMyTask, getTaskDetail, updateTodoTitle } from "../adapters/allMyTaskAdapter";
+import { createSlice, createAsyncThunk, current } from "@reduxjs/toolkit";
+import {differenceInDays, format } from "date-fns"
+import { getAllMyTask, getTaskDetail, updateTodoTitle, updateTodoDescription } from "../adapters/allMyTaskAdapter";
 import { VARIABLE_STATUS } from "../constants/appStatusConstant";
 import INIT_STATE from "./constant";
 const initialState = {
@@ -48,6 +48,18 @@ export const updateTodoTitleSlice = createAsyncThunk(
   }
 );
 
+export const updateTodoDescriptionSlice = createAsyncThunk(
+  "allMyTask/updateTodoDescriptionSlice",
+  async (initialState) => {
+    const response = await updateTodoDescription(initialState);
+
+    return {
+      ...initialState,
+      data: response.data,
+    };
+  }
+);
+
 const tasksSlice = createSlice({
   name: "alltask",
   initialState,
@@ -67,7 +79,15 @@ const tasksSlice = createSlice({
       })
       .addCase(updateTodoTitleSlice.fulfilled, (state, action) => {
         state.allTasks.status = VARIABLE_STATUS.SUCCEEDED;
-        const field = 'allTaskUpComming'
+        const day = differenceInDays(
+        new Date(format(new Date(action.payload.data.todoDate), 'MM/dd/yyyy')),
+        new Date(format(new Date(), 'MM/dd/yyyy'))
+      )
+        let field; 
+        if (day === 0) field = 'allTaskToday'
+        if (day === 1) field = 'allTaskTomorrow'
+        if (day > 1) field = 'allTaskUpComming'
+
         // TODO: calculate field by todoDate by this function differenceInBusinessDays
         state.allTasks.data = {
           ...state.allTasks.data,
@@ -79,6 +99,28 @@ const tasksSlice = createSlice({
         })
         }
       })
+    .addCase(updateTodoDescriptionSlice.fulfilled, (state, action) => {
+      state.allTasks.status = VARIABLE_STATUS.SUCCEEDED;
+      const day = differenceInDays(
+        new Date(format(new Date(action.payload.data.todoDate), 'MM/dd/yyyy')),
+        new Date(format(new Date(), 'MM/dd/yyyy'))
+      )
+      let field; 
+      if (day === 0) field = 'allTaskToday'
+      if (day === 1) field = 'allTaskTomorrow'
+      if (day > 1) field = 'allTaskUpComming'
+      // TODO: calculate field by todoDate by this function differenceInBusinessDays
+      state.allTasks.data = {
+        ...state.allTasks.data,
+        [field]: current(state.allTasks.data[field]).map(item => {
+          if (item.id === action.payload.data.id) {
+          console.log(item, action.payload.data)
+          return action.payload.data;
+        }
+        return item;
+      })
+      }
+    })
   },
 });
 

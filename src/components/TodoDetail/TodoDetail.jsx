@@ -39,7 +39,7 @@ import LockIcon from "@mui/icons-material/Lock";
 import AssignmentIcon from "@mui/icons-material/Assignment";
 import TagIcon from "@mui/icons-material/Tag";
 import clsx from "clsx";
-
+import { useState } from "react";
 const useStyle = makeStyles(() => ({
   list: {
     overflowY: "scroll",
@@ -159,6 +159,11 @@ const useStyle = makeStyles(() => ({
   radioDialog: {
     marginRight: "8px",
   },
+  helperText: {
+    color: "red",
+    fontSize: "14px"
+  }
+
 }));
 export default function TodoDetail({
   selectedTodo,
@@ -169,10 +174,19 @@ export default function TodoDetail({
   onSubTaskChange,
   handleCreateSubtask,
   onTodoTitleChange,
+  onTodoDescriptionChange,
   className,
 }) {
+  const [titleHelperText, setTitleHelperText] = useState("");
+  const isValidTitle = (title) => {
+    if (title.length > 200) {
+      setTitleHelperText("Max character of title must be less than 200")
+      return false;
+    }
+    setTitleHelperText("")
+    return true;
+  }
   const classes = useStyle();
-
   return (
     <Box className={className}>
       <Box className={classes.titleContainer}>
@@ -212,17 +226,25 @@ export default function TodoDetail({
       </Box>
       <Box className={classes.dialogContainer}>
         <Input
+          minRows={1}
+          multiline
+          maxRows={5}
           autoFocus={true}
           fullWidth={true}
           placeholder={"content of todo"}
           value={selectedTodo.title}
-          onChange={(e) =>
-            onTodoTitleChange({todo: selectedTodo, e})
-          }
+          onChange={(e) => {
+            const isValid = isValidTitle(e.target.value);
+            if (isValid) {
+              onTodoTitleChange({todo: selectedTodo, e})
+            }  
+          }}
           onClick={(e) => {
             console.log("tạo task");
           }}
+          error={titleHelperText}
         />
+        <Typography className={classes.helperText}>{titleHelperText}</Typography>
       </Box>
       <Box className={classes.dialogContainer}>
         <Button
@@ -245,15 +267,15 @@ export default function TodoDetail({
       <Box className={classes.dialogContainer}>
         <Typography variant="subtitle2">NOTES</Typography>
         <Input
+          multiline
+          minRows={1}
+          maxRows={5}
           fullWidth={true}
           placeholder={"Notes"}
           value={selectedTodo.description || ""}
-          onChange={(e) =>
-            setSelectedTodo((preSelectedTodo) => ({
-              ...preSelectedTodo,
-              description: e.target.value,
-            }))
-          }
+          onChange={(e) => {
+            onTodoDescriptionChange({todo: selectedTodo, e})
+          }}
         />
       </Box>
       <Box className={classes.dialogContainer}>
@@ -268,6 +290,9 @@ export default function TodoDetail({
               name="radio-buttons"
             />
             <Input
+              multiline
+              minRows={1}
+              maxRows={5}
               fullWidth={true}
               placeholder={"Content of todo"}
               onChange={(e) => {
@@ -284,6 +309,9 @@ export default function TodoDetail({
             disabled={true}
           />
           <Input
+            multiline
+            minRows={1}
+            maxRows={5}
             fullWidth={true}
             placeholder={"Content of todo"}
             onKeyDown={(e) => handleCreateSubtask(e, selectedTodo.id)}

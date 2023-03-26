@@ -26,6 +26,9 @@ const useStyle = makeStyles(() => ({
   item: {
     height: "100%",
     overflow: "scroll"
+  },
+  todoTitle: { 
+    wordBreak: "break-all"
   }
 }))
 export default function Accordition({tasks, title,handleTodoIsCompletedChange, onClick}) {
@@ -49,7 +52,7 @@ export default function Accordition({tasks, title,handleTodoIsCompletedChange, o
                       checked={todo.isCompleted}
                       onChange={(e) => handleTodoIsCompletedChange(todo, e)}
                     />
-                    <Typography>{todo.title}</Typography>
+                    <Typography className={classes.todoTitle}>{todo.title}</Typography>
                   </ListItemButton>
                 )
               })}
