@@ -1,23 +1,23 @@
 import React, { useEffect, useRef, useState } from "react";
 
 import HeaderRouteItem from "../../components/core/HeaderRouteItem";
-import NextSevenDayListItem from "../../components/core/NextSevenDayListItem";
+import NextSevenDayListItem from "./NextSevenDayItem";
 import {format,addDays} from 'date-fns';
-
 import { Col, Container, Row } from "react-bootstrap";
 import {Box, Button, Dialog, Radio, Typography, TextField} from "@mui/material"
 import { useDispatch, useSelector } from "react-redux";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import _ from "lodash"
-import { getMyListNextSevenDay, updateTodoTitleSlice } from "../../slices/nextSevenDaySlice";
+import { getMyListNextSevenDay, updateTodoTitleSlice, updateTodoDescriptionSlice } from "../../slices/nextSevenDaySlice";
 
 import { VARIABLE_STATUS } from "../../constants/appStatusConstant";
 import LockIcon from "@mui/icons-material/Lock";
-
+import axios from 'axios';
 import "./style.css";
 
 import { makeStyles } from "@mui/styles/";
 import TodoDetail from "../../components/TodoDetail/TodoDetail";
+import { getTokenFromLocalStorage } from "../../extensions/tokenExtension";
 
 const useStyle = makeStyles(() => ({
   container: {
@@ -62,8 +62,6 @@ const NextSevenDay = ({now = new Date()}) => {
   const nextSevenDayTask = useSelector(
     (state) => state.nextSevenDayReducer.getMyListNextSevenDay
   );
-  const [taskTitle, setTaskTitle] = useState("");
-    
   const [state, setState] =  useState([
     nextSevenDayTask?.data?.dayOne || [],
     nextSevenDayTask?.data?.dayTwo || [],
@@ -98,7 +96,6 @@ const reorder = (list, startIndex, endIndex) => {
  * Moves an item from one list to another list.
  */
   const move = (source, destination, droppableSource, droppableDestination) => {
-  console.log({source, destination})
   const sourceClone = Array.from(source);
   const destClone = Array.from(destination);
   const [removed] = sourceClone.splice(droppableSource.index, 1);
@@ -113,9 +110,9 @@ const reorder = (list, startIndex, endIndex) => {
 };
 
 
-  function onDragEnd(result) {
-    const { source, destination } = result;
-    console.log({result})
+  async function onDragEnd(result) {
+    const { source, destination, draggableId} = result;
+    console.log({ result })
 
     // dropped outside the list
     if (!destination) {
@@ -123,7 +120,23 @@ const reorder = (list, startIndex, endIndex) => {
     }
     const sInd = +source.droppableId;
     const dInd = +destination.droppableId;
-
+    const isNotRequest = source.index === destination.index && source.droppableId === destination.droppableId
+    if (!isNotRequest) {
+      axios({
+        method: "put",
+        url: "https://localhost:44334/api/v1/todos/drag-drop-todo",
+        data: {
+          dragId: draggableId,
+          dropDate: addDays(new Date(), destination.droppableId),
+          priority: destination.index,
+          isSameColumn: destination.droppableId === source.droppableId
+        },
+        headers: {
+          Authorization: `Bearer ${getTokenFromLocalStorage()}`,
+        },
+      })
+    }
+    
     if (sInd === dInd) {
       // TODO: send request to be to update priority of todo from source.index to destination.index
       const items = reorder(state[sInd], source.index, destination.index);
@@ -131,7 +144,6 @@ const reorder = (list, startIndex, endIndex) => {
       newState[sInd] = items;
       setState(newState);
     } else {
-      console.log({source: source.droppableId, destination: destination.droppableId})
       // TODO: send request to be to update column and priority of todo
       const result = move(state[sInd], state[dInd], source, destination);
       const newState = [...state];
@@ -155,7 +167,6 @@ const reorder = (list, startIndex, endIndex) => {
    const handleClickOpen =
     ({ todo }) =>
       () => {
-      console.log({todo})
       setOpen(true);
       setSelectedTodo(todo);
     };
@@ -164,11 +175,15 @@ const reorder = (list, startIndex, endIndex) => {
     setOpen(false);
     setSelectedTodo(undefined);
   };
-   const debouncedTitle = useRef(_.debounce(({id, title}) => {dispatch(updateTodoTitleSlice({id, title}))}, 500)).current
+  const debouncedTitle = useRef(_.debounce(({id, title}) => {dispatch(updateTodoTitleSlice({id, title}))}, 500)).current
   const onTodoTitleChange = async ({ todo, e }) => {
     setSelectedTodo((preSelectedTodo => ({...preSelectedTodo, title: e.target.value})))
     debouncedTitle({ id: todo.id, title: e.target.value })
-    
+  }
+  const debouncedDescription = useRef(_.debounce(({id, description}) => {dispatch(updateTodoDescriptionSlice({id, description}))}, 500)).current
+  const onTodoDescriptionChange = async ({ todo, e }) => {
+    setSelectedTodo((preSelectedTodo => ({...preSelectedTodo, description: e.target.value})))
+    debouncedDescription({ id: todo.id, description: e.target.value })
   }
 
   const getItemStyle = (isDragging, draggableStyle) => {
@@ -188,7 +203,7 @@ const reorder = (list, startIndex, endIndex) => {
     if (nextSevenDayTask.status === VARIABLE_STATUS.IDLE) {
       dispatch(getMyListNextSevenDay(new Date().toLocaleDateString()));
     }
-  }, []);
+  }, [dispatch]);
   return (
     <Box className="NextSevenDay_Page_Block" style={{ paddingTop: "20px" }}>
       <Row className="NextSevenDay_Header_Block">
@@ -199,79 +214,13 @@ const reorder = (list, startIndex, endIndex) => {
       <Box className={classes.container}>
         <DragDropContext onDragEnd={onDragEnd}>
           {state?.map((el, ind) => (
-            <Droppable key={ind} droppableId={`${ind}`}>
-              {(provided, snapshot) => (
-                <Box
-                  ref={provided.innerRef}
-                  style={getListStyle(snapshot.isDraggingOver)}
-                  {...provided.droppableProps}
-                >
-                  <Typography variant="h5">{format(addDays(now, ind), 'EEEE')}</Typography>
-                  <Box className={classes.scroll}>
-                    <Box className={classes.mini}>
-                      {el?.map((item, index) => (
-                      <Draggable
-                        key={item.id}
-                        draggableId={item.id}
-                        index={index}
-                      >
-                        {(provided, snapshot) => (
-                          <Box
-                            onClick={handleClickOpen({ todo: item })}
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            {...provided.dragHandleProps}
-                            style={getItemStyle(
-                              snapshot.isDragging,
-                              provided.draggableProps.style
-                            )}
-                          >
-                            <Box 
-                              style={{
-                                display: "flex",
-                                alignItems: "center"
-                              }}
-                            
-                            >
-                              <Radio
-                                checked={item.isCompleted}
-                                // TODO: send request to be to toggle checked button 
-                                onChange={() => { }}
-                              />
-                                <Box>
-                                <Box className={classes.hello}>
-                                  <LockIcon className={classes.LockIconDialog} />
-                                  {"My List > "}
-                                  {item.category}
-                                </Box>
-                                <Typography className={classes.titleTodo}>
-                                  {item.title}
-                                </Typography>
-                              </Box>
-                            </Box>
-                          </Box>
-                        )}
-                      </Draggable>
-                    ))}
-                    </Box>
-                  </Box>
-                  <Box className={classes.input}>
-                    <TextField
-                      label="Enter todo content"
-                      placeholder="Enter todo content"
-                      color="primary"
-                      fullWidth
-                      value={taskTitle}
-                      size={"small"}
-                      // TODO: Same with ALL TASK PAGE row 195 
-                      // onKeyUp={(e) => onKeyPressHandler(e)}
-                      // onChange={(e) => setTaskTitle(e.target.value)}
-                    />
-                  </Box>
-                </Box>
-              )}
-              
-            </Droppable>
+            <NextSevenDayListItem
+              ind={ind}
+              el={el}
+              handleClickOpen={handleClickOpen}
+              getItemStyle={getItemStyle}
+              getListStyle={getListStyle} 
+            />
           ))}
         </DragDropContext>
       </Box>
@@ -291,6 +240,7 @@ const reorder = (list, startIndex, endIndex) => {
           handleClose={handleClose}
           setSelectedTodo={setSelectedTodo}
           onTodoTitleChange={onTodoTitleChange}
+          onTodoDescriptionChange={onTodoDescriptionChange}
           // onSubTaskIsCompletedChange={onSubTaskIsCompletedChange}
           // onSubTaskChange={onSubTaskChange}
           // handleCreateSubtask={handleCreateSubtask}
