@@ -80,9 +80,9 @@ const tasksSlice = createSlice({
       .addCase(updateTodoTitleSlice.fulfilled, (state, action) => {
         state.allTasks.status = VARIABLE_STATUS.SUCCEEDED;
         const day = differenceInDays(
-        new Date(format(new Date(action.payload.data.todoDate), 'MM/dd/yyyy')),
-        new Date(format(new Date(), 'MM/dd/yyyy'))
-      )
+          new Date(format(new Date(action.payload.data.todoDate), 'MM/dd/yyyy')),
+          new Date(format(new Date(), 'MM/dd/yyyy'))
+        )
         let field; 
         if (day === 0) field = 'allTaskToday'
         if (day === 1) field = 'allTaskTomorrow'
@@ -114,7 +114,6 @@ const tasksSlice = createSlice({
         ...state.allTasks.data,
         [field]: current(state.allTasks.data[field]).map(item => {
           if (item.id === action.payload.data.id) {
-          console.log(item, action.payload.data)
           return action.payload.data;
         }
         return item;

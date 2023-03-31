@@ -2,6 +2,7 @@ import { VARIABLE_STATUS } from "../constants/appStatusConstant";
 import { createSlice, createAsyncThunk, current } from "@reduxjs/toolkit";
 import { getMyListNextSevenDayRequest } from "../adapters/nextSevenDatAdapter";
 import INIT_STATE from "./constant"
+import {differenceInDays, format } from "date-fns"
 import { updateTodoTitle, updateTodoDescription } from "../adapters/allMyTaskAdapter";
 const initialState = {
   getMyListNextSevenDay: INIT_STATE.getMyListNextSevenDay,
@@ -17,8 +18,6 @@ const nextSevenDaySlice = createSlice({
         state.getMyListNextSevenDay.status = VARIABLE_STATUS.LOADING;
       })
       .addCase(getMyListNextSevenDay.fulfilled, (state, action) => {
-        console.log({ action: action.payload });
-
         state.getMyListNextSevenDay.status = VARIABLE_STATUS.SUCCEEDED;
         state.getMyListNextSevenDay.data = action.payload.data;
       })
@@ -27,26 +26,68 @@ const nextSevenDaySlice = createSlice({
         state.getMyListNextSevenDay.erorr = action.payload;
       })
       .addCase(updateTodoTitleSlice.fulfilled, (state, action) => {
+        console.log("11")
         state.getMyListNextSevenDay.status = VARIABLE_STATUS.SUCCEEDED;
-        console.log(current(state.getMyListNextSevenDay.data), action.payload.data)
+        const day = differenceInDays(
+          new Date(format(new Date(action.payload.data.todoDate), 'MM/dd/yyyy')),
+          new Date(format(new Date(), 'MM/dd/yyyy'))
+        )
+        let field = "";
+        if (day === 0) field = "dayOne";
+        if (day === 1) field = "dayTwo";
+        if (day === 2) field = "dayThree";
+        if (day === 3) field = "dayFour";
+        if (day === 4) field = "dayFive";
+        if (day === 5) field = "daySix";
+        if (day === 6) field = "daySeven";
+        console.log(
+          {
+            day,
+            field,
+            a: current(state.getMyListNextSevenDay.data),
+            b: current(state.getMyListNextSevenDay.data[field])
+          });
         // TODO: waiting be add todoDate field
-        // state.getCurrentTodo.todos = current(state.getCurrentTodo.todos).map(item => {
-          // if (item.id === action.payload.data.id) {
-            // return action.payload.data;
-          // }
-          // return item;
-        // })
+        state.getMyListNextSevenDay.data = {
+          ...current(state.getMyListNextSevenDay.data),
+          [field]: current(state.getMyListNextSevenDay.data[field]).map(item => {
+          if (item.id === action.payload.data.id) {
+            return action.payload.data;
+          }
+          return item;
+        })
+        }
       })
     .addCase(updateTodoDescriptionSlice.fulfilled, (state, action) => {
-        state.getMyListNextSevenDay.status = VARIABLE_STATUS.SUCCEEDED;
-        console.log(current(state.getMyListNextSevenDay.data), action.payload.data)
+        const day = differenceInDays(
+          new Date(format(new Date(action.payload.data.todoDate), 'MM/dd/yyyy')),
+          new Date(format(new Date(), 'MM/dd/yyyy'))
+        )
+        let field = "";
+        if (day === 0) field = "dayOne";
+        if (day === 1) field = "dayTwo";
+        if (day === 2) field = "dayThree";
+        if (day === 3) field = "dayFour";
+        if (day === 4) field = "dayFive";
+        if (day === 5) field = "daySix";
+        if (day === 6) field = "daySeven";
+        console.log(
+          {
+            day,
+            field,
+            a: current(state.getMyListNextSevenDay.data),
+            b: current(state.getMyListNextSevenDay.data[field])
+          });
         // TODO: waiting be add todoDate field
-        // state.getCurrentTodo.todos = current(state.getCurrentTodo.todos).map(item => {
-          // if (item.id === action.payload.data.id) {
-            // return action.payload.data;
-          // }
-          // return item;
-        // })
+        state.getMyListNextSevenDay.data = {
+          ...current(state.getMyListNextSevenDay.data),
+          [field]: current(state.getMyListNextSevenDay.data[field]).map(item => {
+          if (item.id === action.payload.data.id) {
+            return action.payload.data;
+          }
+          return item;
+        })
+        }
       })
   },
 });
