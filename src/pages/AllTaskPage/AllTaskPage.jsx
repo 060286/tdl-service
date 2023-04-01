@@ -3,24 +3,15 @@ import { useSelector, useDispatch } from "react-redux";
 import {
   getAllTask,
   selectAllTasks,
-  selectTaskDetail,
   updateTodoTitleSlice,
   updateTodoDescriptionSlice,
+  updateSubTaskStatus,
 } from "../../slices/allMyTaskSlice";
 import { VARIABLE_STATUS } from "../../constants/appStatusConstant";
-import AllMyTask from "../../components/core/AllMyTask";
-import {
-  Box,
-  Grid,
-  Item,
-  List,
-  ListItem,
-  ListItemButton,
-  Radio,
-  TextField,
-} from "@mui/material";
+import { Box, Grid, TextField } from "@mui/material";
 import Typography from "@mui/material/Typography";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+
+import { updateSubTaskStatusSlice } from "../../slices/todoSlice";
 
 import clsx from "clsx";
 import { makeStyles } from "@mui/styles/";
@@ -28,17 +19,11 @@ import Accordition from "../../components/Accordition/Accordition";
 import TodoDetail from "../../components/TodoDetail/TodoDetail";
 import _ from "lodash";
 import {
-  getCurrentTodoList,
-  selectAllTodos,
   removeTodoFromList,
   archiveTodo,
-  getSuggestionTodo,
-  selectAllSuggestionTodo,
   addNewTodo,
   createSubTodo,
-  removeSuggestion,
   addSubTaskToDetailTodo,
-  removeDetailTodo,
 } from "../../slices/todoSlice";
 const useStyle = makeStyles(() => ({
   listItem: {
@@ -97,10 +82,7 @@ const AllTaskPage = () => {
   const tasksStatus = useSelector(
     (state) => state.allTaskReducer.allTasks.status
   );
-  const { data } = useSelector(selectTaskDetail);
-  const tasksError = useSelector(
-    (state) => state.allTaskReducer.allTasks.error
-  );
+  const [currentTask, setCurrentTask] = useState(undefined); // Get current open task
 
   useEffect(() => {
     if (tasksStatus === VARIABLE_STATUS.IDLE) {
@@ -162,15 +144,25 @@ const AllTaskPage = () => {
   const onSubTaskChange = (todo, e) => {
     // TODO: send request to BE to update subtask text
   };
-  const onSubTaskIsCompletedChange = (todo, e) => {
+
+  // ! Đang làm
+  const onSubTaskIsCompletedChange = (subtask, e) => {
     // TODO: send request to BE to update isCompleted subtask
+    const { id, isCompleted } = subtask;
+
+    dispatch(updateSubTaskStatus({ id, currentTask }));
+
+    // ? UPDATE API
+    dispatch(updateSubTaskStatusSlice(id));
   };
   const onSubTaskDelete = (todo) => {
     // TODO: send request to be to delete subtask
   };
-  const onTodoClick = (todo) => {
+  const onTodoClick = (todo, title) => {
     setSelectedTodo(todo);
+    setCurrentTask(title);
   };
+
   const handleCreateSubtask = async (e, id, tod) => {
     if (e.key === "Enter") {
       await dispatch(
