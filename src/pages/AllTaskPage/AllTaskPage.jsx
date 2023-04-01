@@ -6,12 +6,11 @@ import {
   updateTodoTitleSlice,
   updateTodoDescriptionSlice,
   updateSubTaskStatus,
+  removeSubTask,
 } from "../../slices/allMyTaskSlice";
 import { VARIABLE_STATUS } from "../../constants/appStatusConstant";
 import { Box, Grid, TextField } from "@mui/material";
 import Typography from "@mui/material/Typography";
-
-import { updateSubTaskStatusSlice } from "../../slices/todoSlice";
 
 import clsx from "clsx";
 import { makeStyles } from "@mui/styles/";
@@ -24,7 +23,11 @@ import {
   addNewTodo,
   createSubTodo,
   addSubTaskToDetailTodo,
+  updateSubTaskStatusSlice,
 } from "../../slices/todoSlice";
+
+import { removeSubTaskByIdSlice } from "../../slices/subtaskSlice";
+
 const useStyle = makeStyles(() => ({
   listItem: {
     borderRadius: "16px",
@@ -145,19 +148,36 @@ const AllTaskPage = () => {
     // TODO: send request to BE to update subtask text
   };
 
-  // ! Đang làm
   const onSubTaskIsCompletedChange = (subtask, e) => {
     // TODO: send request to BE to update isCompleted subtask
-    const { id, isCompleted } = subtask;
+    const { id } = subtask;
 
     dispatch(updateSubTaskStatus({ id, currentTask }));
 
     // ? UPDATE API
     dispatch(updateSubTaskStatusSlice(id));
   };
-  const onSubTaskDelete = (todo) => {
+
+  const onDeleteSubTask = (subTask) => {
     // TODO: send request to be to delete subtask
+    const data = { ...subTask, todoId: selectedTodo.id };
+
+    // * Remove from state
+    const newSelectedTodo = selectedTodo;
+    const newSubTask = newSelectedTodo.subTasks.filter((el) => {
+      return el.id != subTask.id;
+    });
+
+    const result = { ...newSelectedTodo, subTasks: newSubTask };
+
+    console.log(result);
+
+    // * Remove from slice
+    dispatch(removeSubTask(data));
+    setSelectedTodo(result);
+    dispatch(removeSubTaskByIdSlice(subTask.id));
   };
+
   const onTodoClick = (todo, title) => {
     setSelectedTodo(todo);
     setCurrentTask(title);
@@ -256,6 +276,7 @@ const AllTaskPage = () => {
               onTodoTitleChange={onTodoTitleChange}
               handleCreateSubtask={handleCreateSubtask}
               onTodoDescriptionChange={onTodoDescriptionChange}
+              onDeleteSubTask={onDeleteSubTask}
             />
           )}
         </Grid>

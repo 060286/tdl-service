@@ -86,6 +86,69 @@ const tasksSlice = createSlice({
           }
         });
       }
+
+      if (currentTask === "Tomorrow") {
+        const data = state.allTasks.data.allTaskTomorrow;
+
+        data.forEach((obj) => {
+          const index = obj.subTasks.findIndex((el) => el.id === id);
+
+          if (index > -1) {
+            console.log(JSON.stringify(obj.subTasks[index]));
+            obj.subTasks[index].isCompleted = !obj.subTasks[index].isCompleted;
+          }
+        });
+      }
+
+      if (currentTask === "Upcoming") {
+        const data = state.allTasks.data.allTaskUpComming;
+
+        data.forEach((obj) => {
+          const index = obj.subTasks.findIndex((el) => el.id === id);
+
+          if (index > -1) {
+            console.log(JSON.stringify(obj.subTasks[index]));
+            obj.subTasks[index].isCompleted = !obj.subTasks[index].isCompleted;
+          }
+        });
+      }
+    },
+    removeSubTask(state, action) {
+      const { id, isCompleted, todoId } = action.payload;
+
+      const dataToday = state.allTasks.data.allTaskToday;
+      const dataTomorrow = state.allTasks.data.allTaskTomorrow;
+      const dataUpComming = state.allTasks.data.allTaskUpComming;
+
+      dataToday.forEach((data) => {
+        if (data.id === todoId) {
+          const newSubTask = data.subTasks.filter((st) => {
+            return st.id !== id;
+          });
+
+          data.subTasks = newSubTask;
+        }
+      });
+
+      dataTomorrow.forEach((data) => {
+        if (data.id === todoId) {
+          const newSubTask = data.subTasks.filter((st) => {
+            return st.id !== id;
+          });
+
+          data.subTasks = newSubTask;
+        }
+      });
+
+      dataUpComming.forEach((data) => {
+        if (data.id === todoId) {
+          const newSubTask = data.subTasks.filter((st) => {
+            return st.id !== id;
+          });
+
+          data.subTasks = newSubTask;
+        }
+      });
     },
   },
   extraReducers(builder) {
@@ -156,7 +219,7 @@ export const selectTaskDetail = (state) => {
 };
 
 export const {
-  actions: { updateTaskDetail, updateSubTaskStatus },
+  actions: { updateTaskDetail, updateSubTaskStatus, removeSubTask },
   reducer: allTaskReducer,
 } = tasksSlice;
 
