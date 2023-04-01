@@ -7,6 +7,7 @@ import {
   updateTodoDescriptionSlice,
   updateSubTaskStatus,
   removeSubTask,
+  createSubTask,
 } from "../../slices/allMyTaskSlice";
 import { VARIABLE_STATUS } from "../../constants/appStatusConstant";
 import { Box, Grid, TextField } from "@mui/material";
@@ -170,8 +171,6 @@ const AllTaskPage = () => {
 
     const result = { ...newSelectedTodo, subTasks: newSubTask };
 
-    console.log(result);
-
     // * Remove from slice
     dispatch(removeSubTask(data));
     setSelectedTodo(result);
@@ -183,20 +182,40 @@ const AllTaskPage = () => {
     setCurrentTask(title);
   };
 
+  // * Đang làm
   const handleCreateSubtask = async (e, id, tod) => {
     if (e.key === "Enter") {
-      await dispatch(
+      const newSubTask = await dispatch(
         createSubTodo({ todoId: id, name: e.target.value })
       ).unwrap();
 
+      const subTaskId = newSubTask.data.data.id;
+      const subTaskname = newSubTask.data.data.title;
+
       setSubtaskText("");
-      dispatch(
-        addSubTaskToDetailTodo({
-          todoId: id,
-          name: e.target.value,
-          isCompleted: false,
-        })
-      );
+
+      const data = {
+        ...newSubTask.data.data,
+        isCompleted: false,
+        todoId: selectedTodo.id,
+        current: currentTask,
+      };
+
+      // * Create subtask in slice
+      dispatch(createSubTask(data));
+
+      // * Create subtask in selectedTodo
+      let oldSubTasks = selectedTodo.subTasks;
+      const st = {
+        id: subTaskId,
+        name: subTaskname,
+        isCompleted: false,
+      };
+      const result = [...oldSubTasks, st];
+      const newSelectedTodo = { ...selectedTodo, subTasks: result };
+
+      setSelectedTodo(newSelectedTodo);
+
       e.target.value = "";
     }
   };
