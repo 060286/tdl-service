@@ -71,6 +71,45 @@ const tasksSlice = createSlice({
     updateTaskDetail(state, action) {
       state.infoTask.data = action.payload.data;
     },
+    createSubTask(state, action) {
+      const { id, isCompleted, current, title, todoId } = action.payload;
+
+      if (current === "Today") {
+        const index = state.allTasks.data.allTaskToday.findIndex(
+          (el) => el.id === todoId
+        );
+
+        state.allTasks.data.allTaskToday[index].subTasks.push({
+          id: id,
+          isCompleted: isCompleted,
+          name: title,
+        });
+      }
+
+      if (current === "Tomorrow") {
+        const index = state.allTasks.data.allTaskTomorrow.findIndex(
+          (el) => el.id === todoId
+        );
+
+        state.allTasks.data.allTaskTomorrow[index].subTasks.push({
+          id: id,
+          isCompleted: isCompleted,
+          name: title,
+        });
+      }
+
+      if (current === "Upcoming") {
+        const index = state.allTasks.data.allTaskUpComming.findIndex(
+          (el) => el.id === todoId
+        );
+
+        state.allTasks.data.allTaskUpComming[index].subTasks.push({
+          id: id,
+          isCompleted: isCompleted,
+          name: title,
+        });
+      }
+    },
     updateSubTaskStatus(state, action) {
       const { id, currentTask } = action.payload;
 
@@ -219,7 +258,12 @@ export const selectTaskDetail = (state) => {
 };
 
 export const {
-  actions: { updateTaskDetail, updateSubTaskStatus, removeSubTask },
+  actions: {
+    updateTaskDetail,
+    updateSubTaskStatus,
+    removeSubTask,
+    createSubTask,
+  },
   reducer: allTaskReducer,
 } = tasksSlice;
 
