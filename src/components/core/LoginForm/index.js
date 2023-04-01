@@ -24,8 +24,6 @@ export default function LoginForm() {
 
       localStorage.setItem("token", JSON.stringify(token));
 
-      console.log({ res });
-
       navigate("/myday");
     } else {
       if (res.statusCode === 401) {

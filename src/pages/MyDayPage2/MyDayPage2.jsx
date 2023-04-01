@@ -15,6 +15,8 @@ import {
   RadioGroup,
   TextField,
   Typography,
+  Checkbox,
+  Tooltip,
 } from "@mui/material";
 import { Box } from "@mui/system";
 import { makeStyles } from "@mui/styles/";
@@ -27,9 +29,8 @@ import AddIcon from "@mui/icons-material/Add";
 import LockIcon from "@mui/icons-material/Lock";
 import { getTokenFromLocalStorage } from "../../extensions/tokenExtension";
 import DeleteIcon from "@mui/icons-material/Delete";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CloseIcon from "@mui/icons-material/Close";
-import _ from "lodash"
+import _ from "lodash";
 import {
   getCurrentTodoList,
   selectAllTodos,
@@ -42,9 +43,23 @@ import {
   removeSuggestion,
   addSubTaskToDetailTodo,
   removeDetailTodo,
+  getTagListSlice,
+  setDefaultTagList,
+  updateTodoTagSlicde,
+  updateSubTaskTitle,
+  updateSubTaskIsCompleted,
+  updateCompletedTodoSlice,
+  updateTodoStatusSlicde,
   updateTodoTitleSlice,
-  updateTodoDescriptionSlice
+  updateTodoDescriptionSlice,
+  updateRemindAtSlice,
+  updateTodoStatusSlice,
 } from "../../slices/todoSlice";
+
+import {
+  updateSubTaskStatusSlice,
+  removeSubTaskByIdSlice,
+} from "../../slices/subtaskSlice";
 import { VARIABLE_STATUS } from "../../constants/appStatusConstant";
 import MyDayCalendar from "../../components/core/MyDayCalendar";
 import ArticleIcon from "@mui/icons-material/Article";
@@ -53,6 +68,10 @@ import TagIcon from "@mui/icons-material/Tag";
 import clsx from "clsx";
 import TodoDialog from "../../components/TodoDetail/TodoDetail";
 import TodoDetail from "../../components/TodoDetail/TodoDetail";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
+import { RadioButtonChecked } from "@mui/icons-material";
+
 const useStyle = makeStyles(() => ({
   list: {
     overflowY: "scroll",
@@ -173,8 +192,8 @@ const useStyle = makeStyles(() => ({
     marginRight: "8px",
   },
   todoTitle: {
-    "wordBreak": "break-all"
-  }
+    wordBreak: "break-all",
+  },
 }));
 
 export default function MyDayPage2() {
@@ -196,15 +215,34 @@ export default function MyDayPage2() {
   const [subtaskText, setSubtaskText] = useState("");
   const [monthOfYear, setMonthOfYear] = useState(0);
   const [taskTitle, setTaskTitle] = useState("");
-  const [taskTitleHelperText, setTaskTitleHelperText] = useState("")
+  const [taskTitleHelperText, setTaskTitleHelperText] = useState("");
   const [addRequestStatus, setAddRequestStatus] = useState("idle");
   const [open, setOpen] = useState(false);
   const [selectedTodo, setSelectedTodo] = useState(undefined);
+  const [selectedTag, setSelectedTag] = useState(undefined);
+  const [openTag, setOpenTag] = useState(false);
+  const [selectedTagDetail, setSelectedTagDetail] = useState(undefined);
+  const [openRemindMe, setOpenRemindMe] = useState(false);
 
   const cansave =
     addRequestStatus === VARIABLE_STATUS.IDLE &&
     taskTitle.length > 0 &&
     taskTitle !== "Add Task";
+
+  const onOpenRemindMe = () => {
+    setOpenRemindMe(true);
+  };
+
+  const onCloseRemindMe = () => {
+    setOpenRemindMe(false);
+  };
+
+  const onUpdateRemindAtHandler = async (data) => {
+    dispatch(updateRemindAtSlice(data));
+
+    // ? Update Todo
+  };
+
   const onKeyPressHandler = async (e) => {
     const enterKey = "Enter";
 
@@ -257,23 +295,6 @@ export default function MyDayPage2() {
     setDateOfMonth(date.getDate());
     setMonthOfYear(monthFormatted(monthNumber));
   };
-  useEffect(() => {
-    handleQuotes();
-
-    if (todoStatus === VARIABLE_STATUS.IDLE) {
-      dispatch(getCurrentTodoList(todos));
-    }
-
-    if (userInfo.status === VARIABLE_STATUS.IDLE) {
-      const token = getTokenFromLocalStorage();
-
-      dispatch(getUserInfo(token));
-    }
-
-    if (suggestionStatus === VARIABLE_STATUS.IDLE) {
-      dispatch(getSuggestionTodo());
-    }
-  }, [todoStatus, dispatch]);
 
   const monthFormatted = (monthNumber) => {
     const date = new Date();
@@ -311,35 +332,36 @@ export default function MyDayPage2() {
         return "Error";
     }
   };
+
   const handleClickOpen =
     ({ todo }) =>
     () => {
       setOpen(true);
       setSelectedTodo(todo);
+      setSelectedTagDetail(todo.tag);
     };
 
   const handleClose = () => {
     setOpen(false);
     setSelectedTodo(undefined);
   };
-  const onRadioButtonChange = (e) => (preTodo) => {
+
+  const onRadioButtonChange = (preTodo) => {
     // TODO: send request to be to update isCompleted of this todo
-    // ? Intergate với function này nhé updateSubTaskStatusSlice
-    // ? Ông truyền cái id xuống là được.
+    dispatch(updateTodoStatusSlicde(preTodo));
   };
+
   const handleArchivedTodo = ({ id }) => {
     handleClose();
-
-    // remove item from todo list
     dispatch(removeTodoFromList(id));
     dispatch(archiveTodo(id));
   };
-  const handleCreateSubtask = async (e, id, tod) => {
+
+  const handleCreateSubtask = async (e, id) => {
     if (e.key === "Enter") {
       await dispatch(
         createSubTodo({ todoId: id, name: e.target.value })
       ).unwrap();
-
       setSubtaskText("");
       dispatch(
         addSubTaskToDetailTodo({
@@ -348,32 +370,139 @@ export default function MyDayPage2() {
           isCompleted: false,
         })
       );
+
+      const newSubTask = {
+        id: id,
+        name: e.target.value,
+        isCompleted: false,
+      };
+
+      setSelectedTodo((newSelectedTodo) => {
+        return {
+          ...newSelectedTodo,
+          subTasks: [...newSelectedTodo?.subTasks, newSubTask],
+        };
+      });
+
       e.target.value = "";
     }
   };
-  const debouncedTitle = useRef(_.debounce(({id, title}) => {dispatch(updateTodoTitleSlice({id, title}))}, 500)).current
+
+  const debouncedTitle = useRef(
+    _.debounce(({ id, title }) => {
+      dispatch(updateTodoTitleSlice({ id, title }));
+    }, 500)
+  ).current;
+
   const onTodoTitleChange = ({ todo, e }) => {
-    setSelectedTodo((preSelectedTodo => ({...preSelectedTodo, title: e.target.value})))
-    debouncedTitle({ id: todo.id, title: e.target.value })
-  }
-  
-  const debouncedDescription = useRef(_.debounce(async({id, description}) => {await dispatch(updateTodoDescriptionSlice({id, description}))}, 500)).current
+    setSelectedTodo((preSelectedTodo) => ({
+      ...preSelectedTodo,
+      title: e.target.value,
+    }));
+
+    debouncedTitle({ id: todo.id, title: e.target.value });
+  };
+
+  const debouncedDescription = useRef(
+    _.debounce(async ({ id, description }) => {
+      await dispatch(updateTodoDescriptionSlice({ id, description }));
+    }, 500)
+  ).current;
+
   const onTodoDescriptionChange = ({ todo, e }) => {
-    setSelectedTodo((preSelectedTodo => ({...preSelectedTodo, description: e.target.value})))
-    debouncedDescription({ id: todo.id, description: e.target.value })
-  }
-  const onSubTaskChange = (todo, e) => {
+    setSelectedTodo((preSelectedTodo) => ({
+      ...preSelectedTodo,
+      description: e.target.value,
+    }));
+    debouncedDescription({ id: todo.id, description: e.target.value });
+  };
+
+  const onSubTaskChange = (e, subtask, todoId) => {
     // TODO: send request to BE to update subtask text
-    // ? Tui nghĩ cái này mình sẽ send id + title của subtask
-    // ?
+    const { id } = subtask;
+    const title = e.target.value;
+
+    dispatch(updateSubTaskTitle({ id, title, todoId }));
   };
-  const onSubTaskIsCompletedChange = (todo, e) => {
+
+  const onSubTaskIsCompletedChange = async (subtask, e) => {
     // TODO: send request to BE to update isCompleted subtask
-    // ? Tui nghĩ cái này bị duplicate với onRadioButtonChange á.
+    const { id, isCompleted } = subtask;
+    const newTodo = { ...selectedTodo };
+    newTodo.subTasks = newTodo.subTasks.map((ele) =>
+      ele.id === id ? { ...ele, isCompleted: !isCompleted } : ele
+    );
+    setSelectedTodo(newTodo);
+
+    // ? UPDATE API
+    dispatch(updateSubTaskStatusSlice(id));
+    dispatch(updateSubTaskIsCompleted({ id, todoId: selectedTodo.id }));
   };
-  const onSubTaskDelete = (todo) => {
+
+  const onHandleChangeDescription = () => {};
+
+  const onDeleteSubTask = async ({ id }) => {
     // TODO: send request to be to delete subtask
+    const newTodo = { ...selectedTodo };
+    newTodo.subTasks = newTodo?.subTasks.filter((ele) => ele.id != id);
+
+    // ? UPDATE API
+    setSelectedTodo(newTodo);
+
+    await dispatch(removeSubTaskByIdSlice(id));
   };
+
+  const onOpenSelectedTag = async () => {
+    const { payload } = await dispatch(getTagListSlice());
+
+    setSelectedTag(payload?.data?.data);
+    setOpenTag(true);
+  };
+
+  const onCloseSelectedTag = async () => {
+    dispatch(setDefaultTagList());
+    setSelectedTag(undefined);
+    setOpenTag(false);
+  };
+
+  // ? Update Current Tag Detail
+  const onTagItemClick = async (tag, todoId) => {
+    setOpenTag(false);
+    setSelectedTagDetail(tag);
+
+    // ? Update On API
+    const res = await dispatch(updateTodoTagSlicde({ tag, todoId }));
+    const newSelectedTodo = { ...selectedTodo };
+    newSelectedTodo.tag = res.payload?.data?.data;
+    setSelectedTodo(newSelectedTodo);
+
+    todos?.todos?.forEach((element, index) => {
+      if (element.id === todoId) {
+        const newElement = { ...element };
+        newElement.tag = tag;
+
+        element[index] = newElement;
+      }
+    });
+  };
+
+  useEffect(() => {
+    handleQuotes();
+
+    if (todoStatus === VARIABLE_STATUS.IDLE) {
+      dispatch(getCurrentTodoList(todos));
+    }
+
+    if (userInfo.status === VARIABLE_STATUS.IDLE) {
+      const token = getTokenFromLocalStorage();
+
+      dispatch(getUserInfo(token));
+    }
+
+    if (suggestionStatus === VARIABLE_STATUS.IDLE) {
+      dispatch(getSuggestionTodo());
+    }
+  }, [todoStatus, dispatch]);
 
   return (
     <Box className={classes.conatiner}>
@@ -395,13 +524,15 @@ export default function MyDayPage2() {
                 disablePadding
                 className={classes.todoItem}
                 secondaryAction={
-                  <IconButton
-                    edge="end"
-                    aria-label="delete"
-                    onClick={handleClickOpen({ todo })}
-                  >
-                    <ArticleIcon />
-                  </IconButton>
+                  <Tooltip title="Open todo">
+                    <IconButton
+                      edge="end"
+                      aria-label="delete"
+                      onClick={handleClickOpen({ todo })}
+                    >
+                      <ArticleIcon />
+                    </IconButton>
+                  </Tooltip>
                 }
               >
                 <ListItemButton className={classes.todoItemButton}>
@@ -414,15 +545,27 @@ export default function MyDayPage2() {
                   )}
                   <Box className={classes.suggestionItemBoxTitle}>
                     <ListItemIcon>
-                      <RadioGroup
-                        value={todo.isCompleted}
-                        name={todo.id}
-                        onChange={onRadioButtonChange(todo)}
+                      <Tooltip
+                        title={
+                          todo.isCompleted
+                            ? "Uncompleted task"
+                            : "Completed task"
+                        }
                       >
-                        <Radio />
-                      </RadioGroup>
+                        <Checkbox
+                          checked={todo.isCompleted}
+                          name={todo.id}
+                          onChange={() => onRadioButtonChange(todo)}
+                          icon={<RadioButtonUncheckedIcon />}
+                          checkedIcon={<RadioButtonChecked />}
+                        ></Checkbox>
+                      </Tooltip>
                     </ListItemIcon>
-                    <ListItemText id={todo.id} primary={todo.title} className={classes.todoTitle} />
+                    <ListItemText
+                      id={todo.id}
+                      primary={todo.title}
+                      className={classes.todoTitle}
+                    />
                   </Box>
                 </ListItemButton>
               </ListItem>
@@ -441,11 +584,13 @@ export default function MyDayPage2() {
             onKeyUp={(e) => onKeyPressHandler(e)}
             onChange={(e) => {
               if (e.target.value.length > 200) {
-                setTaskTitleHelperText("Max character of title must be less than 200")
+                setTaskTitleHelperText(
+                  "Max character of title must be less than 200"
+                );
                 return;
               }
-              setTaskTitleHelperText("")
-              setTaskTitle(e.target.value)
+              setTaskTitleHelperText("");
+              setTaskTitle(e.target.value);
             }}
             helperText={taskTitleHelperText}
             error={taskTitleHelperText}
@@ -464,9 +609,11 @@ export default function MyDayPage2() {
                   dense
                 >
                   <ListItemIcon>
-                    <IconButton>
-                      <AddIcon />
-                    </IconButton>
+                    <Tooltip title="Add todo">
+                      <IconButton>
+                        <AddIcon />
+                      </IconButton>
+                    </Tooltip>
                   </ListItemIcon>
                   <Box>
                     <Box className={classes.suggestionItemBox}>
@@ -497,14 +644,25 @@ export default function MyDayPage2() {
         >
           <TodoDetail
             selectedTodo={selectedTodo}
-            handleArchivedTodo={handleArchivedTodo}
             handleClose={handleClose}
             setSelectedTodo={setSelectedTodo}
+            handleArchivedTodo={handleArchivedTodo}
             onSubTaskIsCompletedChange={onSubTaskIsCompletedChange}
             onSubTaskChange={onSubTaskChange}
             handleCreateSubtask={handleCreateSubtask}
             onTodoTitleChange={onTodoTitleChange}
             onTodoDescriptionChange={onTodoDescriptionChange}
+            onDeleteSubTask={onDeleteSubTask}
+            onOpenSelectedTag={onOpenSelectedTag}
+            onCloseSelectedTag={onCloseSelectedTag}
+            openTag={openTag}
+            selectedTag={selectedTag}
+            selectedTagDetail={selectedTagDetail}
+            onTagItemClick={onTagItemClick}
+            onOpenRemindMe={onOpenRemindMe}
+            openRemindMe={openRemindMe}
+            onUpdateRemindAtHandler={onUpdateRemindAtHandler}
+            onCloseRemindMe={onCloseRemindMe}
           />
         </Dialog>
       )}

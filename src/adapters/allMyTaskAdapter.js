@@ -3,8 +3,8 @@ import axios from "axios";
 import { getTokenFromLocalStorage } from "../extensions/tokenExtension";
 
 const getAllMyTask = async () => {
-  const url =
-    `https://localhost:44334/api/v1/allmytask-page/all-task?dateTime=${new Date().toLocaleDateString()}`;
+  const url = `https://localhost:44334/api/v1/allmytask-page/all-task?dateTime=${new Date().toLocaleDateString()}`;
+
   const token = getTokenFromLocalStorage();
 
   const response = await axios({
@@ -38,7 +38,6 @@ const getTaskDetail = async (id) => {
 };
 
 const updateTodoTitle = async ({ id, title }) => {
-  console.log(1111111111, {id, title})
   try {
     const url = `https://localhost:44334/api/v1/todos/${id}/update-todo-title
 `;
@@ -61,9 +60,7 @@ const updateTodoTitle = async ({ id, title }) => {
   }
 };
 
-
 const updateTodoDescription = async ({ id, description }) => {
-  console.log(1111111111, {id, description})
   try {
     const url = `https://localhost:44334/api/v1/todos/${id}/update-todo-description
 `;
@@ -85,7 +82,5 @@ const updateTodoDescription = async ({ id, description }) => {
     console.log(error);
   }
 };
-
-
 
 export { getAllMyTask, getTaskDetail, updateTodoTitle, updateTodoDescription };

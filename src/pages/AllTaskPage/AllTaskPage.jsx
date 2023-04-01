@@ -5,19 +5,28 @@ import {
   selectAllTasks,
   selectTaskDetail,
   updateTodoTitleSlice,
-  updateTodoDescriptionSlice
+  updateTodoDescriptionSlice,
 } from "../../slices/allMyTaskSlice";
 import { VARIABLE_STATUS } from "../../constants/appStatusConstant";
 import AllMyTask from "../../components/core/AllMyTask";
-import { Box, Grid, Item, List, ListItem, ListItemButton, Radio, TextField } from "@mui/material"
-import Typography from '@mui/material/Typography';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import {
+  Box,
+  Grid,
+  Item,
+  List,
+  ListItem,
+  ListItemButton,
+  Radio,
+  TextField,
+} from "@mui/material";
+import Typography from "@mui/material/Typography";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
-import clsx from "clsx"
-import { makeStyles } from '@mui/styles/';
+import clsx from "clsx";
+import { makeStyles } from "@mui/styles/";
 import Accordition from "../../components/Accordition/Accordition";
 import TodoDetail from "../../components/TodoDetail/TodoDetail";
-import _ from 'lodash';
+import _ from "lodash";
 import {
   getCurrentTodoList,
   selectAllTodos,
@@ -29,12 +38,12 @@ import {
   createSubTodo,
   removeSuggestion,
   addSubTaskToDetailTodo,
-  removeDetailTodo
+  removeDetailTodo,
 } from "../../slices/todoSlice";
 const useStyle = makeStyles(() => ({
   listItem: {
     borderRadius: "16px",
-    padding: "4px"
+    padding: "4px",
   },
   container: {
     marginTop: "16px",
@@ -42,19 +51,19 @@ const useStyle = makeStyles(() => ({
   },
   gridContainer: {
     marginTop: "16px",
-    height: "100%"
+    height: "100%",
   },
   rightContainer: {
-    overflow: "scroll"
+    overflow: "scroll",
   },
   item: {
     height: "calc(100% - 32px)",
-    overflow: "scroll"
+    overflow: "scroll",
   },
   todoDetail: {
     border: "1px solid #ccc",
     borderRadius: "16px",
-    padding: "16px"
+    padding: "16px",
   },
   containerAcc: {
     border: "1px solid #ccc",
@@ -62,7 +71,7 @@ const useStyle = makeStyles(() => ({
     padding: "16px",
     display: "flex",
     flexDirection: "column",
-    justifyContent: "space-between"
+    justifyContent: "space-between",
   },
   accordition: {
     marginBottom: "32px",
@@ -70,17 +79,18 @@ const useStyle = makeStyles(() => ({
     overflow: "scroll",
     display: "flex",
     flexDirection: "column",
-    justifyContent: "flex-start"
+    justifyContent: "flex-start",
   },
   selectedTodoContainer: {
-    paddingTop: "0"
-  }
-}))
+    paddingTop: "0",
+  },
+}));
+
 const AllTaskPage = () => {
   const dispatch = useDispatch();
-  const classes = useStyle()
+  const classes = useStyle();
   const tasks = useSelector(selectAllTasks);
-  const [selectedTodo, setSelectedTodo] = useState(undefined)
+  const [selectedTodo, setSelectedTodo] = useState(undefined);
   const [subtaskText, setSubtaskText] = useState("");
   const [taskTitle, setTaskTitle] = useState("");
   const [addRequestStatus, setAddRequestStatus] = useState("idle");
@@ -91,49 +101,76 @@ const AllTaskPage = () => {
   const tasksError = useSelector(
     (state) => state.allTaskReducer.allTasks.error
   );
+
   useEffect(() => {
     if (tasksStatus === VARIABLE_STATUS.IDLE) {
       dispatch(getAllTask(tasks));
     }
   }, [tasksStatus, dispatch, tasks]);
-  const debouncedTitle = useRef(_.debounce(async({id, title}) => {await dispatch(updateTodoTitleSlice({id, title}))}, 500)).current
+
+  const debouncedTitle = useRef(
+    _.debounce(async ({ id, title }) => {
+      await dispatch(updateTodoTitleSlice({ id, title }));
+    }, 500)
+  ).current;
+
   const onTodoTitleChange = ({ todo, e }) => {
-    setSelectedTodo((preSelectedTodo => ({...preSelectedTodo, title: e.target.value})))
-    debouncedTitle({ id: todo.id, title: e.target.value })
-  }
-  
-  const debouncedDescription = useRef(_.debounce(async({id, description}) => {await dispatch(updateTodoDescriptionSlice({id, description}))}, 500)).current
+    setSelectedTodo((preSelectedTodo) => ({
+      ...preSelectedTodo,
+      title: e.target.value,
+    }));
+    debouncedTitle({ id: todo.id, title: e.target.value });
+  };
+
+  const debouncedDescription = useRef(
+    _.debounce(async ({ id, description }) => {
+      await dispatch(updateTodoDescriptionSlice({ id, description }));
+    }, 500)
+  ).current;
+
   const onTodoDescriptionChange = ({ todo, e }) => {
-    setSelectedTodo((preSelectedTodo => ({...preSelectedTodo, description: e.target.value})))
-    debouncedDescription({ id: todo.id, description: e.target.value })
-  }
+    setSelectedTodo((preSelectedTodo) => ({
+      ...preSelectedTodo,
+      description: e.target.value,
+    }));
+    debouncedDescription({ id: todo.id, description: e.target.value });
+  };
+
+  // console.log({ todo, e });
+  // setSelectedTodo((preSelectedTodo) => ({
+  //   ...preSelectedTodo,
+  //   title: e.target.value,
+  // }));
+  // _.debounce(
+  //   dispatch(updateTodoTitleSlice({ id: todo.id, title: e.target.value })),
+  //   500
+  // );
 
   const handleTodoIsCompletedChange = (todo, e) => {
     // TODO: call api to update todo of this todo
-  }
+  };
   const handleArchivedTodo = async () => {
     await dispatch(removeTodoFromList(selectedTodo.id));
     await dispatch(archiveTodo(selectedTodo.id));
-    dispatch(getAllTask())
-    setSelectedTodo(undefined)
+    dispatch(getAllTask());
+    setSelectedTodo(undefined);
   };
   const handleClose = () => {
-    setSelectedTodo(undefined)
-  }
-  
+    setSelectedTodo(undefined);
+  };
+
   const onSubTaskChange = (todo, e) => {
     // TODO: send request to BE to update subtask text
-  }
+  };
   const onSubTaskIsCompletedChange = (todo, e) => {
     // TODO: send request to BE to update isCompleted subtask
-
-  }
+  };
   const onSubTaskDelete = (todo) => {
     // TODO: send request to be to delete subtask
-  }
+  };
   const onTodoClick = (todo) => {
     setSelectedTodo(todo);
-  }
+  };
   const handleCreateSubtask = async (e, id, tod) => {
     if (e.key === "Enter") {
       await dispatch(
@@ -154,9 +191,9 @@ const AllTaskPage = () => {
   const onKeyPressHandler = async (e) => {
     const enterKey = "Enter";
     const cansave =
-        addRequestStatus === VARIABLE_STATUS.IDLE &&
-        taskTitle.length > 0 &&
-        taskTitle !== "Add Task";
+      addRequestStatus === VARIABLE_STATUS.IDLE &&
+      taskTitle.length > 0 &&
+      taskTitle !== "Add Task";
     if (e.key === enterKey) {
       try {
         if (!cansave) {
@@ -175,6 +212,7 @@ const AllTaskPage = () => {
       }
     }
   };
+
   return (
     <Box className={classes.container}>
       <Typography variant="h5">All My Tasks</Typography>
@@ -190,14 +228,14 @@ const AllTaskPage = () => {
             <Accordition
               tasks={tasks?.data?.allTaskTomorrow}
               title={"Tomorrow"}
-              handleTodoIsCompletedChange={handleTodoIsCompletedChange} 
+              handleTodoIsCompletedChange={handleTodoIsCompletedChange}
               onClick={onTodoClick}
             />
             <Accordition
               tasks={tasks?.data?.allTaskUpComming}
               title={"Upcoming"}
               onClick={onTodoClick}
-              handleTodoIsCompletedChange={handleTodoIsCompletedChange} 
+              handleTodoIsCompletedChange={handleTodoIsCompletedChange}
             />
           </Box>
           <Box className={classes.input}>
@@ -214,26 +252,40 @@ const AllTaskPage = () => {
           </Box>
         </Grid>
         <Grid item spacing={2} xs={6} className={classes.selectedTodoContainer}>
-          {
-            selectedTodo && (
-              <TodoDetail 
-                className={classes.todoDetail}
-                selectedTodo={selectedTodo}
-                handleArchivedTodo={handleArchivedTodo}
-                handleClose={handleClose}
-                setSelectedTodo={setSelectedTodo}
-                onSubTaskIsCompletedChange={onSubTaskIsCompletedChange}
-                onSubTaskChange={onSubTaskChange}
-                onTodoTitleChange={onTodoTitleChange}
-                handleCreateSubtask={handleCreateSubtask}
-                onTodoDescriptionChange={onTodoDescriptionChange}
-              />
-            )
-          }
+          {selectedTodo && (
+            <TodoDetail
+              className={classes.todoDetail}
+              selectedTodo={selectedTodo}
+              handleArchivedTodo={handleArchivedTodo}
+              handleClose={handleClose}
+              setSelectedTodo={setSelectedTodo}
+              onSubTaskIsCompletedChange={onSubTaskIsCompletedChange}
+              onSubTaskChange={onSubTaskChange}
+              onTodoTitleChange={onTodoTitleChange}
+              handleCreateSubtask={handleCreateSubtask}
+              onTodoDescriptionChange={onTodoDescriptionChange}
+            />
+          )}
         </Grid>
       </Grid>
     </Box>
-  )
+  );
 };
 
 export default AllTaskPage;
+
+{
+  /* // {selectedTodo && (
+          //   <TodoDetail
+          //     className={classes.todoDetail}
+          //     selectedTodo={selectedTodo}
+          //     handleArchivedTodo={handleArchivedTodo}
+          //     handleClose={handleClose}
+          //     setSelectedTodo={setSelectedTodo}
+          //     onSubTaskIsCompletedChange={onSubTaskIsCompletedChange}
+          //     onSubTaskChange={onSubTaskChange}
+          //     onTodoTitleChange={onTodoTitleChange}
+          //     handleCreateSubtask={handleCreateSubtask}
+          //   />
+          // )} */
+}

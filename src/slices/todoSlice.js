@@ -1,26 +1,50 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-
 import {
   createTodo,
   getTodayJobList,
   getSuggestionTodoList,
+  updateStatusOfTodoAdapter,
 } from "../adapters/myDayPageAdapter";
-import {current } from '@reduxjs/toolkit'
+
+import { current } from "@reduxjs/toolkit";
+
 import {
   getTaskById,
   createSubTaskInTodo,
   archiveTodoById,
   updateSubTaskStatus,
+  getTagListAdapter,
+  updateRemindAtAdapter,
 } from "../adapters/taskAdapter";
+import { updateTodoTagAdapter } from "../adapters/tagAdapter";
 import { VARIABLE_STATUS } from "../constants/appStatusConstant";
 
-import INIT_STATE from "./constant"
-import { updateTodoTitle, updateTodoDescription } from "../adapters/allMyTaskAdapter";
+import INIT_STATE from "./constant";
+import {
+  updateTodoTitle,
+  updateTodoDescription,
+} from "../adapters/allMyTaskAdapter";
 const initialState = {
-  getCurrentTodo: INIT_STATE.getCurrentTodo,
-  createTodo: INIT_STATE.createTodo,
-  getSuggestionTodo: INIT_STATE.getSuggestionTodo,
-  getDetailTodo: INIT_STATE.getDetailTodo,
+  getCurrentTodo: {
+    todos: [],
+    status: VARIABLE_STATUS.IDLE,
+    error: null,
+  },
+  createTodo: {
+    title: "",
+    status: VARIABLE_STATUS.IDLE,
+    error: null,
+  },
+  getSuggestionTodo: {
+    todos: [],
+    status: VARIABLE_STATUS.IDLE,
+    error: null,
+  },
+  getDetailTodo: {
+    todo: {},
+    status: VARIABLE_STATUS.IDLE,
+    error: null,
+  },
 };
 
 export const createSubTodo = createAsyncThunk(
@@ -28,6 +52,43 @@ export const createSubTodo = createAsyncThunk(
   async (subtask) => {
     try {
       const response = await createSubTaskInTodo(subtask);
+
+      return response;
+    } catch (err) {
+      console.log(err);
+    }
+  }
+);
+
+export const updateRemindAtSlice = createAsyncThunk(
+  "todo/updateRemindAtSlice",
+  async ({ todoId, remindAt }) => {
+    const response = await updateRemindAtAdapter({ todoId, remindAt });
+
+    return response;
+  }
+);
+
+export const updateTodoTagSlicde = createAsyncThunk(
+  "todo/updateTodoTagSlicde",
+  async ({ tag, todoId }) => {
+    try {
+      const data = { ...tag, todoId };
+
+      const response = await updateTodoTagAdapter(data);
+
+      return response;
+    } catch (err) {
+      // ! Err: Do something
+    }
+  }
+);
+
+export const getTagListSlice = createAsyncThunk(
+  "todo/getTagListSlice",
+  async () => {
+    try {
+      const response = await getTagListAdapter();
 
       return response;
     } catch (err) {
@@ -65,8 +126,8 @@ export const getCurrentTodoList = createAsyncThunk(
 export const addNewTodo = createAsyncThunk(
   "todo/addNewTodo",
   async (initialState) => {
-    const { title } = initialState;
-    const response = await createTodo(title);
+    const { title, todoDate } = initialState;
+    const response = await createTodo({ title, todoDate });
 
     if (response.statusCode !== 200 || response.isSuccess !== true) {
       alert("add new todo error");
@@ -109,11 +170,19 @@ export const updateSubTaskStatusSlice = createAsyncThunk(
   }
 );
 
+export const updateTodoStatusSlicde = createAsyncThunk(
+  "todo/updateTodoStatusSlicde",
+  async (todo) => {
+    const response = await updateStatusOfTodoAdapter(todo);
+
+    return response;
+  }
+);
 
 export const updateTodoTitleSlice = createAsyncThunk(
   "myDayPage2/updateTodoTitleSlice",
   async (initialState) => {
-    console.log("CALL")
+    console.log("CALL");
     const response = await updateTodoTitle(initialState);
 
     return {
@@ -123,11 +192,10 @@ export const updateTodoTitleSlice = createAsyncThunk(
   }
 );
 
-
 export const updateTodoDescriptionSlice = createAsyncThunk(
   "myDayPage2/updateTodoDescriptionSlice",
   async (initialState) => {
-    console.log("CALL")
+    console.log("CALL");
     const response = await updateTodoDescription(initialState);
 
     return {
@@ -155,8 +223,6 @@ const todoSlice = createSlice({
     },
     addSubTaskToDetailTodo(state, action) {
       console.log(action);
-
-      // state.getDetailTodo.todo.subTasks.push(action.payload);
     },
     removeTodoFromList(state, action) {
       console.log(action.payload);
@@ -177,6 +243,46 @@ const todoSlice = createSlice({
           };
         }
       });
+    },
+    setDefaultTagList(state) {
+      state.tagList.data = [];
+      state.tagList.error = null;
+      state.tagList.status = VARIABLE_STATUS.IDLE;
+    },
+    updateSubTaskTitle(state, action) {
+      const { id, title, todoId } = action.payload;
+      const todoIndex = state.getCurrentTodo?.todos.findIndex(
+        (el) => el.id === todoId
+      );
+      const subTaskIndex = state.getCurrentTodo?.todos[
+        todoIndex
+      ]?.subTasks.findIndex((el) => el.id === id);
+      const newSubtask =
+        state.getCurrentTodo?.todos[todoIndex].subTasks[subTaskIndex];
+      const result = { ...newSubtask, name: title };
+      state.getCurrentTodo.todos[todoIndex].subTasks[subTaskIndex] = result;
+    },
+    updateSubTaskIsCompleted(state, action) {
+      const { id, todoId } = action.payload;
+      const todoIndex = state.getCurrentTodo?.todos.findIndex(
+        (el) => el.id === todoId
+      );
+      const subTaskIndex = state.getCurrentTodo?.todos[
+        todoIndex
+      ]?.subTasks.findIndex((el) => el.id === id);
+      const currentStatus =
+        state.getCurrentTodo?.todos[todoIndex].subTasks[subTaskIndex]
+          .isCompleted;
+      const newSubtask =
+        state.getCurrentTodo?.todos[todoIndex].subTasks[subTaskIndex];
+      const result = { ...newSubtask, isCompleted: !currentStatus };
+      state.getCurrentTodo.todos[todoIndex].subTasks[subTaskIndex] = result;
+    },
+    updateCompletedTodoSlice(state, action) {
+      console.log({ action });
+    },
+    updateTodoStatusSlice(state, action) {
+      console.log({ state, action });
     },
   },
   extraReducers: (builder) => {
@@ -237,27 +343,41 @@ const todoSlice = createSlice({
         }
       })
       .addCase(updateSubTaskStatusSlice.rejected, (state, action) => {
-        // do sth
         console.log(action.payload);
+      })
+      .addCase(updateRemindAtSlice.fulfilled, (state, action) => {
+        console.log(action, "updateRemindAtSlice");
+      })
+      .addCase(updateTodoStatusSlicde.fulfilled, (state, action) => {
+        const index = state.getCurrentTodo.todos.findIndex(
+          (el) => el.id === action.payload.data.id
+        );
+
+        state.getCurrentTodo.todos[index].isCompleted =
+          action.payload.data.isCompleted;
       })
       .addCase(updateTodoTitleSlice.fulfilled, (state, action) => {
         state.getCurrentTodo.status = VARIABLE_STATUS.SUCCEEDED;
-        state.getCurrentTodo.todos = current(state.getCurrentTodo.todos).map(item => {
-          if (item.id === action.payload.data.id) {
-            return action.payload.data;
+        state.getCurrentTodo.todos = current(state.getCurrentTodo.todos).map(
+          (item) => {
+            if (item.id === action.payload.data.id) {
+              return action.payload.data;
+            }
+            return item;
           }
-          return item;
-        })
+        );
       })
-    .addCase(updateTodoDescriptionSlice.fulfilled, (state, action) => {
+      .addCase(updateTodoDescriptionSlice.fulfilled, (state, action) => {
         state.getCurrentTodo.status = VARIABLE_STATUS.SUCCEEDED;
-        state.getCurrentTodo.todos = current(state.getCurrentTodo.todos).map(item => {
-          if (item.id === action.payload.data.id) {
-            return action.payload.data;
+        state.getCurrentTodo.todos = current(state.getCurrentTodo.todos).map(
+          (item) => {
+            if (item.id === action.payload.data.id) {
+              return action.payload.data;
+            }
+            return item;
           }
-          return item;
-        })
-      })
+        );
+      });
   },
 });
 
@@ -284,6 +404,11 @@ export const {
     addSubTaskToDetailTodo,
     removeTodoFromList,
     changeCompletedStatusOfSubtaskById,
+    setDefaultTagList,
+    updateSubTaskTitle,
+    updateSubTaskIsCompleted,
+    updateCompletedTodoSlice,
+    updateTodoStatusSlice,
   },
   reducer: todoReducer,
 } = todoSlice;

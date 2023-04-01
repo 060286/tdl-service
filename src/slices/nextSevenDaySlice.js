@@ -1,9 +1,13 @@
 import { VARIABLE_STATUS } from "../constants/appStatusConstant";
 import { createSlice, createAsyncThunk, current } from "@reduxjs/toolkit";
 import { getMyListNextSevenDayRequest } from "../adapters/nextSevenDatAdapter";
-import INIT_STATE from "./constant"
-import {differenceInDays, format } from "date-fns"
-import { updateTodoTitle, updateTodoDescription } from "../adapters/allMyTaskAdapter";
+import { createTodo } from "../adapters/myDayPageAdapter";
+import INIT_STATE from "./constant";
+import { differenceInDays, format } from "date-fns";
+import {
+  updateTodoTitle,
+  updateTodoDescription,
+} from "../adapters/allMyTaskAdapter";
 const initialState = {
   getMyListNextSevenDay: INIT_STATE.getMyListNextSevenDay,
 };
@@ -26,12 +30,14 @@ const nextSevenDaySlice = createSlice({
         state.getMyListNextSevenDay.erorr = action.payload;
       })
       .addCase(updateTodoTitleSlice.fulfilled, (state, action) => {
-        console.log("11")
+        console.log("11");
         state.getMyListNextSevenDay.status = VARIABLE_STATUS.SUCCEEDED;
         const day = differenceInDays(
-          new Date(format(new Date(action.payload.data.todoDate), 'MM/dd/yyyy')),
-          new Date(format(new Date(), 'MM/dd/yyyy'))
-        )
+          new Date(
+            format(new Date(action.payload.data.todoDate), "MM/dd/yyyy")
+          ),
+          new Date(format(new Date(), "MM/dd/yyyy"))
+        );
         let field = "";
         if (day === 0) field = "dayOne";
         if (day === 1) field = "dayTwo";
@@ -40,29 +46,32 @@ const nextSevenDaySlice = createSlice({
         if (day === 4) field = "dayFive";
         if (day === 5) field = "daySix";
         if (day === 6) field = "daySeven";
-        console.log(
-          {
-            day,
-            field,
-            a: current(state.getMyListNextSevenDay.data),
-            b: current(state.getMyListNextSevenDay.data[field])
-          });
+        console.log({
+          day,
+          field,
+          a: current(state.getMyListNextSevenDay.data),
+          b: current(state.getMyListNextSevenDay.data[field]),
+        });
         // TODO: waiting be add todoDate field
         state.getMyListNextSevenDay.data = {
           ...current(state.getMyListNextSevenDay.data),
-          [field]: current(state.getMyListNextSevenDay.data[field]).map(item => {
-          if (item.id === action.payload.data.id) {
-            return action.payload.data;
-          }
-          return item;
-        })
-        }
+          [field]: current(state.getMyListNextSevenDay.data[field]).map(
+            (item) => {
+              if (item.id === action.payload.data.id) {
+                return action.payload.data;
+              }
+              return item;
+            }
+          ),
+        };
       })
-    .addCase(updateTodoDescriptionSlice.fulfilled, (state, action) => {
+      .addCase(updateTodoDescriptionSlice.fulfilled, (state, action) => {
         const day = differenceInDays(
-          new Date(format(new Date(action.payload.data.todoDate), 'MM/dd/yyyy')),
-          new Date(format(new Date(), 'MM/dd/yyyy'))
-        )
+          new Date(
+            format(new Date(action.payload.data.todoDate), "MM/dd/yyyy")
+          ),
+          new Date(format(new Date(), "MM/dd/yyyy"))
+        );
         let field = "";
         if (day === 0) field = "dayOne";
         if (day === 1) field = "dayTwo";
@@ -71,27 +80,28 @@ const nextSevenDaySlice = createSlice({
         if (day === 4) field = "dayFive";
         if (day === 5) field = "daySix";
         if (day === 6) field = "daySeven";
-        console.log(
-          {
-            day,
-            field,
-            a: current(state.getMyListNextSevenDay.data),
-            b: current(state.getMyListNextSevenDay.data[field])
-          });
+        console.log({
+          day,
+          field,
+          a: current(state.getMyListNextSevenDay.data),
+          b: current(state.getMyListNextSevenDay.data[field]),
+        });
         // TODO: waiting be add todoDate field
         state.getMyListNextSevenDay.data = {
           ...current(state.getMyListNextSevenDay.data),
-          [field]: current(state.getMyListNextSevenDay.data[field]).map(item => {
-          if (item.id === action.payload.data.id) {
-            return action.payload.data;
-          }
-          return item;
-        })
-        }
-      })
+          [field]: current(state.getMyListNextSevenDay.data[field]).map(
+            (item) => {
+              if (item.id === action.payload.data.id) {
+                return action.payload.data;
+              }
+              return item;
+            }
+          ),
+        };
+      });
   },
 });
- 
+
 const getMyListNextSevenDay = createAsyncThunk(
   "nextSevenDay/getMyListNextSevenDay",
   async (dateTime) => {
@@ -116,6 +126,14 @@ export const updateTodoTitleSlice = createAsyncThunk(
   }
 );
 
+export const createTodoSlice = createAsyncThunk(
+  "nextSevenDay/updateTodoTitleSlice",
+  async (initialState) => {
+    const response = await createTodo(initialState);
+
+    return response;
+  }
+);
 
 export const updateTodoDescriptionSlice = createAsyncThunk(
   "nextSevenDay/updateTodoDescriptionSlice",

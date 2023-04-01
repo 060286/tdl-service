@@ -8,7 +8,7 @@ import { getTargetOfProxy } from "../extensions/proxyExtension";
 
 import { VARIABLE_STATUS } from "../constants/appStatusConstant";
 import SLICE_NAMES from "../constants/sliceConstant";
-import INIT_STATE from "./constant"
+import INIT_STATE from "./constant";
 const initialState = {
   login: INIT_STATE.login,
   register: INIT_STATE.register,
@@ -60,10 +60,8 @@ const accountSlice = createSlice({
       .addCase(getUserInfo.pending, (state, action) => {
         state.userInfo.status = VARIABLE_STATUS.IDLE;
         state.userInfo.error = null;
-        
       })
       .addCase(getUserInfo.fulfilled, (state, action) => {
-        console.log({action})
         state.userInfo.status = VARIABLE_STATUS.SUCCEEDED;
         state.userInfo = action.payload;
         state.userInfo.error = null;
