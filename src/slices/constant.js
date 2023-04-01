@@ -16,7 +16,7 @@ const INIT_STATE = {
     status: VARIABLE_STATUS.IDLE,
     error: null,
   },
-   allTasks: {
+  allTasks: {
     data: {},
     error: null,
     status: "idle",
@@ -51,6 +51,11 @@ const INIT_STATE = {
     status: VARIABLE_STATUS.IDLE,
     error: null,
   },
+  updateSubTask: {
+    subtask: {},
+    status: VARIABLE_STATUS.IDLE,
+    error: null,
+  },
 };
 
-export default INIT_STATE
+export default INIT_STATE;

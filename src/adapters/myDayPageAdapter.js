@@ -46,7 +46,7 @@ const getTodayJobList = async () => {
   return response.data;
 };
 
-const createTodo = async (title) => {
+const createTodo = async ({ title, todoDate }) => {
   const url = `${PATH_API}${MY_DAY_PAGE_CONTROLLER}/${SIMPLE_TODO}`;
   const token = getTokenFromLocalStorage();
 
@@ -60,6 +60,7 @@ const createTodo = async (title) => {
     data: {
       title: title,
       categoryId: null,
+      todoDate: todoDate !== null ? todoDate : new Date().toLocaleString(),
     },
   });
 
@@ -84,4 +85,61 @@ const getSuggestionTodoList = async () => {
   return response.data;
 };
 
-export { getTodo, createTodo, getTodayJobList, getSuggestionTodoList };
+// ? Update IsCompleted Of SubTask
+
+const updateSubTaskStatusAdapter = async (id) => {
+  const url = `https://localhost:44334/api/v1/myday-page/${id}/subtask-complete-status`;
+  const token = getTokenFromLocalStorage();
+
+  const response = await axios({
+    url: url,
+    method: "PUT",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return response.data;
+};
+
+// ? Remove SubTask By Id
+
+const removeSubTaskByIdAdapter = async (id) => {
+  const url = `https://localhost:44334/api/v1/todos/${id}/remove-sub-task`;
+  const token = getTokenFromLocalStorage();
+
+  const response = await axios({
+    url: url,
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return response.data;
+};
+
+const updateStatusOfTodoAdapter = async ({ id }) => {
+  const url = `https://localhost:44334/api/v1/todos/${id}/completed-todo`;
+  const token = getTokenFromLocalStorage();
+
+  const response = await axios({
+    url: url,
+    method: "PUT",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return response.data;
+};
+
+export {
+  getTodo,
+  createTodo,
+  getTodayJobList,
+  getSuggestionTodoList,
+  updateSubTaskStatusAdapter,
+  removeSubTaskByIdAdapter,
+  updateStatusOfTodoAdapter,
+};

@@ -88,7 +88,6 @@ export default function Sidebar() {
   const onNavigate =
     ({ href }) =>
     () => {
-      console.log({ href });
       navigate(href);
     };
 

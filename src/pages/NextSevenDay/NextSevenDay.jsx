@@ -2,17 +2,38 @@ import React, { useEffect, useRef, useState } from "react";
 
 import HeaderRouteItem from "../../components/core/HeaderRouteItem";
 import NextSevenDayListItem from "./NextSevenDayItem";
-import {format,addDays} from 'date-fns';
+import { format, addDays } from "date-fns";
+
+// import NextSevenDayListItem from "../../components/core/NextSevenDayListItem";
+// import { format, addDays } from "date-fns";
+
 import { Col, Container, Row } from "react-bootstrap";
-import {Box, Button, Dialog, Radio, Typography, TextField} from "@mui/material"
+import {
+  Box,
+  Button,
+  Dialog,
+  Radio,
+  Typography,
+  TextField,
+} from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
-import _ from "lodash"
-import { getMyListNextSevenDay, updateTodoTitleSlice, updateTodoDescriptionSlice } from "../../slices/nextSevenDaySlice";
+import _ from "lodash";
+import {
+  getMyListNextSevenDay,
+  updateTodoTitleSlice,
+  updateTodoDescriptionSlice,
+} from "../../slices/nextSevenDaySlice";
+
+// import _ from "lodash";
+// import {
+//   getMyListNextSevenDay,
+//   updateTodoTitleSlice,
+// } from "../../slices/nextSevenDaySlice";
 
 import { VARIABLE_STATUS } from "../../constants/appStatusConstant";
 import LockIcon from "@mui/icons-material/Lock";
-import axios from 'axios';
+import axios from "axios";
 import "./style.css";
 
 import { makeStyles } from "@mui/styles/";
@@ -24,17 +45,17 @@ const useStyle = makeStyles(() => ({
     display: "flex",
     marginTop: "48px",
     width: "175%",
-    height: "calc(100% - 88px)"
+    height: "calc(100% - 88px)",
   },
   hello: {
     fontSize: "14px",
     display: "flex",
     alignItems: "center",
     color: "#888",
-    marginBottom: "8px"
+    marginBottom: "8px",
   },
   LockIconDialog: {
-    fontSize: "16px"
+    fontSize: "16px",
   },
   dialogTodo: {
     "& .MuiDialog-paper": {
@@ -43,17 +64,14 @@ const useStyle = makeStyles(() => ({
   },
   scroll: {
     height: "100%",
-    overflow: "scroll"
+    overflow: "scroll",
   },
   mini: {
-    marginRight: "16px"
+    marginRight: "16px",
   },
-  titleTodo: {
-    wordBreak: "break-all",
-  }
 }));
 
-const NextSevenDay = ({now = new Date()}) => {
+const NextSevenDay = ({ now = new Date() }) => {
   const classes = useStyle();
   const [isMyList, setIsMyList] = useState(true);
   const dispatch = useDispatch();
@@ -62,15 +80,20 @@ const NextSevenDay = ({now = new Date()}) => {
   const nextSevenDayTask = useSelector(
     (state) => state.nextSevenDayReducer.getMyListNextSevenDay
   );
-  const [state, setState] =  useState([
+
+  // const [taskTitle, setTaskTitle] = useState("");
+  // const [state, setState] = useState([
+  const [state, setState] = useState([
     nextSevenDayTask?.data?.dayOne || [],
     nextSevenDayTask?.data?.dayTwo || [],
     nextSevenDayTask?.data?.dayThree || [],
     nextSevenDayTask?.data?.dayFour || [],
     nextSevenDayTask?.data?.dayFive || [],
     nextSevenDayTask?.data?.daySix || [],
-    nextSevenDayTask?.data?.daySeven || []
-  ])
+    nextSevenDayTask?.data?.daySeven || [],
+  ]);
+
+  console.log(state);
 
   useEffect(() => {
     setState([
@@ -80,39 +103,44 @@ const NextSevenDay = ({now = new Date()}) => {
       nextSevenDayTask?.data?.dayFour || [],
       nextSevenDayTask?.data?.dayFive || [],
       nextSevenDayTask?.data?.daySix || [],
-      nextSevenDayTask?.data?.daySeven || []
-    ])
-}, [nextSevenDayTask])
+      nextSevenDayTask?.data?.daySeven || [],
+    ]);
+  }, [nextSevenDayTask]);
 
-const reorder = (list, startIndex, endIndex) => {
-  const result = Array.from(list);
-  const [removed] = result.splice(startIndex, 1);
-  result.splice(endIndex, 0, removed);
+  const reorder = (list, startIndex, endIndex) => {
+    const result = Array.from(list);
+    const [removed] = result.splice(startIndex, 1);
+    result.splice(endIndex, 0, removed);
 
-  return result;
-};
+    return result;
+  };
 
-/**
- * Moves an item from one list to another list.
- */
+  /**
+   * Moves an item from one list to another list.
+   */
   const move = (source, destination, droppableSource, droppableDestination) => {
-  const sourceClone = Array.from(source);
-  const destClone = Array.from(destination);
-  const [removed] = sourceClone.splice(droppableSource.index, 1);
+    const sourceClone = Array.from(source);
+    const destClone = Array.from(destination);
+    const [removed] = sourceClone.splice(droppableSource.index, 1);
+    // const sourceClone = Array.from(source);
+    // const destClone = Array.from(destination);
+    // const [removed] = sourceClone.splice(droppableSource.index, 1);
 
-  destClone.splice(droppableDestination.index, 0, removed);
+    destClone.splice(droppableDestination.index, 0, removed);
 
-  const result = {};
-  result[droppableSource.droppableId] = sourceClone;
-  result[droppableDestination.droppableId] = destClone;
+    const result = {};
+    result[droppableSource.droppableId] = sourceClone;
+    result[droppableDestination.droppableId] = destClone;
 
-  return result;
-};
+    return result;
+  };
 
+  // function onDragEnd(result) {
+  //   const { source, destination } = result;
 
   async function onDragEnd(result) {
-    const { source, destination, draggableId} = result;
-    console.log({ result })
+    const { source, destination, draggableId } = result;
+    console.log({ result });
 
     // dropped outside the list
     if (!destination) {
@@ -120,7 +148,9 @@ const reorder = (list, startIndex, endIndex) => {
     }
     const sInd = +source.droppableId;
     const dInd = +destination.droppableId;
-    const isNotRequest = source.index === destination.index && source.droppableId === destination.droppableId
+    const isNotRequest =
+      source.index === destination.index &&
+      source.droppableId === destination.droppableId;
     if (!isNotRequest) {
       axios({
         method: "put",
@@ -129,14 +159,14 @@ const reorder = (list, startIndex, endIndex) => {
           dragId: draggableId,
           dropDate: addDays(new Date(), destination.droppableId),
           priority: destination.index,
-          isSameColumn: destination.droppableId === source.droppableId
+          isSameColumn: destination.droppableId === source.droppableId,
         },
         headers: {
           Authorization: `Bearer ${getTokenFromLocalStorage()}`,
         },
-      })
+      });
     }
-    
+
     if (sInd === dInd) {
       // TODO: send request to be to update priority of todo from source.index to destination.index
       const items = reorder(state[sInd], source.index, destination.index);
@@ -144,6 +174,11 @@ const reorder = (list, startIndex, endIndex) => {
       newState[sInd] = items;
       setState(newState);
     } else {
+      // console.log({
+      //   source: source.droppableId,
+      //   destination: destination.droppableId,
+      // });
+
       // TODO: send request to be to update column and priority of todo
       const result = move(state[sInd], state[dInd], source, destination);
       const newState = [...state];
@@ -153,7 +188,7 @@ const reorder = (list, startIndex, endIndex) => {
       setState(newState);
     }
   }
-  const getListStyle = isDraggingOver => ({
+  const getListStyle = (isDraggingOver) => ({
     width: "100%",
     margin: "0 16px",
     border: "1px solid #CCC",
@@ -162,32 +197,57 @@ const reorder = (list, startIndex, endIndex) => {
     borderRadius: "8px",
     backgroundColor: "#fafbfc",
     display: "flex",
-    flexDirection: "column"
+    flexDirection: "column",
   });
-   const handleClickOpen =
+  const handleClickOpen =
     ({ todo }) =>
-      () => {
+    () => {
       setOpen(true);
       setSelectedTodo(todo);
     };
 
- const handleClose = () => {
+  const handleClose = () => {
     setOpen(false);
     setSelectedTodo(undefined);
   };
-  const debouncedTitle = useRef(_.debounce(({id, title}) => {dispatch(updateTodoTitleSlice({id, title}))}, 500)).current
+  const debouncedTitle = useRef(
+    _.debounce(({ id, title }) => {
+      dispatch(updateTodoTitleSlice({ id, title }));
+    }, 500)
+  ).current;
   const onTodoTitleChange = async ({ todo, e }) => {
-    setSelectedTodo((preSelectedTodo => ({...preSelectedTodo, title: e.target.value})))
-    debouncedTitle({ id: todo.id, title: e.target.value })
-  }
-  const debouncedDescription = useRef(_.debounce(({id, description}) => {dispatch(updateTodoDescriptionSlice({id, description}))}, 500)).current
+    setSelectedTodo((preSelectedTodo) => ({
+      ...preSelectedTodo,
+      title: e.target.value,
+    }));
+    debouncedTitle({ id: todo.id, title: e.target.value });
+  };
+  const debouncedDescription = useRef(
+    _.debounce(({ id, description }) => {
+      dispatch(updateTodoDescriptionSlice({ id, description }));
+    }, 500)
+  ).current;
   const onTodoDescriptionChange = async ({ todo, e }) => {
-    setSelectedTodo((preSelectedTodo => ({...preSelectedTodo, description: e.target.value})))
-    debouncedDescription({ id: todo.id, description: e.target.value })
-  }
+    setSelectedTodo((preSelectedTodo) => ({
+      ...preSelectedTodo,
+      description: e.target.value,
+    }));
+    debouncedDescription({ id: todo.id, description: e.target.value });
+  };
+  // const debouncedTitle = useRef(
+  //   _.debounce(({ id, title }) => {
+  //     dispatch(updateTodoTitleSlice({ id, title }));
+  //   }, 500)
+  // ).current;
+  // const onTodoTitleChange = async ({ todo, e }) => {
+  //   setSelectedTodo((preSelectedTodo) => ({
+  //     ...preSelectedTodo,
+  //     title: e.target.value,
+  //   }));
+  //   debouncedTitle({ id: todo.id, title: e.target.value });
+  // };
 
   const getItemStyle = (isDragging, draggableStyle) => {
-    
     return {
       with: "25%",
       border: "1px solid #ccc",
@@ -195,9 +255,9 @@ const reorder = (list, startIndex, endIndex) => {
       margin: "8px 0",
       borderRadius: "8px",
       backgroundColor: "#FFF",
-      ...draggableStyle
+      ...draggableStyle,
     };
-  }
+  };
 
   useEffect(() => {
     if (nextSevenDayTask.status === VARIABLE_STATUS.IDLE) {
@@ -219,36 +279,150 @@ const reorder = (list, startIndex, endIndex) => {
               el={el}
               handleClickOpen={handleClickOpen}
               getItemStyle={getItemStyle}
-              getListStyle={getListStyle} 
+              getListStyle={getListStyle}
             />
           ))}
         </DragDropContext>
       </Box>
-      {
-        selectedTodo && 
-      <Dialog
-        onClose={handleClose}
-        open={open}
-        fullWidth={true}
-        maxWidth="md"
-        className={classes.dialogTodo}
-      >
-        {/* TODO:  Add disabled function same with MyDayPage2 page*/}
-        <TodoDetail
-          selectedTodo={selectedTodo}
-          // handleArchivedTodo={handleArchivedTodo}
-          handleClose={handleClose}
-          setSelectedTodo={setSelectedTodo}
-          onTodoTitleChange={onTodoTitleChange}
-          onTodoDescriptionChange={onTodoDescriptionChange}
-          // onSubTaskIsCompletedChange={onSubTaskIsCompletedChange}
-          // onSubTaskChange={onSubTaskChange}
-          // handleCreateSubtask={handleCreateSubtask}
-        />
-      </Dialog>
-      }
+      {selectedTodo && (
+        <Dialog
+          onClose={handleClose}
+          open={open}
+          fullWidth={true}
+          maxWidth="md"
+          className={classes.dialogTodo}
+        >
+          {/* TODO:  Add disabled function same with MyDayPage2 page*/}
+          <TodoDetail
+            selectedTodo={selectedTodo}
+            // handleArchivedTodo={handleArchivedTodo}
+            handleClose={handleClose}
+            setSelectedTodo={setSelectedTodo}
+            onTodoTitleChange={onTodoTitleChange}
+            onTodoDescriptionChange={onTodoDescriptionChange}
+            // onSubTaskIsCompletedChange={onSubTaskIsCompletedChange}
+            // onSubTaskChange={onSubTaskChange}
+            // handleCreateSubtask={handleCreateSubtask}
+          />
+        </Dialog>
+      )}
     </Box>
   );
 };
 
 export default NextSevenDay;
+
+{
+  /* <Droppable key={ind} droppableId={`${ind}`}>
+              {(provided, snapshot) => (
+                <Box
+                  ref={provided.innerRef}
+                  style={getListStyle(snapshot.isDraggingOver)}
+                  {...provided.droppableProps}
+                >
+                  <Typography variant="h5">
+                    {format(addDays(now, ind), "EEEE")}
+                  </Typography>
+                  <Box className={classes.scroll}>
+                    <Box className={classes.mini}>
+                      {el?.map((item, index) => (
+                        <Draggable
+                          key={item.id}
+                          draggableId={item.id}
+                          index={index}
+                        >
+                          {(provided, snapshot) => (
+                            <Box
+                              onClick={handleClickOpen({ todo: item })}
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              {...provided.dragHandleProps}
+                              style={getItemStyle(
+                                snapshot.isDragging,
+                                provided.draggableProps.style
+                              )}
+                            >
+                              <Box
+                                style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                }}
+                              >
+                                <Radio
+                                  checked={item.isCompleted}
+                                  // TODO: send request to be to toggle checked button
+                                  onChange={() => {}}
+                                />
+                                <Box>
+                                  <Box className={classes.hello}>
+                                    <LockIcon
+                                      className={classes.LockIconDialog}
+                                    />
+                                    {"My List > "}
+                                    {item.category}
+                                  </Box>
+                                  <Typography className={classes.titleTodo}>
+                                    {item.title}
+                                  </Typography>
+                                </Box>
+                              </Box>
+                            </Box>
+                          )}
+                        </Draggable>
+                      ))}
+                    </Box>
+                  </Box>
+                  <Box className={classes.input}>
+                    <TextField
+                      label="Enter todo content"
+                      placeholder="Enter todo content"
+                      color="primary"
+                      fullWidth
+                      value={taskTitle}
+                      size={"small"}
+                      // TODO: Same with ALL TASK PAGE row 195
+                      // onKeyUp={(e) => onKeyPressHandler(e)}
+                      // onChange={(e) => setTaskTitle(e.target.value)}
+                    />
+                  </Box>
+                </Box>
+              )}
+            </Droppable>
+          ))}
+        </DragDropContext>
+      </Box>
+      {selectedTodo && (
+        <Dialog
+          onClose={handleClose}
+          open={open}
+          fullWidth={true}
+          maxWidth="md"
+          className={classes.dialogTodo}
+        >
+          {/* TODO:  Add disabled function same with MyDayPage2 page*/
+}
+//<TodoDetail
+// selectedTodo={selectedTodo}
+//handleClose={handleClose}
+//setSelectedTodo={setSelectedTodo}
+// new
+// handleArchivedTodo={handleArchivedTodo}
+// onSubTaskIsCompletedChange={onSubTaskIsCompletedChange}
+// onSubTaskChange={onSubTaskChange}
+// handleCreateSubtask={handleCreateSubtask}
+// onTodoTitleChange={onTodoTitleChange}
+// onTodoDescriptionChange={onTodoDescriptionChange}
+// onDeleteSubTask={onDeleteSubTask}
+// onOpenSelectedTag={onOpenSelectedTag}
+// onCloseSelectedTag={onCloseSelectedTag}
+// openTag={openTag}
+// selectedTag={selectedTag}
+// selectedTagDetail={selectedTagDetail}
+// onTagItemClick={onTagItemClick}
+// onOpenRemindMe={onOpenRemindMe}
+// openRemindMe={openRemindMe}
+// onUpdateRemindAtHandler={onUpdateRemindAtHandler}
+// onCloseRemindMe={onCloseRemindMe}
+// />
+//</Dialog> */}
+//)}
