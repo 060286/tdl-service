@@ -181,8 +181,6 @@ export default function TodoDetail({
   const [titleHelperText, setTitleHelperText] = useState("");
   const [selectedRemindAt, setSelectedRemindAt] = useState(null);
 
-  console.log(selectedTodo);
-
   useEffect(() => {
     if (selectedTodo) {
       setSelectedRemindAt(selectedTodo.remindedAt);
@@ -197,8 +195,6 @@ export default function TodoDetail({
     setTitleHelperText("");
     return true;
   };
-
-  console.log(selectedTodo.remindedAt);
 
   const classes = useStyle();
   return (
