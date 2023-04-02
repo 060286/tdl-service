@@ -25,6 +25,9 @@ import {
   createSubTodo,
   addSubTaskToDetailTodo,
   updateSubTaskStatusSlice,
+  getTagListSlice,
+  setDefaultTagList,
+  updateTodoTagSlicde,
 } from "../../slices/todoSlice";
 
 import { removeSubTaskByIdSlice } from "../../slices/subtaskSlice";
@@ -87,6 +90,9 @@ const AllTaskPage = () => {
     (state) => state.allTaskReducer.allTasks.status
   );
   const [currentTask, setCurrentTask] = useState(undefined); // Get current open task
+  const [openTag, setOpenTag] = useState(false);
+  const [selectedTag, setSelectedTag] = useState(undefined);
+  const [selectedTagDetail, setSelectedTagDetail] = useState(undefined);
 
   useEffect(() => {
     if (tasksStatus === VARIABLE_STATUS.IDLE) {
@@ -166,7 +172,7 @@ const AllTaskPage = () => {
     // * Remove from state
     const newSelectedTodo = selectedTodo;
     const newSubTask = newSelectedTodo.subTasks.filter((el) => {
-      return el.id != subTask.id;
+      return el.id !== subTask.id;
     });
 
     const result = { ...newSelectedTodo, subTasks: newSubTask };
@@ -180,9 +186,10 @@ const AllTaskPage = () => {
   const onTodoClick = (todo, title) => {
     setSelectedTodo(todo);
     setCurrentTask(title);
+
+    setSelectedTagDetail(todo.tag);
   };
 
-  // * Đang làm
   const handleCreateSubtask = async (e, id, tod) => {
     if (e.key === "Enter") {
       const newSubTask = await dispatch(
@@ -219,6 +226,7 @@ const AllTaskPage = () => {
       e.target.value = "";
     }
   };
+
   const onKeyPressHandler = async (e) => {
     const enterKey = "Enter";
     const cansave =
@@ -242,6 +250,38 @@ const AllTaskPage = () => {
         setAddRequestStatus(VARIABLE_STATUS.IDLE);
       }
     }
+  };
+
+  const onOpenSelectedTag = async () => {
+    const { payload } = await dispatch(getTagListSlice());
+    console.log(payload?.data?.data);
+
+    setOpenTag(true);
+    setSelectedTag(payload?.data?.data);
+  };
+
+  const onCloseSelectedTag = () => {
+    setOpenTag(false);
+    dispatch(setDefaultTagList());
+    setSelectedTag(undefined);
+  };
+
+  const onTagItemClick = async (tag, todoId) => {
+    setOpenTag(false);
+    setSelectedTagDetail(tag);
+
+    // ? Update on API
+
+    const res = await dispatch(updateTodoTagSlicde({ tag, todoId }));
+    const newSelectedTodo = { ...selectedTodo };
+
+    console.log(`before ${JSON.stringify(newSelectedTodo.tag)}`);
+
+    newSelectedTodo.tag = res.payload?.data?.data;
+
+    console.log(`after ${JSON.stringify(newSelectedTodo.tag)}`);
+
+    setSelectedTodo(newSelectedTodo);
   };
 
   return (
@@ -296,6 +336,12 @@ const AllTaskPage = () => {
               handleCreateSubtask={handleCreateSubtask}
               onTodoDescriptionChange={onTodoDescriptionChange}
               onDeleteSubTask={onDeleteSubTask}
+              selectedTag={selectedTag}
+              openTag={openTag}
+              onOpenSelectedTag={onOpenSelectedTag}
+              onCloseSelectedTag={onCloseSelectedTag}
+              onTagItemClick={onTagItemClick}
+              selectedTagDetail={selectedTagDetail}
             />
           )}
         </Grid>
@@ -305,19 +351,3 @@ const AllTaskPage = () => {
 };
 
 export default AllTaskPage;
-
-{
-  /* // {selectedTodo && (
-          //   <TodoDetail
-          //     className={classes.todoDetail}
-          //     selectedTodo={selectedTodo}
-          //     handleArchivedTodo={handleArchivedTodo}
-          //     handleClose={handleClose}
-          //     setSelectedTodo={setSelectedTodo}
-          //     onSubTaskIsCompletedChange={onSubTaskIsCompletedChange}
-          //     onSubTaskChange={onSubTaskChange}
-          //     onTodoTitleChange={onTodoTitleChange}
-          //     handleCreateSubtask={handleCreateSubtask}
-          //   />
-          // )} */
-}
