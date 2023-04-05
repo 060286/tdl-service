@@ -289,7 +289,7 @@ export default function TodoDetail({
               size="small"
               variant="contained"
               startIcon={<CategoryIcon />}
-              onclick={() => {
+              onClick={() => {
                 console.log("Chọn category");
               }}
             >
@@ -435,7 +435,6 @@ export default function TodoDetail({
                 onCloseRemindMe();
 
                 //Todo : set remind at
-
                 setSelectedRemindAt(JSON.stringify(remindAt));
 
                 // Todo : call api to update

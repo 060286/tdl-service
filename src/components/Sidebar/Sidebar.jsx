@@ -15,12 +15,15 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import HomeIcon from "@mui/icons-material/Home";
 import UpcomingIcon from "@mui/icons-material/Upcoming";
 import ListAltIcon from "@mui/icons-material/ListAlt";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { makeStyles } from "@mui/styles/";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { Box } from "@mui/system";
 import { useNavigate } from "react-router-dom";
 import CloseIcon from "@mui/icons-material/Close";
+import { VARIABLE_STATUS } from "../../constants/appStatusConstant";
+import { getUserInfo } from "../../slices/accountSlice";
+import { getTokenFromLocalStorage } from "../../extensions/tokenExtension";
 
 const items = [
   {
@@ -81,9 +84,10 @@ export default function Sidebar() {
   const userInfo = useSelector((state) => state.accountReducer.userInfo);
   const img =
     userInfo !== null
-      ? "https://www.w3schools.com/howto/img_avatar.png"
+      ? userInfo.img
       : // ? userInfo.img
         "https://www.w3schools.com/howto/img_avatar.png";
+  const dispatch = useDispatch();
 
   const onNavigate =
     ({ href }) =>
@@ -97,6 +101,14 @@ export default function Sidebar() {
 
     navigate(loginHref);
   };
+
+  useEffect(() => {
+    if (userInfo.status === VARIABLE_STATUS.IDLE) {
+      const token = getTokenFromLocalStorage();
+
+      dispatch(getUserInfo(token));
+    }
+  }, [dispatch, userInfo.status]);
 
   return (
     <Box className={classes.sideBar}>

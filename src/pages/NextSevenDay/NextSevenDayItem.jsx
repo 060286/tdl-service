@@ -47,6 +47,7 @@ export default function NextSevenDayItem({
   handleClickOpen,
   getItemStyle,
   getListStyle,
+  onCreateTodo,
   now = new Date(),
 }) {
   const dispatch = useDispatch();
@@ -58,14 +59,15 @@ export default function NextSevenDayItem({
     setCurrentDate(addDays(now, ind));
   }, []);
 
-  const handleCreateTodo = (e) => {
+  const handleCreateTodo = async (e) => {
     if (e.key === "Enter") {
       const data = {
         title: taskTitle,
         todoDate: currentDate,
       };
 
-      dispatch(createTodoSlice(data));
+      const todo = await dispatch(createTodoSlice(data));
+      onCreateTodo(todo.payload.data, ind, e);
     }
   };
 
