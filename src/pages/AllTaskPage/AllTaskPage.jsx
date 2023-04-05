@@ -30,7 +30,14 @@ import {
   updateTodoTagSlicde,
 } from "../../slices/todoSlice";
 
+import {
+  createTodoSlice,
+  updateTodoTag,
+  updateTodoRemind,
+} from "../../slices/allMyTaskSlice";
+
 import { removeSubTaskByIdSlice } from "../../slices/subtaskSlice";
+import { updateRemindAtAdapter } from "../../adapters/taskAdapter";
 
 const useStyle = makeStyles(() => ({
   listItem: {
@@ -93,12 +100,21 @@ const AllTaskPage = () => {
   const [openTag, setOpenTag] = useState(false);
   const [selectedTag, setSelectedTag] = useState(undefined);
   const [selectedTagDetail, setSelectedTagDetail] = useState(undefined);
+  const [openRemindMe, setOpenRemindMe] = useState(false);
 
   useEffect(() => {
     if (tasksStatus === VARIABLE_STATUS.IDLE) {
       dispatch(getAllTask(tasks));
     }
   }, [tasksStatus, dispatch, tasks]);
+
+  const onOpenRemindMe = () => {
+    setOpenRemindMe(true);
+  };
+
+  const onCloseRemindMe = () => {
+    setOpenRemindMe(false);
+  };
 
   const debouncedTitle = useRef(
     _.debounce(async ({ id, title }) => {
@@ -128,16 +144,6 @@ const AllTaskPage = () => {
     debouncedDescription({ id: todo.id, description: e.target.value });
   };
 
-  // console.log({ todo, e });
-  // setSelectedTodo((preSelectedTodo) => ({
-  //   ...preSelectedTodo,
-  //   title: e.target.value,
-  // }));
-  // _.debounce(
-  //   dispatch(updateTodoTitleSlice({ id: todo.id, title: e.target.value })),
-  //   500
-  // );
-
   const handleTodoIsCompletedChange = (todo, e) => {
     // TODO: call api to update todo of this todo
   };
@@ -151,8 +157,13 @@ const AllTaskPage = () => {
     setSelectedTodo(undefined);
   };
 
-  const onSubTaskChange = (todo, e) => {
+  const onSubTaskChange = (e, subtask, todoId) => {
     // TODO: send request to BE to update subtask text
+
+    const { id } = subtask;
+    const title = e.target.value;
+
+    // dispatch(updateSubTaskTitle({ id, title, todoId }));
   };
 
   const onSubTaskIsCompletedChange = (subtask, e) => {
@@ -184,6 +195,8 @@ const AllTaskPage = () => {
   };
 
   const onTodoClick = (todo, title) => {
+    console.log(todo, title);
+
     setSelectedTodo(todo);
     setCurrentTask(title);
 
@@ -194,15 +207,15 @@ const AllTaskPage = () => {
     if (e.key === "Enter") {
       const newSubTask = await dispatch(
         createSubTodo({ todoId: id, name: e.target.value })
-      ).unwrap();
+      );
 
-      const subTaskId = newSubTask.data.data.id;
-      const subTaskname = newSubTask.data.data.title;
+      const subTaskId = newSubTask.payload.response.data.data.id;
+      const subTaskname = newSubTask.payload.response.data.data.title;
 
       setSubtaskText("");
 
       const data = {
-        ...newSubTask.data.data,
+        ...newSubTask.payload.response.data.data,
         isCompleted: false,
         todoId: selectedTodo.id,
         current: currentTask,
@@ -218,6 +231,7 @@ const AllTaskPage = () => {
         name: subTaskname,
         isCompleted: false,
       };
+
       const result = [...oldSubTasks, st];
       const newSelectedTodo = { ...selectedTodo, subTasks: result };
 
@@ -241,8 +255,9 @@ const AllTaskPage = () => {
         }
 
         setAddRequestStatus(VARIABLE_STATUS.LOADING);
-        await dispatch(addNewTodo({ title: taskTitle })).unwrap();
+        const newTodo = await dispatch(addNewTodo({ title: taskTitle }));
 
+        dispatch(createTodoSlice(newTodo.payload));
         setTaskTitle("");
       } catch (err) {
         console.log("Failed to save the post", err);
@@ -254,8 +269,6 @@ const AllTaskPage = () => {
 
   const onOpenSelectedTag = async () => {
     const { payload } = await dispatch(getTagListSlice());
-    console.log(payload?.data?.data);
-
     setOpenTag(true);
     setSelectedTag(payload?.data?.data);
   };
@@ -275,13 +288,26 @@ const AllTaskPage = () => {
     const res = await dispatch(updateTodoTagSlicde({ tag, todoId }));
     const newSelectedTodo = { ...selectedTodo };
 
-    console.log(`before ${JSON.stringify(newSelectedTodo.tag)}`);
-
     newSelectedTodo.tag = res.payload?.data?.data;
 
-    console.log(`after ${JSON.stringify(newSelectedTodo.tag)}`);
-
     setSelectedTodo(newSelectedTodo);
+    dispatch(
+      updateTodoTag({
+        tag: res.payload.data.data,
+        todoId,
+      })
+    );
+  };
+
+  const onUpdateRemindAtHandler = async (data) => {
+    dispatch(updateTodoRemind(data));
+
+    const response = await updateRemindAtAdapter({
+      todoId: data.todoId,
+      remindAt: data.remindAt,
+    });
+
+    console.log(response);
   };
 
   return (
@@ -342,6 +368,10 @@ const AllTaskPage = () => {
               onCloseSelectedTag={onCloseSelectedTag}
               onTagItemClick={onTagItemClick}
               selectedTagDetail={selectedTagDetail}
+              onOpenRemindMe={onOpenRemindMe}
+              openRemindMe={openRemindMe}
+              onUpdateRemindAtHandler={onUpdateRemindAtHandler}
+              onCloseRemindMe={onCloseRemindMe}
             />
           )}
         </Grid>

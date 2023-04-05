@@ -24,6 +24,7 @@ import {
   updateTodoTitle,
   updateTodoDescription,
 } from "../adapters/allMyTaskAdapter";
+import { formatDateTime } from "../extensions/stringExtention";
 const initialState = {
   getCurrentTodo: {
     todos: [],
@@ -45,6 +46,11 @@ const initialState = {
     status: VARIABLE_STATUS.IDLE,
     error: null,
   },
+  tagList: {
+    data: [],
+    status: VARIABLE_STATUS.IDLE,
+    error: null,
+  },
 };
 
 export const createSubTodo = createAsyncThunk(
@@ -53,7 +59,7 @@ export const createSubTodo = createAsyncThunk(
     try {
       const response = await createSubTaskInTodo(subtask);
 
-      return response;
+      return { response, subtask };
     } catch (err) {
       console.log(err);
     }
@@ -65,7 +71,7 @@ export const updateRemindAtSlice = createAsyncThunk(
   async ({ todoId, remindAt }) => {
     const response = await updateRemindAtAdapter({ todoId, remindAt });
 
-    return response;
+    return { todoId, remindAt };
   }
 );
 
@@ -222,7 +228,7 @@ const todoSlice = createSlice({
       state.getDetailTodo.todo.title = action.payload;
     },
     addSubTaskToDetailTodo(state, action) {
-      console.log(action);
+      console.log({ action });
     },
     removeTodoFromList(state, action) {
       console.log(action.payload);
@@ -284,14 +290,42 @@ const todoSlice = createSlice({
     updateTodoStatusSlice(state, action) {
       console.log({ state, action });
     },
+    updateTagSlice(state, action) {
+      const { tag, todoId } = action.payload;
+      const newTodos = state.getCurrentTodo.todos.map((todo) => {
+        if (todo.id === todoId) {
+          todo.tag = tag;
+
+          return todo;
+        }
+
+        return todo;
+      });
+
+      state.getCurrentTodo.todos = newTodos;
+    },
   },
   extraReducers: (builder) => {
     builder
-      .addCase(createSubTodo.pending, (state, action) => {
-        // state.getDetailTodo.status = VARIABLE_STATUS.LOADING;
-      })
       .addCase(createSubTodo.fulfilled, (state, action) => {
-        // state.getDetailTodo.todo.subTasks.unshift(action.payload.data.data);
+        const { data } = action.payload.response.data;
+        const { todoId } = action.payload.subtask;
+        console.log({ data, todoId });
+
+        const newTodos = state.getCurrentTodo.todos.map((todo) => {
+          if (todo === todoId) {
+            const newSubtasks = [
+              ...todo.subTasks,
+              { id: data.id, isCompleted: false, name: data.title },
+            ];
+
+            todo.subTasks = newSubtasks;
+            return todo;
+          }
+          return todo;
+        });
+
+        console.log(newTodos.subTasks);
       })
       .addCase(archiveTodo.fulfilled, (state, action) => {
         console.log("archived completed");
@@ -346,7 +380,23 @@ const todoSlice = createSlice({
         console.log(action.payload);
       })
       .addCase(updateRemindAtSlice.fulfilled, (state, action) => {
-        console.log(action, "updateRemindAtSlice");
+        const { remindAt, todoId } = action.payload;
+
+        const newTodos = state.getCurrentTodo.todos.map((todo) => {
+          if (todo.id === todoId) {
+            const dateFormat = formatDateTime(remindAt);
+
+            console.log(JSON.stringify(todo), dateFormat);
+
+            todo.remindedAt = dateFormat;
+
+            return todo;
+          }
+
+          return todo;
+        });
+
+        state.getCurrentTodo.todos = newTodos;
       })
       .addCase(updateTodoStatusSlicde.fulfilled, (state, action) => {
         const index = state.getCurrentTodo.todos.findIndex(
@@ -409,6 +459,8 @@ export const {
     updateSubTaskIsCompleted,
     updateCompletedTodoSlice,
     updateTodoStatusSlice,
+    updateTagSlice,
+    updateRemindAtTodoSlice,
   },
   reducer: todoReducer,
 } = todoSlice;

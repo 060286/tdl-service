@@ -30,7 +30,6 @@ const nextSevenDaySlice = createSlice({
         state.getMyListNextSevenDay.erorr = action.payload;
       })
       .addCase(updateTodoTitleSlice.fulfilled, (state, action) => {
-        console.log("11");
         state.getMyListNextSevenDay.status = VARIABLE_STATUS.SUCCEEDED;
         const day = differenceInDays(
           new Date(
@@ -46,12 +45,12 @@ const nextSevenDaySlice = createSlice({
         if (day === 4) field = "dayFive";
         if (day === 5) field = "daySix";
         if (day === 6) field = "daySeven";
-        console.log({
-          day,
-          field,
-          a: current(state.getMyListNextSevenDay.data),
-          b: current(state.getMyListNextSevenDay.data[field]),
-        });
+        // console.log({
+        //   day,
+        //   field,
+        //   a: current(state.getMyListNextSevenDay.data),
+        //   b: current(state.getMyListNextSevenDay.data[field]),
+        // });
         // TODO: waiting be add todoDate field
         state.getMyListNextSevenDay.data = {
           ...current(state.getMyListNextSevenDay.data),

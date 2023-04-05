@@ -54,6 +54,7 @@ import {
   updateTodoDescriptionSlice,
   updateRemindAtSlice,
   updateTodoStatusSlice,
+  updateTagSlice,
 } from "../../slices/todoSlice";
 
 import {
@@ -81,6 +82,7 @@ const useStyle = makeStyles(() => ({
     overflowY: "scroll",
     maxHeight: "100%",
     width: "100%",
+    padding: "15px",
   },
   mydayPage: {
     height: "calc(100vh - 24px)",
@@ -239,8 +241,6 @@ export default function MyDayPage2() {
 
   const onUpdateRemindAtHandler = async (data) => {
     dispatch(updateRemindAtSlice(data));
-
-    // ? Update Todo
   };
 
   const onKeyPressHandler = async (e) => {
@@ -363,13 +363,13 @@ export default function MyDayPage2() {
         createSubTodo({ todoId: id, name: e.target.value })
       ).unwrap();
       setSubtaskText("");
-      dispatch(
-        addSubTaskToDetailTodo({
-          todoId: id,
-          name: e.target.value,
-          isCompleted: false,
-        })
-      );
+      // dispatch(
+      //   addSubTaskToDetailTodo({
+      //     todoId: id,
+      //     name: e.target.value,
+      //     isCompleted: false,
+      //   })
+      // );
 
       const newSubTask = {
         id: id,
@@ -460,9 +460,9 @@ export default function MyDayPage2() {
   };
 
   const onCloseSelectedTag = async () => {
-    dispatch(setDefaultTagList());
-    setSelectedTag(undefined);
     setOpenTag(false);
+    setSelectedTag(undefined);
+    dispatch(setDefaultTagList());
   };
 
   // ? Update Current Tag Detail
@@ -476,14 +476,7 @@ export default function MyDayPage2() {
     newSelectedTodo.tag = res.payload?.data?.data;
     setSelectedTodo(newSelectedTodo);
 
-    todos?.todos?.forEach((element, index) => {
-      if (element.id === todoId) {
-        const newElement = { ...element };
-        newElement.tag = tag;
-
-        element[index] = newElement;
-      }
-    });
+    dispatch(updateTagSlice({ tag, todoId }));
   };
 
   useEffect(() => {

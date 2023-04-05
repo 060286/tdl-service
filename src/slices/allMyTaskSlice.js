@@ -74,6 +74,8 @@ const tasksSlice = createSlice({
     createSubTask(state, action) {
       const { id, isCompleted, current, title, todoId } = action.payload;
 
+      console.log({ id, isCompleted, current, title, todoId });
+
       if (current === "Today") {
         const index = state.allTasks.data.allTaskToday.findIndex(
           (el) => el.id === todoId
@@ -189,10 +191,68 @@ const tasksSlice = createSlice({
         }
       });
     },
+    createTodoSlice(state, action) {
+      const newAllTaskToday = [
+        ...state.allTasks.data.allTaskToday,
+        action.payload,
+      ];
+
+      state.allTasks.data.allTaskToday = newAllTaskToday;
+    },
+    updateTodoTag(state, action) {
+      const { tag, todoId } = action.payload;
+
+      const dataToday = state.allTasks.data.allTaskToday;
+      const dataTomorrow = state.allTasks.data.allTaskTomorrow;
+      const dataUpComming = state.allTasks.data.allTaskUpComming;
+
+      dataToday.forEach((data) => {
+        if (data.id === todoId) {
+          data.tag = tag;
+        }
+      });
+
+      dataTomorrow.forEach((data) => {
+        if (data.id === todoId) {
+          data.tag = tag;
+        }
+      });
+
+      dataUpComming.forEach((data) => {
+        if (data.id === todoId) {
+          data.tag = tag;
+        }
+      });
+    },
+    updateTodoRemind(state, action) {
+      const { remindAt, todoId } = action.payload;
+
+      const dataToday = state.allTasks.data.allTaskToday;
+      const dataTomorrow = state.allTasks.data.allTaskTomorrow;
+      const dataUpComming = state.allTasks.data.allTaskUpComming;
+
+      dataToday.forEach((data) => {
+        if (data.id === todoId) {
+          data.remindedAt = remindAt;
+        }
+      });
+
+      dataTomorrow.forEach((data) => {
+        if (data.id === todoId) {
+          data.remindedAt = remindAt;
+        }
+      });
+
+      dataUpComming.forEach((data) => {
+        if (data.id === todoId) {
+          data.remindedAt = remindAt;
+        }
+      });
+    },
   },
   extraReducers(builder) {
     builder
-      .addCase(getAllTask.pending, (state, action) => {
+      .addCase(getAllTask.pending, (state) => {
         state.allTasks.status = VARIABLE_STATUS.LOADING;
       })
       .addCase(getAllTask.fulfilled, (state, action) => {
@@ -263,6 +323,9 @@ export const {
     updateSubTaskStatus,
     removeSubTask,
     createSubTask,
+    createTodoSlice,
+    updateTodoTag,
+    updateTodoRemind,
   },
   reducer: allTaskReducer,
 } = tasksSlice;
