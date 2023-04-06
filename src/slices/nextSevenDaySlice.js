@@ -4,6 +4,8 @@ import { getMyListNextSevenDayRequest } from "../adapters/nextSevenDatAdapter";
 import { createTodo } from "../adapters/myDayPageAdapter";
 import INIT_STATE from "./constant";
 import { differenceInDays, format } from "date-fns";
+import { archiveTodoById } from "../adapters/taskAdapter";
+
 import {
   updateTodoTitle,
   updateTodoDescription,
@@ -12,12 +14,51 @@ const initialState = {
   getMyListNextSevenDay: INIT_STATE.getMyListNextSevenDay,
 };
 
+export const archiveTodoSlice = createAsyncThunk(
+  "todo/archiveTodo",
+  async (data) => {
+    const { id } = data.data;
+    await archiveTodoById(id);
+
+    console.log(id);
+
+    return { id };
+  }
+);
+
 const nextSevenDaySlice = createSlice({
   name: "nextSevenDaySlice",
   initialState,
   reducers: {},
   extraReducers(builder) {
     builder
+      .addCase(archiveTodoSlice.fulfilled, (state, action) => {
+        const { id } = action.payload;
+
+        const dayOne = state.getMyListNextSevenDay.data.dayOne;
+        const dayTwo = state.getMyListNextSevenDay.data.dayTwo;
+        const dayThree = state.getMyListNextSevenDay.data.dayThree;
+        const dayFour = state.getMyListNextSevenDay.data.dayFour;
+        const dayFive = state.getMyListNextSevenDay.data.dayFive;
+        const daySix = state.getMyListNextSevenDay.data.daySix;
+        const daySeven = state.getMyListNextSevenDay.data.daySeven;
+
+        const newDayOne = dayOne.filter((el) => el.id !== id);
+        const newDayTwo = dayTwo.filter((el) => el.id !== id);
+        const newDayThree = dayThree.filter((el) => el.id !== id);
+        const newDayFour = dayFour.filter((el) => el.id !== id);
+        const newDayFive = dayFive.filter((el) => el.id !== id);
+        const newDaySix = daySix.filter((el) => el.id !== id);
+        const newDaySeven = daySeven.filter((el) => el.id !== id);
+
+        state.getMyListNextSevenDay.data.dayOne = newDayOne;
+        state.getMyListNextSevenDay.data.dayTwo = newDayTwo;
+        state.getMyListNextSevenDay.data.dayThree = newDayThree;
+        state.getMyListNextSevenDay.data.dayFour = newDayFour;
+        state.getMyListNextSevenDay.data.dayFive = newDayFive;
+        state.getMyListNextSevenDay.data.daySix = newDaySix;
+        state.getMyListNextSevenDay.data.daySeven = newDaySeven;
+      })
       .addCase(getMyListNextSevenDay.pending, (state) => {
         state.getMyListNextSevenDay.status = VARIABLE_STATUS.LOADING;
       })

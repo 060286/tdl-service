@@ -23,6 +23,8 @@ import { makeStyles } from "@mui/styles/";
 import TodoDetail from "../../components/TodoDetail/TodoDetail";
 import { getTokenFromLocalStorage } from "../../extensions/tokenExtension";
 
+import { archiveTodoSlice } from "../../slices/nextSevenDaySlice";
+
 const useStyle = makeStyles(() => ({
   container: {
     display: "flex",
@@ -231,8 +233,6 @@ const NextSevenDay = ({ now = new Date() }) => {
   const onCreateTodo = (todo, ind, e) => {
     const newState = state.map((item, index) => {
       if (index === ind) {
-        console.log([...item, todo]);
-
         return [...item, todo];
       }
 
@@ -242,6 +242,14 @@ const NextSevenDay = ({ now = new Date() }) => {
     setState(newState);
 
     e.target.value = "";
+  };
+
+  const handleArchivedTodo = (data) => {
+    // Tắt Popup
+    handleClose();
+
+    // Call api & update state
+    dispatch(archiveTodoSlice({ data }));
   };
 
   useEffect(() => {
@@ -281,7 +289,7 @@ const NextSevenDay = ({ now = new Date() }) => {
           {/* TODO:  Add disabled function same with MyDayPage2 page*/}
           <TodoDetail
             selectedTodo={selectedTodo}
-            // handleArchivedTodo={handleArchivedTodo}
+            handleArchivedTodo={handleArchivedTodo}
             handleClose={handleClose}
             setSelectedTodo={setSelectedTodo}
             onTodoTitleChange={onTodoTitleChange}
