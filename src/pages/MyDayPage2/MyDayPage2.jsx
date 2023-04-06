@@ -363,13 +363,6 @@ export default function MyDayPage2() {
         createSubTodo({ todoId: id, name: e.target.value })
       ).unwrap();
       setSubtaskText("");
-      // dispatch(
-      //   addSubTaskToDetailTodo({
-      //     todoId: id,
-      //     name: e.target.value,
-      //     isCompleted: false,
-      //   })
-      // );
 
       const newSubTask = {
         id: id,

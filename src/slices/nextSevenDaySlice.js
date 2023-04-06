@@ -29,7 +29,76 @@ export const archiveTodoSlice = createAsyncThunk(
 const nextSevenDaySlice = createSlice({
   name: "nextSevenDaySlice",
   initialState,
-  reducers: {},
+  reducers: {
+    addSubTaskByTodoId(state, action) {
+      console.log(action);
+      const { todoId, newSubtask } = action.payload;
+
+      const dayOne = state.getMyListNextSevenDay.data.dayOne;
+      const dayTwo = state.getMyListNextSevenDay.data.dayTwo;
+      const dayThree = state.getMyListNextSevenDay.data.dayThree;
+      const dayFour = state.getMyListNextSevenDay.data.dayFour;
+      const dayFive = state.getMyListNextSevenDay.data.dayFive;
+      const daySix = state.getMyListNextSevenDay.data.daySix;
+      const daySeven = state.getMyListNextSevenDay.data.daySeven;
+
+      dayOne.forEach((el) => {
+        if (el.id === todoId) {
+          const newSubTasks = [...el.subTasks, newSubtask];
+
+          el.subTasks = newSubTasks;
+        }
+      });
+
+      dayTwo.forEach((el) => {
+        if (el.id === todoId) {
+          const newSubTasks = [...el.subTasks, newSubtask];
+
+          el.subTasks = newSubTasks;
+        }
+      });
+
+      dayThree.forEach((el) => {
+        if (el.id === todoId) {
+          const newSubTasks = [...el.subTasks, newSubtask];
+
+          el.subTasks = newSubTasks;
+        }
+      });
+
+      dayFour.forEach((el) => {
+        if (el.id === todoId) {
+          const newSubTasks = [...el.subTasks, newSubtask];
+
+          el.subTasks = newSubTasks;
+        }
+      });
+
+      dayFive.forEach((el) => {
+        if (el.id === todoId) {
+          const newSubTasks = [...el.subTasks, newSubtask];
+
+          el.subTasks = newSubTasks;
+        }
+      });
+
+      daySix.forEach((el) => {
+        if (el.id === todoId) {
+          const newSubTasks = [...el.subTasks, newSubtask];
+
+          el.subTasks = newSubTasks;
+        }
+      });
+
+      daySeven.forEach((el) => {
+        if (el.id === todoId) {
+          const newSubTasks = [...el.subTasks, newSubtask];
+
+          el.subTasks = newSubTasks;
+        }
+      });
+    },
+  },
   extraReducers(builder) {
     builder
       .addCase(archiveTodoSlice.fulfilled, (state, action) => {
@@ -191,7 +260,7 @@ export { getMyListNextSevenDay };
 
 export const {
   reducer: nextSevenDayReducer,
-  actions: {},
+  actions: { addSubTaskByTodoId },
 } = nextSevenDaySlice;
 
 export default nextSevenDaySlice;
