@@ -112,7 +112,7 @@ export default function NextSevenDayItem({
                           <Box className={classes.hello}>
                             <LockIcon className={classes.LockIconDialog} />
                             {"My List > "}
-                            {item.category}
+                            {item.categoryName}
                           </Box>
                           <Typography className={classes.titleTodo}>
                             {item.title}
