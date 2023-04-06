@@ -24,6 +24,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import { VARIABLE_STATUS } from "../../constants/appStatusConstant";
 import { getUserInfo } from "../../slices/accountSlice";
 import { getTokenFromLocalStorage } from "../../extensions/tokenExtension";
+import Tooltip from "@mui/material/Tooltip";
 
 const items = [
   {
@@ -114,7 +115,9 @@ export default function Sidebar() {
     <Box className={classes.sideBar}>
       <Box disablePadding className={classes.listItemAvatar}>
         <Box className={classes.temp}>
-          <Avatar className={{ width: 42, height: 42 }} src={img} />
+          <Tooltip title={userInfo?.email}>
+            <Avatar className={{ width: 42, height: 42 }} src={img} />
+          </Tooltip>
           <Typography className={classes.displayName}>
             {userInfo.fullName}
           </Typography>

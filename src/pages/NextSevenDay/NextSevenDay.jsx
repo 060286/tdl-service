@@ -13,6 +13,7 @@ import {
   getMyListNextSevenDay,
   updateTodoTitleSlice,
   updateTodoDescriptionSlice,
+  addSubTaskByTodoId,
 } from "../../slices/nextSevenDaySlice";
 
 import { VARIABLE_STATUS } from "../../constants/appStatusConstant";
@@ -24,6 +25,7 @@ import TodoDetail from "../../components/TodoDetail/TodoDetail";
 import { getTokenFromLocalStorage } from "../../extensions/tokenExtension";
 
 import { archiveTodoSlice } from "../../slices/nextSevenDaySlice";
+import { createSubTaskInTodo } from "../../adapters/taskAdapter";
 
 const useStyle = makeStyles(() => ({
   container: {
@@ -252,11 +254,35 @@ const NextSevenDay = ({ now = new Date() }) => {
     dispatch(archiveTodoSlice({ data }));
   };
 
+  const handleCreateSubtask = async (e, todoId) => {
+    if (e.key === "Enter") {
+      const response = await createSubTaskInTodo({
+        name: e.target.value,
+        todoId,
+      });
+
+      const newSubtask = {
+        id: response.data.data.id,
+        name: response.data.data.title,
+        isCompleted: false,
+      };
+
+      const subTasks = selectedTodo?.subTasks;
+      const newSubtasks = [...subTasks, newSubtask];
+
+      const newSelectedTodo = { ...selectedTodo, subTasks: newSubtasks };
+      setSelectedTodo(newSelectedTodo);
+
+      dispatch(addSubTaskByTodoId({ newSubtask, todoId }));
+      e.target.value = "";
+    }
+  };
+
   useEffect(() => {
     if (nextSevenDayTask.status === VARIABLE_STATUS.IDLE) {
       dispatch(getMyListNextSevenDay(new Date().toLocaleDateString()));
     }
-  }, [dispatch]);
+  }, [dispatch, nextSevenDayTask.status]);
   return (
     <Box className="NextSevenDay_Page_Block" style={{ paddingTop: "20px" }}>
       <Row className="NextSevenDay_Header_Block">
@@ -296,7 +322,7 @@ const NextSevenDay = ({ now = new Date() }) => {
             onTodoDescriptionChange={onTodoDescriptionChange}
             // onSubTaskIsCompletedChange={onSubTaskIsCompletedChange}
             // onSubTaskChange={onSubTaskChange}
-            // handleCreateSubtask={handleCreateSubtask}
+            handleCreateSubtask={handleCreateSubtask}
           />
         </Dialog>
       )}
