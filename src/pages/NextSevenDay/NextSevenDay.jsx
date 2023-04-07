@@ -27,6 +27,8 @@ import { getTokenFromLocalStorage } from "../../extensions/tokenExtension";
 import { archiveTodoSlice } from "../../slices/nextSevenDaySlice";
 import { createSubTaskInTodo } from "../../adapters/taskAdapter";
 
+import { getTagListSlice, setDefaultTagList } from "../../slices/todoSlice";
+
 const useStyle = makeStyles(() => ({
   container: {
     display: "flex",
@@ -67,6 +69,9 @@ const NextSevenDay = ({ now = new Date() }) => {
   const nextSevenDayTask = useSelector(
     (state) => state.nextSevenDayReducer.getMyListNextSevenDay
   );
+  const [selectedTagDetail, setSelectedTagDetail] = useState(undefined);
+  const [openTag, setOpenTag] = useState(false);
+  const [selectedTag, setSelectedTag] = useState(undefined);
 
   // const [taskTitle, setTaskTitle] = useState("");
   // const [state, setState] = useState([
@@ -98,6 +103,12 @@ const NextSevenDay = ({ now = new Date() }) => {
     result.splice(endIndex, 0, removed);
 
     return result;
+  };
+
+  const onCloseSelectedTag = async () => {
+    setOpenTag(false);
+    setSelectedTag(undefined);
+    dispatch(setDefaultTagList());
   };
 
   /**
@@ -185,6 +196,7 @@ const NextSevenDay = ({ now = new Date() }) => {
     () => {
       setOpen(true);
       setSelectedTodo(todo);
+      setSelectedTagDetail(todo.tag);
     };
 
   const handleClose = () => {
@@ -244,6 +256,13 @@ const NextSevenDay = ({ now = new Date() }) => {
     setState(newState);
 
     e.target.value = "";
+  };
+
+  const onOpenSelectedTag = async () => {
+    const { payload } = await dispatch(getTagListSlice());
+
+    setSelectedTag(payload?.data?.data);
+    setOpenTag(true);
   };
 
   const handleArchivedTodo = (data) => {
@@ -323,6 +342,11 @@ const NextSevenDay = ({ now = new Date() }) => {
             // onSubTaskIsCompletedChange={onSubTaskIsCompletedChange}
             // onSubTaskChange={onSubTaskChange}
             handleCreateSubtask={handleCreateSubtask}
+            selectedTagDetail={selectedTagDetail}
+            onOpenSelectedTag={onOpenSelectedTag}
+            openTag={openTag}
+            selectedTag={selectedTag}
+            onCloseSelectedTag={onCloseSelectedTag}
           />
         </Dialog>
       )}

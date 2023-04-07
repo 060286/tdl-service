@@ -106,7 +106,7 @@ const AllTaskPage = () => {
     if (tasksStatus === VARIABLE_STATUS.IDLE) {
       dispatch(getAllTask(tasks));
     }
-  }, [tasksStatus, dispatch, tasks]);
+  }, []);
 
   const onOpenRemindMe = () => {
     setOpenRemindMe(true);
