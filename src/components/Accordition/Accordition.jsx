@@ -49,7 +49,7 @@ export default function Accordition({
 
   return (
     <>
-      <Accordion>
+      <Accordion expanded={true}>
         <AccordionSummary expandIcon={<ExpandMoreIcon />} id="allTaskUpComming">
           <Typography component={"subtitle1"}>{title}</Typography>
         </AccordionSummary>

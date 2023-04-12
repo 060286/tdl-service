@@ -10,6 +10,11 @@ import {
   ListItemIcon,
   ListItemText,
   Typography,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  Icon,
+  Tooltip,
 } from "@mui/material";
 import SettingsIcon from "@mui/icons-material/Settings";
 import HomeIcon from "@mui/icons-material/Home";
@@ -24,6 +29,10 @@ import CloseIcon from "@mui/icons-material/Close";
 import { VARIABLE_STATUS } from "../../constants/appStatusConstant";
 import { getUserInfo } from "../../slices/accountSlice";
 import { getTokenFromLocalStorage } from "../../extensions/tokenExtension";
+
+import axios from "axios";
+import { ExpandMoreSharp } from "@mui/icons-material";
+import ClassIcon from "@mui/icons-material/Class";
 
 const items = [
   {
@@ -87,6 +96,8 @@ export default function Sidebar() {
       ? userInfo.img
       : // ? userInfo.img
         "https://www.w3schools.com/howto/img_avatar.png";
+  const [categories, setCategories] = useState(undefined);
+  const [isExpanded, setIsExpanded] = useState(false);
   const dispatch = useDispatch();
 
   const onNavigate =
@@ -102,10 +113,35 @@ export default function Sidebar() {
     navigate(loginHref);
   };
 
+  const onNavigateCategory = (id) => {
+    navigate(`/category/${id}`);
+  };
+
+  const getCategory = async () => {
+    const url = "https://localhost:44334/api/v1/todos/todo-categories";
+    const token = getTokenFromLocalStorage();
+
+    try {
+      const categories = await axios({
+        method: "GET",
+        url: url,
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (categories.data.data !== null) {
+        setCategories(categories.data.data);
+        setIsExpanded(true);
+      }
+    } catch (error) {}
+  };
+
   useEffect(() => {
     if (userInfo.status === VARIABLE_STATUS.IDLE) {
       const token = getTokenFromLocalStorage();
 
+      getCategory();
       dispatch(getUserInfo(token));
     }
   }, [dispatch, userInfo.status]);
@@ -181,6 +217,35 @@ export default function Sidebar() {
             );
           })}
         </List>
+        <Accordion expanded={isExpanded}>
+          <AccordionSummary
+            id="panel-categorie"
+            aria-controls="panel-categories"
+            expandIcon={<ExpandMoreSharp />}
+          >
+            <Typography>My Lists</Typography>
+          </AccordionSummary>
+          <AccordionDetails>
+            {categories?.map(({ id, title }) => {
+              return (
+                <List>
+                  <ListItem
+                    key={id}
+                    disablePadding
+                    onClick={() => onNavigateCategory(id)}
+                  >
+                    <ListItemButton>
+                      <ListItemIcon>
+                        <ClassIcon />
+                      </ListItemIcon>
+                      <ListItemText primary={title}></ListItemText>
+                    </ListItemButton>
+                  </ListItem>
+                </List>
+              );
+            })}
+          </AccordionDetails>
+        </Accordion>
       </Drawer>
     </Box>
   );
