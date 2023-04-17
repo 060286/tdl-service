@@ -117,31 +117,31 @@ export default function Sidebar() {
     navigate(`/category/${id}`);
   };
 
-  const getCategory = async () => {
+  useEffect(() => {
     const url = "https://localhost:44334/api/v1/todos/todo-categories";
     const token = getTokenFromLocalStorage();
 
-    try {
-      const categories = await axios({
-        method: "GET",
-        url: url,
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (categories.data.data !== null) {
-        setCategories(categories.data.data);
-        setIsExpanded(true);
-      }
-    } catch (error) {}
-  };
+    axios({
+      method: "GET",
+      url: url,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((res) => {
+        if (res?.data?.data != null) {
+          setCategories(res.data.data);
+          setIsExpanded(true);
+        }
+      })
+      .catch((err) => console.log(err));
+  }, []);
 
   useEffect(() => {
     if (userInfo.status === VARIABLE_STATUS.IDLE) {
       const token = getTokenFromLocalStorage();
 
-      getCategory();
+      // getCategory();
       dispatch(getUserInfo(token));
     }
   }, [dispatch, userInfo.status]);
