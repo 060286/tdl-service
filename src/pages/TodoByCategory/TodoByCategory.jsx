@@ -11,6 +11,8 @@ import TodoDetail from "../../components/TodoDetail/TodoDetail";
 import { Box, Grid, TextField } from "@mui/material";
 import Typography from "@mui/material/Typography";
 
+import { createTodo } from "../../adapters/myDayPageAdapter";
+
 const useStyle = makeStyles(() => ({
   listItem: {
     borderRadius: "16px",
@@ -55,6 +57,7 @@ const useStyle = makeStyles(() => ({
   selectedTodoContainer: {
     paddingTop: "0",
   },
+
 }));
 
 const TodoByCategory = () => {
@@ -63,6 +66,7 @@ const TodoByCategory = () => {
   const [selectedTodo, setSelectedTodo] = useState(undefined);
   const [todos, setTodos] = useState([]);
   const [title, setTitle] = useState(null);
+  const [todoTitle, setTodoTitle] = useState("");
 
   useEffect(() => {
     const fetchData = async (todoCategoryId) => {
@@ -77,26 +81,60 @@ const TodoByCategory = () => {
         },
       });
 
-      console.log(response?.data?.data[0].categoryName);
-
-      setTodos(response.data.data);
-      setTitle(response?.data?.data[0].categoryName);
+      setTodos(response.data?.data?.todos);
+      setTitle(response?.data?.data.categoryName);
     };
 
     fetchData(id);
   }, [id]);
 
-  console.log(todos);
-
   const onTodoClick = (todo, title) => {
-    console.log(todo, title);
-
     setSelectedTodo(todo);
   };
 
+  const getTodoByCategory = async (id) => {
+    const url = `https://localhost:44334/api/v1/all-list-page/task-by-category?categoryId=${id}`;
+    const token = getTokenFromLocalStorage();
+
+    const response = await axios({
+      method: "get",
+      url: url,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    setTodos(response.data?.data?.todos);
+    setTitle(response?.data?.data.categoryName);
+  }
+
+  const handleCreateTodo = async (e) => {
+    if (e.key === 'Enter') {
+      console.log(todoTitle);
+
+      // clear input
+      setTodoTitle("");
+      e.target.value = "";
+
+
+      const response = await createTodo({
+        title: todoTitle,
+        todoDate: new Date().toLocaleString(),
+        categoryId: id
+      });
+
+      console.log(response);
+
+      if (response.isSuccess && response.statusCode === 200) {
+        // Reload page
+        getTodoByCategory(id);
+      }
+    }
+  }
+
   return (
     <Box className={classes.container}>
-      <Typography variant="h5">All My Tasks</Typography>
+      <Typography variant="h5">Manage todo by category</Typography>
       <Grid container spacing={2} className={classes.gridContainer}>
         <Grid item className={clsx(classes.item, classes.containerAcc)} xs={6}>
           <Box className={classes.accordition}>
@@ -110,13 +148,13 @@ const TodoByCategory = () => {
           <Box className={classes.input}>
             <TextField
               label="Enter todo content"
-              placeholder="Enter todo content"
+              placeholder="Click to quickly add a todo"
               color="primary"
               fullWidth
               focused
-              // value={taskTitle}
-              // onKeyUp={(e) => onKeyPressHandler(e)}
-              // onChange={(e) => setTaskTitle(e.target.value)}
+              // value={todoTitle}
+              onKeyUp={(e) => handleCreateTodo(e)}
+              onChange={(e) => setTodoTitle(e.target.value)}
             />
           </Box>
         </Grid>
@@ -126,24 +164,24 @@ const TodoByCategory = () => {
               className={classes.todoDetail}
               selectedTodo={selectedTodo}
               setSelectedTodo={setSelectedTodo}
-              // handleArchivedTodo={handleArchivedTodo}
-              // handleClose={handleClose}
-              // onSubTaskIsCompletedChange={onSubTaskIsCompletedChange}
-              // onSubTaskChange={onSubTaskChange}
-              // onTodoTitleChange={onTodoTitleChange}
-              // handleCreateSubtask={handleCreateSubtask}
-              // onTodoDescriptionChange={onTodoDescriptionChange}
-              // onDeleteSubTask={onDeleteSubTask}
-              // selectedTag={selectedTag}
-              // openTag={openTag}
-              // onOpenSelectedTag={onOpenSelectedTag}
-              // onCloseSelectedTag={onCloseSelectedTag}
-              // onTagItemClick={onTagItemClick}
-              // selectedTagDetail={selectedTagDetail}
-              // onOpenRemindMe={onOpenRemindMe}
-              // openRemindMe={openRemindMe}
-              // onUpdateRemindAtHandler={onUpdateRemindAtHandler}
-              // onCloseRemindMe={onCloseRemindMe}
+            // handleArchivedTodo={handleArchivedTodo}
+            // handleClose={handleClose}
+            // onSubTaskIsCompletedChange={onSubTaskIsCompletedChange}
+            // onSubTaskChange={onSubTaskChange}
+            // onTodoTitleChange={onTodoTitleChange}
+            // handleCreateSubtask={handleCreateSubtask}
+            // onTodoDescriptionChange={onTodoDescriptionChange}
+            // onDeleteSubTask={onDeleteSubTask}
+            // selectedTag={selectedTag}
+            // openTag={openTag}
+            // onOpenSelectedTag={onOpenSelectedTag}
+            // onCloseSelectedTag={onCloseSelectedTag}
+            // onTagItemClick={onTagItemClick}
+            // selectedTagDetail={selectedTagDetail}
+            // onOpenRemindMe={onOpenRemindMe}
+            // openRemindMe={openRemindMe}
+            // onUpdateRemindAtHandler={onUpdateRemindAtHandler}
+            // onCloseRemindMe={onCloseRemindMe}
             />
           )}
         </Grid>

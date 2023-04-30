@@ -46,20 +46,19 @@ const getTodayJobList = async () => {
   return response.data;
 };
 
-const createTodo = async ({ title, todoDate }) => {
+const createTodo = async ({ title, todoDate, categoryId = null }) => {
   const url = `${PATH_API}${MY_DAY_PAGE_CONTROLLER}/${SIMPLE_TODO}`;
   const token = getTokenFromLocalStorage();
 
   const response = await axios({
     url: url,
     method: "post",
-    // data: use for post method
     headers: {
       Authorization: `Bearer ${token}`,
     },
     data: {
       title: title,
-      categoryId: null,
+      categoryId: categoryId,
       todoDate: todoDate !== null ? todoDate : new Date().toLocaleString(),
     },
   });

@@ -15,12 +15,18 @@ import {
   AccordionDetails,
   Icon,
   Tooltip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  TextField,
+  DialogActions
 } from "@mui/material";
 import SettingsIcon from "@mui/icons-material/Settings";
 import HomeIcon from "@mui/icons-material/Home";
 import UpcomingIcon from "@mui/icons-material/Upcoming";
 import ListAltIcon from "@mui/icons-material/ListAlt";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { makeStyles } from "@mui/styles/";
 import { useSelector, useDispatch } from "react-redux";
 import { Box } from "@mui/system";
@@ -95,16 +101,27 @@ export default function Sidebar() {
     userInfo !== null
       ? userInfo.img
       : // ? userInfo.img
-        "https://www.w3schools.com/howto/img_avatar.png";
+      "https://www.w3schools.com/howto/img_avatar.png";
   const [categories, setCategories] = useState(undefined);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [openCreateCategoryPopup, setOpenCreateCategoryPopup] = useState(false);
+  const [categoryTitle, setCategoryTitle] = useState("");
+
+  const handleOpenClick = () => {
+    setOpenCreateCategoryPopup(true);
+  }
+
+  const handleCloseClick = () => {
+    setOpenCreateCategoryPopup(false);
+  }
+
   const dispatch = useDispatch();
 
   const onNavigate =
     ({ href }) =>
-    () => {
-      navigate(href);
-    };
+      () => {
+        navigate(href);
+      };
 
   const handleLogout = () => {
     // Remove token
@@ -117,7 +134,36 @@ export default function Sidebar() {
     navigate(`/category/${id}`);
   };
 
+  const handleSaveCategoryTitle = async () => {
+    // Close popup
+    setOpenCreateCategoryPopup(false);
+
+    const token = getTokenFromLocalStorage();
+    const url = `https://localhost:44334/api/v1/all-list-page/create-todo-category`;
+
+    const response = await axios({
+      url: url,
+      method: "post",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      data: {
+        title: categoryTitle,
+        description: `description of ${categoryTitle}`
+      },
+    });
+
+    if (response?.status === 200) {
+      // Reload page
+      getCategories();
+    }
+  };
+
   useEffect(() => {
+    getCategories()
+  }, []);
+
+  const getCategories = () => {
     const url = "https://localhost:44334/api/v1/todos/todo-categories";
     const token = getTokenFromLocalStorage();
 
@@ -135,7 +181,7 @@ export default function Sidebar() {
         }
       })
       .catch((err) => console.log(err));
-  }, []);
+  }
 
   useEffect(() => {
     if (userInfo.status === VARIABLE_STATUS.IDLE) {
@@ -217,6 +263,9 @@ export default function Sidebar() {
             );
           })}
         </List>
+        <Button outlined onClick={handleOpenClick}>
+          Create Category
+        </Button>
         <Accordion expanded={isExpanded}>
           <AccordionSummary
             id="panel-categorie"
@@ -247,6 +296,30 @@ export default function Sidebar() {
           </AccordionDetails>
         </Accordion>
       </Drawer>
+
+      <Dialog
+        PaperProps={{ style: { width: '500px' } }}
+        open={openCreateCategoryPopup} onClose={handleCloseClick}>
+        <DialogTitle>Create Category Title</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            id="name"
+            label="Category Title"
+            type="text"
+            fullWidth
+            variant="standard"
+            onChange={(e) => {
+              setCategoryTitle(e.target.value)
+            }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseClick}>Cancel</Button>
+          <Button onClick={handleSaveCategoryTitle}>Save</Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }
