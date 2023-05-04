@@ -191,7 +191,7 @@ export { getMyListNextSevenDay };
 
 export const {
   reducer: nextSevenDayReducer,
-  actions: {},
+  actions: { },
 } = nextSevenDaySlice;
 
 export default nextSevenDaySlice;

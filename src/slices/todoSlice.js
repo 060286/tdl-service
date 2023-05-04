@@ -155,7 +155,7 @@ export const getSuggestionTodo = createAsyncThunk(
 
 export const changeStatusOfSubtaskById = createAsyncThunk(
   "todo/changeStatusOfSubtaskById",
-  async () => {}
+  async () => { }
 );
 
 export const addSuggestionToCurrentTodoList = createAsyncThunk(
@@ -310,8 +310,6 @@ const todoSlice = createSlice({
       .addCase(createSubTodo.fulfilled, (state, action) => {
         const { data } = action.payload.response.data;
         const { todoId } = action.payload.subtask;
-        console.log({ data, todoId });
-
         const newTodos = state.getCurrentTodo.todos.map((todo) => {
           if (todo === todoId) {
             const newSubtasks = [
@@ -319,18 +317,20 @@ const todoSlice = createSlice({
               { id: data.id, isCompleted: false, name: data.title },
             ];
 
-            todo.subTasks = newSubtasks;
-            return todo;
+            const newTodo = { ...todo, subTasks: newSubtasks };
+
+            return newTodo;
           }
+
           return todo;
         });
 
-        console.log(newTodos.subTasks);
+        // console.log('new todos', JSON.stringify(newTodos[0].subTasks));
       })
       .addCase(archiveTodo.fulfilled, (state, action) => {
         console.log("archived completed");
       })
-      .addCase(createSubTodo.rejected, (state, action) => {})
+      .addCase(createSubTodo.rejected, (state, action) => { })
       .addCase(addNewTodo.fulfilled, (state, action) => {
         state.getCurrentTodo.todos.push(action.payload);
       })
@@ -351,8 +351,8 @@ const todoSlice = createSlice({
         state.getSuggestionTodo.status = VARIABLE_STATUS.SUCCEEDED;
         state.getSuggestionTodo.todos = action.payload;
       })
-      .addCase(getSuggestionTodo.rejected, (state, action) => {})
-      .addCase(addSuggestionToCurrentTodoList.fulfilled, (state, action) => {})
+      .addCase(getSuggestionTodo.rejected, (state, action) => { })
+      .addCase(addSuggestionToCurrentTodoList.fulfilled, (state, action) => { })
       .addCase(getTodoById.pending, (state, action) => {
         state.getDetailTodo.status = VARIABLE_STATUS.LOADING;
       })

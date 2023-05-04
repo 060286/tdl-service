@@ -12,7 +12,6 @@ import {
   TODOS,
   SUBTASK_COMPLETE_STATUS,
 } from "../constants/pathApiConstant";
-import id from "date-fns/esm/locale/id/index";
 
 const createSubTaskInTodo = async ({ name, todoId }) => {
   try {
@@ -82,7 +81,7 @@ const updateSubTaskStatus = async (id) => {
 
     const token = getTokenFromLocalStorage();
 
-    const response = await axios({
+    await axios({
       method: "PUT",
       url: url,
       headers: {

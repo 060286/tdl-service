@@ -272,7 +272,7 @@ export default function MyDayPage2() {
       dispatch(removeSuggestion(id));
 
       await dispatch(addNewTodo({ title: title })).unwrap();
-    } catch (error) {}
+    } catch (error) { }
   };
 
   const handleQuotes = () => {
@@ -335,11 +335,11 @@ export default function MyDayPage2() {
 
   const handleClickOpen =
     ({ todo }) =>
-    () => {
-      setOpen(true);
-      setSelectedTodo(todo);
-      setSelectedTagDetail(todo.tag);
-    };
+      () => {
+        setOpen(true);
+        setSelectedTodo(todo);
+        setSelectedTagDetail(todo.tag);
+      };
 
   const handleClose = () => {
     setOpen(false);
@@ -363,13 +363,6 @@ export default function MyDayPage2() {
         createSubTodo({ todoId: id, name: e.target.value })
       ).unwrap();
       setSubtaskText("");
-      // dispatch(
-      //   addSubTaskToDetailTodo({
-      //     todoId: id,
-      //     name: e.target.value,
-      //     isCompleted: false,
-      //   })
-      // );
 
       const newSubTask = {
         id: id,
@@ -377,12 +370,11 @@ export default function MyDayPage2() {
         isCompleted: false,
       };
 
-      setSelectedTodo((newSelectedTodo) => {
-        return {
-          ...newSelectedTodo,
-          subTasks: [...newSelectedTodo?.subTasks, newSubTask],
-        };
-      });
+      const temp = [...selectedTodo.subTasks, newSubTask];
+
+      const newSelectedTodo = { ...selectedTodo, subTasks: temp };
+
+      setSelectedTodo(newSelectedTodo);
 
       e.target.value = "";
     }
@@ -439,7 +431,7 @@ export default function MyDayPage2() {
     dispatch(updateSubTaskIsCompleted({ id, todoId: selectedTodo.id }));
   };
 
-  const onHandleChangeDescription = () => {};
+  const onHandleChangeDescription = () => { };
 
   const onDeleteSubTask = async ({ id }) => {
     // TODO: send request to be to delete subtask

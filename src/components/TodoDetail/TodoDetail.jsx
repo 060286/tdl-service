@@ -185,7 +185,7 @@ export default function TodoDetail({
     if (selectedTodo) {
       setSelectedRemindAt(selectedTodo.remindedAt);
     }
-  }, []);
+  }, [selectedTodo]);
 
   const isValidTitle = (title) => {
     if (title.length > 200) {
@@ -352,39 +352,17 @@ export default function TodoDetail({
             onChange={(e) => {
               onTodoDescriptionChange({ todo: selectedTodo, e });
             }}
-            // value={selectedTodo?.description}
-            // onChange={(e) =>
-            //   setSelectedTodo((preSelectedTodo) => ({
-            //     ...preSelectedTodo,
-            //     description: e.target.value,
-            //   }))
-            // }
+          // value={selectedTodo?.description}
+          // onChange={(e) =>
+          //   setSelectedTodo((preSelectedTodo) => ({
+          //     ...preSelectedTodo,
+          //     description: e.target.value,
+          //   }))
+          // }
           />
         </Box>
         <Box className={classes.dialogContainer}>
           <Typography variant="subtitle2">SUBTASKS</Typography>
-
-          {selectedTodo?.subTasks?.map((todo) => {
-            <Box className={classes.todoDialogContainer}>
-              <Radio
-                className={classes.radioDialog}
-                checked={false}
-                onChange={(e) => onSubTaskIsCompletedChange(todo, e)}
-                value="b"
-                name="radio-buttons"
-              />
-              <Input
-                multiline
-                minRows={1}
-                maxRows={5}
-                fullWidth={true}
-                placeholder={"Content of todo"}
-                onChange={(e) => {
-                  onSubTaskChange(todo, e);
-                }}
-              />
-            </Box>;
-          })}
           <Box className={classes.todoDialogContainer}>
             <Radio
               className={classes.radioDialog}
