@@ -49,7 +49,7 @@ export default function LoginForm() {
       <div className="pass">Forgot Password?</div>
       <input type="submit" value="Login" />
       <div className="signup_link">
-        Not a member <a href="#">Sign up</a>
+        Not a member <a href="/register">Sign up</a>
       </div>
     </form>
   );

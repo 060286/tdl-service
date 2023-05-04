@@ -1,17 +1,24 @@
-import React, { useEffect, useState } from "react";
-
+import React, { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router";
 import axios from "axios";
 import { getTokenFromLocalStorage } from "../../extensions/tokenExtension";
-
+import _ from "lodash";
 import clsx from "clsx";
 import { makeStyles } from "@mui/styles/";
 import Accordition from "../../components/Accordition/Accordition";
 import TodoDetail from "../../components/TodoDetail/TodoDetail";
 import { Box, Grid, TextField } from "@mui/material";
 import Typography from "@mui/material/Typography";
-
 import { createTodo } from "../../adapters/myDayPageAdapter";
+import { archiveTodoById } from "../../adapters/taskAdapter";
+import { updateTodoTitle } from "../../adapters/allMyTaskAdapter";
+import { updateRemindAtAdapter } from "../../adapters/taskAdapter";
+import { updateSubTaskStatusAdapter, removeSubTaskByIdAdapter } from "../../adapters/myDayPageAdapter";
+import { createSubTaskInTodo } from "../../adapters/taskAdapter";
+import { updateTodoDescription } from "../../adapters/allMyTaskAdapter";
+import { getTagListAdapter } from "../../adapters/taskAdapter";
+import { setDefaultTagList } from "../../slices/todoSlice";
+import { useDispatch } from "react-redux";
 
 const useStyle = makeStyles(() => ({
   listItem: {
@@ -67,6 +74,11 @@ const TodoByCategory = () => {
   const [todos, setTodos] = useState([]);
   const [title, setTitle] = useState(null);
   const [todoTitle, setTodoTitle] = useState("");
+  const [openRemindMe, setOpenRemindMe] = useState(false);
+  const [openTag, setOpenTag] = useState(false);
+  const [selectedTag, setSelectedTag] = useState(undefined);
+  const [selectedTagDetail, setSelectedTagDetail] = useState(undefined);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const fetchData = async (todoCategoryId) => {
@@ -110,8 +122,6 @@ const TodoByCategory = () => {
 
   const handleCreateTodo = async (e) => {
     if (e.key === 'Enter') {
-      console.log(todoTitle);
-
       // clear input
       setTodoTitle("");
       e.target.value = "";
@@ -123,13 +133,186 @@ const TodoByCategory = () => {
         categoryId: id
       });
 
-      console.log(response);
-
       if (response.isSuccess && response.statusCode === 200) {
         // Reload page
         getTodoByCategory(id);
       }
     }
+  }
+
+  const handleArchivedTodo = async () => {
+    const response = await archiveTodoById(selectedTodo.id)
+
+    setSelectedTodo(undefined);
+
+    if (response.status === 200) {
+      getTodoByCategory(id);
+    }
+  }
+
+  const debouncedTitle = useRef(
+    _.debounce(({ todoId, title, currentTodos }) => {
+      const newTodos = currentTodos.map((todo) => {
+        if (todo.id === todoId) {
+          return { ...todo, title: title };
+        }
+
+        return todo;
+      });
+
+      setTodos(newTodos);
+
+      // Call api
+      updateTodoTitle({ id: todoId, title });
+    }, 500)
+  ).current;
+
+  const onTodoTitleChange = async ({ todo, e }) => {
+    setSelectedTodo((preSelectedTodo) => ({
+      ...preSelectedTodo,
+      title: e.target.value,
+    }));
+    debouncedTitle({ todoId: todo.id, title: e.target.value, currentTodos: todos });
+  };
+
+  const onOpenRemindMe = () => {
+    setOpenRemindMe(true);
+  };
+
+  const onCloseRemindMe = () => {
+    setOpenRemindMe(false);
+  };
+
+  const onUpdateRemindAtHandler = async (data) => {
+    const { todoId, remindAt } = data;
+
+    const newTodos = todos.map(todo => {
+      if (todo.id === todoId) {
+        return { ...todo, remindedAt: remindAt.toLocaleString() };
+      };
+
+      return todo;
+    })
+
+    await updateRemindAtAdapter(data);
+    setTodos(newTodos);
+  }
+
+  const onSubTaskIsCompletedChange = async (subTask, e) => {
+    const status = !subTask.isCompleted;
+
+    await updateSubTaskStatusAdapter(subTask.id);
+
+    const newTodos = todos.map(todo => {
+      if (todo.id === selectedTodo.id) {
+        const newSubTasks = todo?.subTasks?.map(st => {
+          if (st.id === subTask.id) {
+            return { ...st, isCompleted: status }
+          }
+
+          return st;
+        })
+
+        return { ...todo, subTasks: newSubTasks };
+      }
+
+      return todo;
+    })
+
+    setTodos(newTodos);
+  }
+
+  const onDeleteSubTask = async (subTask) => {
+    const subTaskId = subTask.id
+
+    await removeSubTaskByIdAdapter(subTask.id)
+
+    const newsTodo = todos.map(todo => {
+      if (todo.id === selectedTodo.id) {
+        const newSubTasks = todo?.subTasks?.filter(obj => obj.id !== subTaskId);
+
+        setSelectedTodo({ ...todo, subTasks: newSubTasks });
+
+        return { ...todo, subTasks: newSubTasks };
+      }
+
+      return todo;
+    })
+
+    setTodos(newsTodo);
+  }
+
+  const handleCreateSubtask = async (e, id) => {
+    if (e.key === "Enter") {
+      const response = await createSubTaskInTodo({ name: e.target.value, todoId: selectedTodo.id })
+
+      if (response.status === 200) {
+        const data = response.data.data;
+
+        const newSubTask = {
+          id: data.id,
+          name: data.title,
+          isCompleted: data.isCompleted
+        }
+
+        const newSelectedTodo = { ...selectedTodo, subTasks: [...selectedTodo.subTasks, newSubTask] }
+
+
+        setSelectedTodo(newSelectedTodo);
+      }
+
+      e.target.value = ''
+    }
+  }
+
+  const debouncedDescription = useRef(
+    _.debounce(async ({ id, description, todos }) => {
+      updateTodoDescription({ id, description });
+
+      const newTodos = todos.map(todo => {
+        if (todo.id === id) {
+          return { ...todo, description: description };
+        }
+
+        return todo;
+      });
+
+      setTodos(newTodos);
+    }, 500)
+  ).current;
+
+  const onTodoDescriptionChange = async ({ todo, e }) => {
+    setSelectedTodo((preSelectedTodo) => ({
+      ...preSelectedTodo,
+      description: e.target.value,
+    }));
+    debouncedDescription({ id: todo.id, description: e.target.value, todos });
+  }
+
+  const onTagItemClick = async (tag, todoId) => {
+    setOpenTag(false);
+    const newSelectedTodo = { ...selectedTodo, tag };
+
+    setSelectedTodo(newSelectedTodo);
+    setSelectedTagDetail(tag);
+  };
+
+  const onOpenSelectedTag = async () => {
+    const response = await getTagListAdapter();
+
+    setSelectedTag(response?.data?.data);
+    setOpenTag(true);
+  };
+
+  const onSubTaskChange = async (e, subTask, todoId) => {
+    console.log(e.target.value, subTask, todoId);
+  }
+
+  const onCloseSelectedTag = async () => {
+    setOpenTag(false);
+    setSelectedTag(undefined);
+
+    dispatch(setDefaultTagList());
   }
 
   return (
@@ -164,24 +347,24 @@ const TodoByCategory = () => {
               className={classes.todoDetail}
               selectedTodo={selectedTodo}
               setSelectedTodo={setSelectedTodo}
-            // handleArchivedTodo={handleArchivedTodo}
+              handleArchivedTodo={handleArchivedTodo}
+              onDeleteSubTask={onDeleteSubTask}
+              onSubTaskIsCompletedChange={onSubTaskIsCompletedChange}
+              onTodoTitleChange={onTodoTitleChange}
+              openTag={openTag}
+              onOpenRemindMe={onOpenRemindMe}
+              openRemindMe={openRemindMe}
+              onUpdateRemindAtHandler={onUpdateRemindAtHandler}
+              onCloseRemindMe={onCloseRemindMe}
+              handleCreateSubtask={handleCreateSubtask}
+              onTodoDescriptionChange={onTodoDescriptionChange}
+              onTagItemClick={onTagItemClick}
+              selectedTag={selectedTag}
+              onOpenSelectedTag={onOpenSelectedTag}
+              selectedTagDetail={selectedTagDetail}
+              onSubTaskChange={onSubTaskChange}
+              onCloseSelectedTag={onCloseSelectedTag}
             // handleClose={handleClose}
-            // onSubTaskIsCompletedChange={onSubTaskIsCompletedChange}
-            // onSubTaskChange={onSubTaskChange}
-            // onTodoTitleChange={onTodoTitleChange}
-            // handleCreateSubtask={handleCreateSubtask}
-            // onTodoDescriptionChange={onTodoDescriptionChange}
-            // onDeleteSubTask={onDeleteSubTask}
-            // selectedTag={selectedTag}
-            // openTag={openTag}
-            // onOpenSelectedTag={onOpenSelectedTag}
-            // onCloseSelectedTag={onCloseSelectedTag}
-            // onTagItemClick={onTagItemClick}
-            // selectedTagDetail={selectedTagDetail}
-            // onOpenRemindMe={onOpenRemindMe}
-            // openRemindMe={openRemindMe}
-            // onUpdateRemindAtHandler={onUpdateRemindAtHandler}
-            // onCloseRemindMe={onCloseRemindMe}
             />
           )}
         </Grid>
