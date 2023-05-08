@@ -18,6 +18,7 @@ import {
   Checkbox,
   Tooltip,
 } from "@mui/material";
+import SearchIcon from "@mui/icons-material/Search";
 import { Box } from "@mui/system";
 import { makeStyles } from "@mui/styles/";
 import MyDayWelcomeName from "../../components/core/MyDayWelcomeName";
@@ -55,7 +56,10 @@ import {
   updateRemindAtSlice,
   updateTodoStatusSlice,
   updateTagSlice,
+  setSelectedTodoId,
 } from "../../slices/todoSlice";
+
+import SearchResultDialog from "../../components/SearchResultDialog/SearchResultDialog";
 
 import {
   updateSubTaskStatusSlice,
@@ -72,6 +76,9 @@ import TodoDetail from "../../components/TodoDetail/TodoDetail";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
 import { RadioButtonChecked } from "@mui/icons-material";
+import { searchTodoByKeyword } from "../../adapters/myDayPageAdapter";
+import { searchTodoByKeywordSlice } from "../../slices/todoSlice";
+import { useNavigate } from "react-router";
 
 const useStyle = makeStyles(() => ({
   list: {
@@ -225,6 +232,10 @@ export default function MyDayPage2() {
   const [openTag, setOpenTag] = useState(false);
   const [selectedTagDetail, setSelectedTagDetail] = useState(undefined);
   const [openRemindMe, setOpenRemindMe] = useState(false);
+  const [openSearchResult, setOpenSearchResult] = useState(false);
+  const [tasks, setTasks] = useState([]);
+  const [subTasks, setSubtasks] = useState([]);
+  const navigate = useNavigate();
 
   const cansave =
     addRequestStatus === VARIABLE_STATUS.IDLE &&
@@ -272,7 +283,7 @@ export default function MyDayPage2() {
       dispatch(removeSuggestion(id));
 
       await dispatch(addNewTodo({ title: title })).unwrap();
-    } catch (error) { }
+    } catch (error) {}
   };
 
   const handleQuotes = () => {
@@ -335,11 +346,11 @@ export default function MyDayPage2() {
 
   const handleClickOpen =
     ({ todo }) =>
-      () => {
-        setOpen(true);
-        setSelectedTodo(todo);
-        setSelectedTagDetail(todo.tag);
-      };
+    () => {
+      setOpen(true);
+      setSelectedTodo(todo);
+      setSelectedTagDetail(todo.tag);
+    };
 
   const handleClose = () => {
     setOpen(false);
@@ -431,7 +442,7 @@ export default function MyDayPage2() {
     dispatch(updateSubTaskIsCompleted({ id, todoId: selectedTodo.id }));
   };
 
-  const onHandleChangeDescription = () => { };
+  const onHandleChangeDescription = () => {};
 
   const onDeleteSubTask = async ({ id }) => {
     // TODO: send request to be to delete subtask
@@ -469,6 +480,28 @@ export default function MyDayPage2() {
     setSelectedTodo(newSelectedTodo);
 
     dispatch(updateTagSlice({ tag, todoId }));
+  };
+
+  const searchTodoAndSubTask = async (e) => {
+    if (e.key === "Enter") {
+      const res = await dispatch(searchTodoByKeywordSlice(e.target.value));
+      setSubtasks(res.payload.subTasks);
+      setTasks(res.payload.tasks);
+      setOpenSearchResult(true);
+
+      e.target.value = "";
+    }
+  };
+
+  const handleCloseSearchResultDialog = () => {
+    setOpenSearchResult(false);
+  };
+
+  const onSearchResultClick = (task) => {
+    setOpenSearchResult(false);
+    dispatch(setSelectedTodoId(task.id));
+
+    navigate(`/category/${task.categoryId}`);
   };
 
   useEffect(() => {
@@ -584,6 +617,19 @@ export default function MyDayPage2() {
       </Box>
       <Box className={classes.suggestionListPage}>
         <List className={classes.suggestionList}>
+          <TextField
+            id="search-bar"
+            className="text"
+            // onInput={(e) => {
+            //   setSearchQuery(e.target.value);
+            // }}
+            onKeyDown={(e) => searchTodoAndSubTask(e)}
+            label="Search todo & subtask"
+            variant="outlined"
+            placeholder="Search..."
+            size="small"
+            style={{ width: "100%" }}
+          />
           {suggestionTodos?.todos.map((todo) => {
             return (
               <ListItem disablePadding className={classes.suggestionItem}>
@@ -650,6 +696,15 @@ export default function MyDayPage2() {
             onCloseRemindMe={onCloseRemindMe}
           />
         </Dialog>
+      )}
+      {openSearchResult && (
+        <SearchResultDialog
+          handleCloseSearchResultDialog={handleCloseSearchResultDialog}
+          tasks={tasks}
+          subTasks={subTasks}
+          openSearchResult={openSearchResult}
+          onSearchResultClick={onSearchResultClick}
+        />
       )}
     </Box>
   );

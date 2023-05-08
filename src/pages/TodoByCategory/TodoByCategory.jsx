@@ -13,12 +13,15 @@ import { createTodo } from "../../adapters/myDayPageAdapter";
 import { archiveTodoById } from "../../adapters/taskAdapter";
 import { updateTodoTitle } from "../../adapters/allMyTaskAdapter";
 import { updateRemindAtAdapter } from "../../adapters/taskAdapter";
-import { updateSubTaskStatusAdapter, removeSubTaskByIdAdapter } from "../../adapters/myDayPageAdapter";
+import {
+  updateSubTaskStatusAdapter,
+  removeSubTaskByIdAdapter,
+} from "../../adapters/myDayPageAdapter";
 import { createSubTaskInTodo } from "../../adapters/taskAdapter";
 import { updateTodoDescription } from "../../adapters/allMyTaskAdapter";
 import { getTagListAdapter } from "../../adapters/taskAdapter";
+import { useDispatch, useSelector } from "react-redux";
 import { setDefaultTagList } from "../../slices/todoSlice";
-import { useDispatch } from "react-redux";
 
 const useStyle = makeStyles(() => ({
   listItem: {
@@ -64,7 +67,6 @@ const useStyle = makeStyles(() => ({
   selectedTodoContainer: {
     paddingTop: "0",
   },
-
 }));
 
 const TodoByCategory = () => {
@@ -79,8 +81,13 @@ const TodoByCategory = () => {
   const [selectedTag, setSelectedTag] = useState(undefined);
   const [selectedTagDetail, setSelectedTagDetail] = useState(undefined);
   const dispatch = useDispatch();
+  const selectedId = useSelector(
+    (state) => state.todoReducer.selectedTodoId.id
+  );
 
   useEffect(() => {
+    console.log(selectedId);
+
     const fetchData = async (todoCategoryId) => {
       const url = `https://localhost:44334/api/v1/all-list-page/task-by-category?categoryId=${todoCategoryId}`;
       const token = getTokenFromLocalStorage();
@@ -95,10 +102,18 @@ const TodoByCategory = () => {
 
       setTodos(response.data?.data?.todos);
       setTitle(response?.data?.data.categoryName);
+
+      if (selectedId) {
+        const todo = response.data?.data?.todos.find(
+          (todo) => todo.id === selectedId
+        );
+
+        setSelectedTodo(todo);
+      }
     };
 
     fetchData(id);
-  }, [id]);
+  }, [id, dispatch, selectedId]);
 
   const onTodoClick = (todo, title) => {
     setSelectedTodo(todo);
@@ -118,19 +133,18 @@ const TodoByCategory = () => {
 
     setTodos(response.data?.data?.todos);
     setTitle(response?.data?.data.categoryName);
-  }
+  };
 
   const handleCreateTodo = async (e) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       // clear input
       setTodoTitle("");
       e.target.value = "";
 
-
       const response = await createTodo({
         title: todoTitle,
         todoDate: new Date().toLocaleString(),
-        categoryId: id
+        categoryId: id,
       });
 
       if (response.isSuccess && response.statusCode === 200) {
@@ -138,17 +152,17 @@ const TodoByCategory = () => {
         getTodoByCategory(id);
       }
     }
-  }
+  };
 
   const handleArchivedTodo = async () => {
-    const response = await archiveTodoById(selectedTodo.id)
+    const response = await archiveTodoById(selectedTodo.id);
 
     setSelectedTodo(undefined);
 
     if (response.status === 200) {
       getTodoByCategory(id);
     }
-  }
+  };
 
   const debouncedTitle = useRef(
     _.debounce(({ todoId, title, currentTodos }) => {
@@ -172,7 +186,11 @@ const TodoByCategory = () => {
       ...preSelectedTodo,
       title: e.target.value,
     }));
-    debouncedTitle({ todoId: todo.id, title: e.target.value, currentTodos: todos });
+    debouncedTitle({
+      todoId: todo.id,
+      title: e.target.value,
+      currentTodos: todos,
+    });
   };
 
   const onOpenRemindMe = () => {
@@ -186,50 +204,52 @@ const TodoByCategory = () => {
   const onUpdateRemindAtHandler = async (data) => {
     const { todoId, remindAt } = data;
 
-    const newTodos = todos.map(todo => {
+    const newTodos = todos.map((todo) => {
       if (todo.id === todoId) {
         return { ...todo, remindedAt: remindAt.toLocaleString() };
-      };
+      }
 
       return todo;
-    })
+    });
 
     await updateRemindAtAdapter(data);
     setTodos(newTodos);
-  }
+  };
 
   const onSubTaskIsCompletedChange = async (subTask, e) => {
     const status = !subTask.isCompleted;
 
     await updateSubTaskStatusAdapter(subTask.id);
 
-    const newTodos = todos.map(todo => {
+    const newTodos = todos.map((todo) => {
       if (todo.id === selectedTodo.id) {
-        const newSubTasks = todo?.subTasks?.map(st => {
+        const newSubTasks = todo?.subTasks?.map((st) => {
           if (st.id === subTask.id) {
-            return { ...st, isCompleted: status }
+            return { ...st, isCompleted: status };
           }
 
           return st;
-        })
+        });
 
         return { ...todo, subTasks: newSubTasks };
       }
 
       return todo;
-    })
+    });
 
     setTodos(newTodos);
-  }
+  };
 
   const onDeleteSubTask = async (subTask) => {
-    const subTaskId = subTask.id
+    const subTaskId = subTask.id;
 
-    await removeSubTaskByIdAdapter(subTask.id)
+    await removeSubTaskByIdAdapter(subTask.id);
 
-    const newsTodo = todos.map(todo => {
+    const newsTodo = todos.map((todo) => {
       if (todo.id === selectedTodo.id) {
-        const newSubTasks = todo?.subTasks?.filter(obj => obj.id !== subTaskId);
+        const newSubTasks = todo?.subTasks?.filter(
+          (obj) => obj.id !== subTaskId
+        );
 
         setSelectedTodo({ ...todo, subTasks: newSubTasks });
 
@@ -237,14 +257,17 @@ const TodoByCategory = () => {
       }
 
       return todo;
-    })
+    });
 
     setTodos(newsTodo);
-  }
+  };
 
   const handleCreateSubtask = async (e, id) => {
     if (e.key === "Enter") {
-      const response = await createSubTaskInTodo({ name: e.target.value, todoId: selectedTodo.id })
+      const response = await createSubTaskInTodo({
+        name: e.target.value,
+        todoId: selectedTodo.id,
+      });
 
       if (response.status === 200) {
         const data = response.data.data;
@@ -252,24 +275,26 @@ const TodoByCategory = () => {
         const newSubTask = {
           id: data.id,
           name: data.title,
-          isCompleted: data.isCompleted
-        }
+          isCompleted: data.isCompleted,
+        };
 
-        const newSelectedTodo = { ...selectedTodo, subTasks: [...selectedTodo.subTasks, newSubTask] }
-
+        const newSelectedTodo = {
+          ...selectedTodo,
+          subTasks: [...selectedTodo.subTasks, newSubTask],
+        };
 
         setSelectedTodo(newSelectedTodo);
       }
 
-      e.target.value = ''
+      e.target.value = "";
     }
-  }
+  };
 
   const debouncedDescription = useRef(
     _.debounce(async ({ id, description, todos }) => {
       updateTodoDescription({ id, description });
 
-      const newTodos = todos.map(todo => {
+      const newTodos = todos.map((todo) => {
         if (todo.id === id) {
           return { ...todo, description: description };
         }
@@ -287,7 +312,7 @@ const TodoByCategory = () => {
       description: e.target.value,
     }));
     debouncedDescription({ id: todo.id, description: e.target.value, todos });
-  }
+  };
 
   const onTagItemClick = async (tag, todoId) => {
     setOpenTag(false);
@@ -306,14 +331,14 @@ const TodoByCategory = () => {
 
   const onSubTaskChange = async (e, subTask, todoId) => {
     console.log(e.target.value, subTask, todoId);
-  }
+  };
 
   const onCloseSelectedTag = async () => {
     setOpenTag(false);
     setSelectedTag(undefined);
 
     dispatch(setDefaultTagList());
-  }
+  };
 
   return (
     <Box className={classes.container}>
@@ -364,7 +389,7 @@ const TodoByCategory = () => {
               selectedTagDetail={selectedTagDetail}
               onSubTaskChange={onSubTaskChange}
               onCloseSelectedTag={onCloseSelectedTag}
-            // handleClose={handleClose}
+              // handleClose={handleClose}
             />
           )}
         </Grid>

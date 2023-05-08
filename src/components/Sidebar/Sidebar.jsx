@@ -20,7 +20,7 @@ import {
   DialogContent,
   DialogContentText,
   TextField,
-  DialogActions
+  DialogActions,
 } from "@mui/material";
 import SettingsIcon from "@mui/icons-material/Settings";
 import HomeIcon from "@mui/icons-material/Home";
@@ -45,16 +45,19 @@ const items = [
     text: "My Day",
     Icon: HomeIcon,
     href: "/myday",
+    number: 0,
   },
   {
     text: "Next 7 Day",
     Icon: UpcomingIcon,
     href: "/nextsevenday",
+    number: 0,
   },
   {
     text: "All My Task",
     Icon: ListAltIcon,
     href: "/tasks",
+    number: 0,
   },
 ];
 const useStyle = makeStyles(() => {
@@ -89,6 +92,18 @@ const useStyle = makeStyles(() => {
       display: "flex",
       justifyContent: "flex-end",
     },
+    numberAnalytic: {
+      backgroundColor: "#D3D3D3",
+      borderRadius: "50%",
+      width: "30px",
+      height: "30px",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      color: "black",
+      fontSize: "24px",
+      fontWeight: "bold",
+    },
   };
 });
 const loginHref = "/login";
@@ -101,7 +116,7 @@ export default function Sidebar() {
     userInfo !== null
       ? userInfo.img
       : // ? userInfo.img
-      "https://www.w3schools.com/howto/img_avatar.png";
+        "https://www.w3schools.com/howto/img_avatar.png";
   const [categories, setCategories] = useState(undefined);
   const [isExpanded, setIsExpanded] = useState(false);
   const [openCreateCategoryPopup, setOpenCreateCategoryPopup] = useState(false);
@@ -109,22 +124,21 @@ export default function Sidebar() {
 
   const handleOpenClick = () => {
     setOpenCreateCategoryPopup(true);
-  }
+  };
 
   const handleCloseClick = () => {
     setOpenCreateCategoryPopup(false);
-  }
+  };
 
   const dispatch = useDispatch();
 
   const onNavigate =
     ({ href }) =>
-      () => {
-        navigate(href);
-      };
+    () => {
+      navigate(href);
+    };
 
   const handleLogout = () => {
-    // Remove token
     localStorage.removeItem("token");
 
     navigate(loginHref);
@@ -149,7 +163,7 @@ export default function Sidebar() {
       },
       data: {
         title: categoryTitle,
-        description: `description of ${categoryTitle}`
+        description: `description of ${categoryTitle}`,
       },
     });
 
@@ -160,8 +174,29 @@ export default function Sidebar() {
   };
 
   useEffect(() => {
-    getCategories()
+    getCategories();
   }, []);
+
+  useEffect(() => {
+    const url = "https://localhost:44334/api/v1/user/analytic-todo";
+    const token = getTokenFromLocalStorage();
+
+    const getDataAnalytic = async () => {
+      const response = await axios({
+        method: "get",
+        url: url,
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      items[0].number = null;
+      items[1].number = response.data.data.sevenDayAnalytic.percentage;
+      items[2].number = response.data.data.oneMonthAnalytic.percentage;
+    };
+
+    getDataAnalytic();
+  });
 
   const getCategories = () => {
     const url = "https://localhost:44334/api/v1/todos/todo-categories";
@@ -181,7 +216,7 @@ export default function Sidebar() {
         }
       })
       .catch((err) => console.log(err));
-  }
+  };
 
   useEffect(() => {
     if (userInfo.status === VARIABLE_STATUS.IDLE) {
@@ -246,7 +281,7 @@ export default function Sidebar() {
             </IconButton>
           </ListItem>
           <Divider />
-          {items.map(({ text, Icon, href }) => {
+          {items.map(({ text, Icon, href, number }) => {
             return (
               <ListItem
                 key={text}
@@ -258,6 +293,12 @@ export default function Sidebar() {
                     <Icon />
                   </ListItemIcon>
                   <ListItemText primary={text} />
+                  {text !== "My Day" && (
+                    <ListItemText
+                      className={classes.numberAnalytic}
+                      primary={number}
+                    />
+                  )}
                 </ListItemButton>
               </ListItem>
             );
@@ -298,8 +339,10 @@ export default function Sidebar() {
       </Drawer>
 
       <Dialog
-        PaperProps={{ style: { width: '500px' } }}
-        open={openCreateCategoryPopup} onClose={handleCloseClick}>
+        PaperProps={{ style: { width: "500px" } }}
+        open={openCreateCategoryPopup}
+        onClose={handleCloseClick}
+      >
         <DialogTitle>Create Category Title</DialogTitle>
         <DialogContent>
           <TextField
@@ -311,7 +354,7 @@ export default function Sidebar() {
             fullWidth
             variant="standard"
             onChange={(e) => {
-              setCategoryTitle(e.target.value)
+              setCategoryTitle(e.target.value);
             }}
           />
         </DialogContent>

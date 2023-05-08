@@ -16,6 +16,7 @@ import {
   getTagListAdapter,
   updateRemindAtAdapter,
 } from "../adapters/taskAdapter";
+import { searchTodoByKeyword } from "../adapters/myDayPageAdapter";
 import { updateTodoTagAdapter } from "../adapters/tagAdapter";
 import { VARIABLE_STATUS } from "../constants/appStatusConstant";
 
@@ -51,6 +52,11 @@ const initialState = {
     status: VARIABLE_STATUS.IDLE,
     error: null,
   },
+  selectedTodoId: {
+    id: null,
+    status: VARIABLE_STATUS.IDLE,
+    error: null
+  }
 };
 
 export const createSubTodo = createAsyncThunk(
@@ -65,6 +71,20 @@ export const createSubTodo = createAsyncThunk(
     }
   }
 );
+
+export const searchTodoByKeywordSlice = createAsyncThunk(
+  "todo/searchTodoByKeyword",
+  async (keyword) => {
+    try {
+      const response = await searchTodoByKeyword(keyword);
+
+      return response;
+    }
+    catch(error) {
+      // dosth
+    }
+  }
+)
 
 export const updateRemindAtSlice = createAsyncThunk(
   "todo/updateRemindAtSlice",
@@ -214,6 +234,10 @@ const todoSlice = createSlice({
   name: "todo",
   initialState,
   reducers: {
+    setSelectedTodoId(state, action) {
+      state.selectedTodoId.id = action.payload;
+      state.selectedTodoId.status = VARIABLE_STATUS.SUCCEEDED;
+    },
     removeSuggestion(state, action) {
       state.getSuggestionTodo.todos = state.getSuggestionTodo.todos.filter(
         (el) => el.id !== action.payload
@@ -303,7 +327,7 @@ const todoSlice = createSlice({
       });
 
       state.getCurrentTodo.todos = newTodos;
-    },
+    }
   },
   extraReducers: (builder) => {
     builder
@@ -461,6 +485,7 @@ export const {
     updateTodoStatusSlice,
     updateTagSlice,
     updateRemindAtTodoSlice,
+    setSelectedTodoId,
   },
   reducer: todoReducer,
 } = todoSlice;

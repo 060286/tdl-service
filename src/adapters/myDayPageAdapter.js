@@ -133,6 +133,21 @@ const updateStatusOfTodoAdapter = async ({ id }) => {
   return response.data;
 };
 
+const searchTodoByKeyword = async (keyword) => {
+  const url = `https://localhost:44334/api/v1/todos/search-todo?Keyword=${keyword}`;
+  const token = getTokenFromLocalStorage();
+
+  const response = await axios({
+    url: url,
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  })
+
+  return response.data.data
+}
+
 export {
   getTodo,
   createTodo,
@@ -141,4 +156,5 @@ export {
   updateSubTaskStatusAdapter,
   removeSubTaskByIdAdapter,
   updateStatusOfTodoAdapter,
+  searchTodoByKeyword
 };
