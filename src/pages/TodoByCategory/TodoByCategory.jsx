@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { useParams } from "react-router";
+import { useParams, useNavigate, useLocation } from "react-router";
 import axios from "axios";
 import { getTokenFromLocalStorage } from "../../extensions/tokenExtension";
 import _ from "lodash";
@@ -21,7 +21,10 @@ import { createSubTaskInTodo } from "../../adapters/taskAdapter";
 import { updateTodoDescription } from "../../adapters/allMyTaskAdapter";
 import { getTagListAdapter } from "../../adapters/taskAdapter";
 import { useDispatch, useSelector } from "react-redux";
-import { setDefaultTagList } from "../../slices/todoSlice";
+import {
+  removeSelectedTodoId,
+  setDefaultTagList,
+} from "../../slices/todoSlice";
 
 const useStyle = makeStyles(() => ({
   listItem: {
@@ -86,7 +89,9 @@ const TodoByCategory = () => {
   );
 
   useEffect(() => {
-    console.log(selectedId);
+    if (!id.includes("isSearch=true")) {
+      dispatch(removeSelectedTodoId());
+    }
 
     const fetchData = async (todoCategoryId) => {
       const url = `https://localhost:44334/api/v1/all-list-page/task-by-category?categoryId=${todoCategoryId}`;

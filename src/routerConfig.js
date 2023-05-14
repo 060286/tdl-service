@@ -2,8 +2,6 @@ import {
   createBrowserRouter,
   createRoutesFromElements,
   Route,
-  BrowserRouter,
-  Routes,
 } from "react-router-dom";
 import AllTaskPage from "./pages/AllTaskPage/AllTaskPage.jsx";
 import MyDayPage from "./pages/MyDayPage2/MyDayPage2.jsx";

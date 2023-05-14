@@ -238,6 +238,11 @@ const todoSlice = createSlice({
       state.selectedTodoId.id = action.payload;
       state.selectedTodoId.status = VARIABLE_STATUS.SUCCEEDED;
     },
+    removeSelectedTodoId(state){
+      state.selectedTodoId.id = null;
+      state.selectedTodoId.status = VARIABLE_STATUS.IDLEl;
+      state.selectedTodoId.error = null;
+    },
     removeSuggestion(state, action) {
       state.getSuggestionTodo.todos = state.getSuggestionTodo.todos.filter(
         (el) => el.id !== action.payload
@@ -486,6 +491,7 @@ export const {
     updateTagSlice,
     updateRemindAtTodoSlice,
     setSelectedTodoId,
+    removeSelectedTodoId
   },
   reducer: todoReducer,
 } = todoSlice;

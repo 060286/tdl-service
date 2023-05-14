@@ -370,13 +370,13 @@ export default function MyDayPage2() {
 
   const handleCreateSubtask = async (e, id) => {
     if (e.key === "Enter") {
-      await dispatch(
+      const response = await dispatch(
         createSubTodo({ todoId: id, name: e.target.value })
       ).unwrap();
       setSubtaskText("");
 
       const newSubTask = {
-        id: id,
+        id: response.response.data.data.id,
         name: e.target.value,
         isCompleted: false,
       };
@@ -447,9 +447,10 @@ export default function MyDayPage2() {
   const onDeleteSubTask = async ({ id }) => {
     // TODO: send request to be to delete subtask
     const newTodo = { ...selectedTodo };
-    newTodo.subTasks = newTodo?.subTasks.filter((ele) => ele.id != id);
+    newTodo.subTasks = newTodo?.subTasks.filter((ele) => ele.id !== id);
 
-    // ? UPDATE API
+    console.log(newTodo);
+
     setSelectedTodo(newTodo);
 
     await dispatch(removeSubTaskByIdSlice(id));
@@ -501,7 +502,7 @@ export default function MyDayPage2() {
     setOpenSearchResult(false);
     dispatch(setSelectedTodoId(task.id));
 
-    navigate(`/category/${task.categoryId}`);
+    navigate(`/category/${task.categoryId}&isSearch=true`);
   };
 
   useEffect(() => {
