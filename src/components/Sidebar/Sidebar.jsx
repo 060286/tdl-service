@@ -26,7 +26,7 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import HomeIcon from "@mui/icons-material/Home";
 import UpcomingIcon from "@mui/icons-material/Upcoming";
 import ListAltIcon from "@mui/icons-material/ListAlt";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { makeStyles } from "@mui/styles/";
 import { useSelector, useDispatch } from "react-redux";
 import { Box } from "@mui/system";
@@ -39,6 +39,7 @@ import { getTokenFromLocalStorage } from "../../extensions/tokenExtension";
 import axios from "axios";
 import { ExpandMoreSharp } from "@mui/icons-material";
 import ClassIcon from "@mui/icons-material/Class";
+import ArchivedTaskReport from "../core/ArchivedTaskReport";
 
 const items = [
   {
@@ -121,9 +122,18 @@ export default function Sidebar() {
   const [isExpanded, setIsExpanded] = useState(false);
   const [openCreateCategoryPopup, setOpenCreateCategoryPopup] = useState(false);
   const [categoryTitle, setCategoryTitle] = useState("");
+  const [openArchivedTaskReport, setOpenArchivedTaskReport] = useState(false);
 
   const handleOpenClick = () => {
     setOpenCreateCategoryPopup(true);
+  };
+
+  const onOpenArchivedTaskReportDialog = () => {
+    setOpenArchivedTaskReport(true);
+  };
+
+  const onCloseArchivedTaskReportDialog = () => {
+    setOpenArchivedTaskReport(false);
   };
 
   const handleCloseClick = () => {
@@ -257,6 +267,16 @@ export default function Sidebar() {
           Logout
         </Button>
       </Box>
+      <Box disablePadding className={classes.listItemAvatar}>
+        <Button
+          onClick={() => onOpenArchivedTaskReportDialog()}
+          variant="contained"
+          color="primary"
+          size="small"
+        >
+          View Report
+        </Button>
+      </Box>
       <Drawer
         SlideProps={{ className: classes.sideBar }}
         anchor="left"
@@ -338,6 +358,7 @@ export default function Sidebar() {
         </Accordion>
       </Drawer>
 
+      {/* Create Category Title  */}
       <Dialog
         PaperProps={{ style: { width: "500px" } }}
         open={openCreateCategoryPopup}
@@ -363,6 +384,11 @@ export default function Sidebar() {
           <Button onClick={handleSaveCategoryTitle}>Save</Button>
         </DialogActions>
       </Dialog>
+
+      <ArchivedTaskReport
+        open={openArchivedTaskReport}
+        onCloseArchivedTaskReportDialog={onCloseArchivedTaskReportDialog}
+      />
     </Box>
   );
 }
