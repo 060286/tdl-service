@@ -14,6 +14,7 @@ const CREATE_SUB_TASK = "/create-subtask";
 const GET_DATA_NEXT_SEVEN_DAY_MY_LIST = "/next-seven-day";
 const ARCHIVE_TODO = "/archive-todo";
 const SUBTASK_COMPLETE_STATUS = "/subtask-complete-status";
+const CREATE_WORKSPACE_URL = "/workspace-page/workspace";
 
 export {
   PATH_API,
@@ -30,4 +31,5 @@ export {
   GET_DATA_NEXT_SEVEN_DAY_MY_LIST,
   ARCHIVE_TODO,
   SUBTASK_COMPLETE_STATUS,
+  CREATE_WORKSPACE_URL
 };

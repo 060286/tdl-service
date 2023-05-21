@@ -13,6 +13,7 @@ import LayoutPage from "./pages/LayoutPage/index.js";
 import ProtectedRoute from "./ProtectedRoute.js";
 import TodoByCategory from "./pages/TodoByCategory/TodoByCategory.jsx";
 import ResetPasswordPage from "./pages/ResetPasswordPage/index.js";
+import WorkspacePage from "./pages/WorkspacePage/index.js";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -26,6 +27,7 @@ const router = createBrowserRouter(
           <Route path="/tasks" element={<AllTaskPage />}></Route>
           <Route path="/nextsevenday" element={<NextSevenDay />}></Route>
           <Route path="/category/:id" element={<TodoByCategory />}></Route>
+          <Route path="/workspace/:id" element={<WorkspacePage/>}></Route>
         </Route>
       </Route>
     </>
