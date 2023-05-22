@@ -20,7 +20,7 @@ const MyDayWelcomeName = ({ username, qoutes, author }) => {
         style={{
           fontSize: "28px",
           fontWeight: "700",
-          color: "#d8d8d8",
+          color: "#767474",
           marginTop: "-3%",
         }}
       >

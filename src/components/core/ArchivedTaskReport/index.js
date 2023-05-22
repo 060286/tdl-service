@@ -42,8 +42,6 @@ export default function ArchivedTaskReport({
       .catch((err) => console.log(err));
   }, []);
 
-  console.log(archivedTaskList);
-
   return (
     <Dialog onClose={onCloseArchivedTaskReportDialog} open={open}>
       <DialogTitle>Archived Report View</DialogTitle>
@@ -86,17 +84,3 @@ export default function ArchivedTaskReport({
     </Dialog>
   );
 }
-
-// eslint-disable-next-line no-lone-blocks
-{/* {[0, 1, 2, 3, 4].map((sectionId) => (
-            <li key={`section-${sectionId}`}>
-              <ul>
-                <ListSubheader>{`I'm sticky ${sectionId}`}</ListSubheader>
-                {[0, 1, 2].map((item) => (
-                  <ListItem key={`item-${sectionId}-${item}`}>
-                    <ListItemText primary={`Item ${item}`} />
-                  </ListItem>
-                ))}
-              </ul>
-            </li>
-          ))} */}

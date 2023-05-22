@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 import { Outlet } from "react-router";
 import { Container, Col, Row } from "react-bootstrap";
@@ -6,6 +6,8 @@ import { Container, Col, Row } from "react-bootstrap";
 import SideBar from "../../components/Sidebar/Sidebar";
 
 import { Link } from "react-router-dom";
+import { getTokenFromLocalStorage } from "../../extensions/tokenExtension";
+import axios from "axios";
 
 const LayoutPage = ({ isShowSideBar }) => {
   return (

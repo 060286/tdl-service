@@ -40,6 +40,11 @@ import axios from "axios";
 import { ExpandMoreSharp } from "@mui/icons-material";
 import ClassIcon from "@mui/icons-material/Class";
 import ArchivedTaskReport from "../core/ArchivedTaskReport";
+import AddWorkSpaceDialog from "../core/AddWorkSpaceDialog";
+import {
+  CREATE_WORKSPACE_URL,
+  PATH_API,
+} from "../../constants/pathApiConstant";
 
 const items = [
   {
@@ -118,14 +123,61 @@ export default function Sidebar() {
       ? userInfo.img
       : // ? userInfo.img
         "https://www.w3schools.com/howto/img_avatar.png";
-  const [categories, setCategories] = useState(undefined);
+  const [categories, setCategories] = useState([]);
   const [isExpanded, setIsExpanded] = useState(false);
   const [openCreateCategoryPopup, setOpenCreateCategoryPopup] = useState(false);
   const [categoryTitle, setCategoryTitle] = useState("");
   const [openArchivedTaskReport, setOpenArchivedTaskReport] = useState(false);
+  const [openWorkspaceDialog, setOpenWorkspaceDialog] = useState(false);
+  const [workspaceTitle, setWorkspaceTitle] = useState("");
+  const [workspaceDesc, setWorkspaceDesc] = useState("");
+  const [workspaces, setWorkspaces] = useState([]);
 
   const handleOpenClick = () => {
     setOpenCreateCategoryPopup(true);
+  };
+
+  const handleOpenWorkspaceClick = () => {
+    setOpenWorkspaceDialog(true);
+  };
+
+  const handleWorkspaceTitleChange = (title) => {
+    setWorkspaceTitle(title);
+  };
+
+  const handleWorkspaceDescChange = (desc) => {
+    setWorkspaceDesc(desc);
+  };
+
+  const handleCreateWorkspace = async (e) => {
+    // TODO Create Workspace
+    const url = `${PATH_API}${CREATE_WORKSPACE_URL}`;
+    const token = getTokenFromLocalStorage();
+
+    const response = await axios({
+      method: "POST",
+      url: url,
+      data: {
+        name: workspaceTitle,
+        description: workspaceDesc,
+      },
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    // Update Workspaces
+    const newWorkspaces = [...workspaces, response.data.data];
+
+    setWorkspaces(newWorkspaces);
+
+    handleCloseWorkspaceDialog();
+  };
+
+  console.log({ workspaces });
+
+  const handleCloseWorkspaceDialog = () => {
+    setOpenWorkspaceDialog(false);
   };
 
   const onOpenArchivedTaskReportDialog = () => {
@@ -158,6 +210,53 @@ export default function Sidebar() {
     navigate(`/category/${id}`);
   };
 
+  const onNavigateWorkspace = (id) => {
+    navigate(`/workspace/${id}`);
+  };
+
+  const getCategories = async () => {
+    const url = "https://localhost:44334/api/v1/todos/todo-categories";
+    const token = getTokenFromLocalStorage();
+
+    axios({
+      method: "GET",
+      url: url,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((res) => {
+        if (res?.data?.data != null) {
+          setCategories(res.data.data);
+          setIsExpanded(true);
+        }
+      })
+      .catch((err) => console.log(err));
+  };
+
+  const getWorkspaces = () => {
+    const token = getTokenFromLocalStorage();
+    const url = "https://localhost:44334/api/v1/workspace-page/workspaces";
+
+    axios({
+      method: "GET",
+      url: url,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((res) => {
+        if (res?.data?.data != null) {
+          console.log("get workspace", res.data.data);
+
+          // setWorkspaces(res.data.data);
+          setWorkspaces(res.data.data);
+          console.log(res.data.data);
+        }
+      })
+      .catch((err) => console.log(err));
+  };
+
   const handleSaveCategoryTitle = async () => {
     // Close popup
     setOpenCreateCategoryPopup(false);
@@ -167,7 +266,7 @@ export default function Sidebar() {
 
     const response = await axios({
       url: url,
-      method: "post",
+      method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -182,10 +281,6 @@ export default function Sidebar() {
       getCategories();
     }
   };
-
-  useEffect(() => {
-    getCategories();
-  }, []);
 
   useEffect(() => {
     const url = "https://localhost:44334/api/v1/user/analytic-todo";
@@ -206,27 +301,7 @@ export default function Sidebar() {
     };
 
     getDataAnalytic();
-  });
-
-  const getCategories = () => {
-    const url = "https://localhost:44334/api/v1/todos/todo-categories";
-    const token = getTokenFromLocalStorage();
-
-    axios({
-      method: "GET",
-      url: url,
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-      .then((res) => {
-        if (res?.data?.data != null) {
-          setCategories(res.data.data);
-          setIsExpanded(true);
-        }
-      })
-      .catch((err) => console.log(err));
-  };
+  }, []);
 
   useEffect(() => {
     if (userInfo.status === VARIABLE_STATUS.IDLE) {
@@ -235,7 +310,12 @@ export default function Sidebar() {
       // getCategory();
       dispatch(getUserInfo(token));
     }
-  }, [dispatch, userInfo.status]);
+  }, [userInfo.status]);
+
+  useEffect(() => {
+    getCategories();
+    getWorkspaces();
+  }, []);
 
   return (
     <Box className={classes.sideBar}>
@@ -324,14 +404,16 @@ export default function Sidebar() {
             );
           })}
         </List>
-        <Button outlined onClick={handleOpenClick}>
+        <Button outlined="true" onClick={handleOpenClick}>
           Create Category
         </Button>
         <Accordion expanded={isExpanded}>
           <AccordionSummary
             id="panel-categorie"
             aria-controls="panel-categories"
-            expandIcon={<ExpandMoreSharp />}
+            expandIcon={
+              <ExpandMoreSharp onClick={() => setIsExpanded(!isExpanded)} />
+            }
           >
             <Typography>My Lists</Typography>
           </AccordionSummary>
@@ -356,6 +438,27 @@ export default function Sidebar() {
             })}
           </AccordionDetails>
         </Accordion>
+        <Button outlined="true" onClick={handleOpenWorkspaceClick}>
+          Create Workspace
+        </Button>
+        <>
+          {workspaces.map((workspace) => {
+            return (
+              <ListItem
+                key={workspace.name}
+                disablePadding
+                onClick={() => onNavigateWorkspace(workspace.id)}
+              >
+                <ListItemButton>
+                  <ListItemIcon>
+                    <Icon />
+                  </ListItemIcon>
+                  <ListItemText primary={workspace.name} />
+                </ListItemButton>
+              </ListItem>
+            );
+          })}
+        </>
       </Drawer>
 
       {/* Create Category Title  */}
@@ -389,6 +492,15 @@ export default function Sidebar() {
         open={openArchivedTaskReport}
         onCloseArchivedTaskReportDialog={onCloseArchivedTaskReportDialog}
       />
+      {openWorkspaceDialog && (
+        <AddWorkSpaceDialog
+          openWorkspaceDialog={openWorkspaceDialog}
+          handleCloseWorkspaceDialog={handleCloseWorkspaceDialog}
+          handleCreateWorkspace={handleCreateWorkspace}
+          handleWorkspaceDescChange={handleWorkspaceDescChange}
+          handleWorkspaceTitleChange={handleWorkspaceTitleChange}
+        />
+      )}
     </Box>
   );
 }
