@@ -14,13 +14,12 @@ import {
   AccordionSummary,
   AccordionDetails,
   Icon,
-  Tooltip,
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogContentText,
   TextField,
   DialogActions,
+  Badge,
 } from "@mui/material";
 import SettingsIcon from "@mui/icons-material/Settings";
 import HomeIcon from "@mui/icons-material/Home";
@@ -45,6 +44,13 @@ import {
   CREATE_WORKSPACE_URL,
   PATH_API,
 } from "../../constants/pathApiConstant";
+
+import NotificationsIcon from "@mui/icons-material/Notifications";
+// import MessageComponent from "../MessageComponent";
+import NotificationDialog from "../core/NotificationDialog";
+import Snackbar from "@mui/material/Snackbar";
+import MuiAlert from "@mui/material/Alert";
+import { HubConnectionBuilder } from "@microsoft/signalr";
 
 const items = [
   {
@@ -112,7 +118,9 @@ const useStyle = makeStyles(() => {
     },
   };
 });
+
 const loginHref = "/login";
+
 export default function Sidebar() {
   const classes = useStyle();
   const navigate = useNavigate();
@@ -132,6 +140,67 @@ export default function Sidebar() {
   const [workspaceTitle, setWorkspaceTitle] = useState("");
   const [workspaceDesc, setWorkspaceDesc] = useState("");
   const [workspaces, setWorkspaces] = useState([]);
+  const [notifications, setNotifications] = useState([]);
+  const [notificationNumber, setNotificationNumber] = useState(0);
+  const [openNotificationDialog, setOpenNotificationDialog] = useState(false);
+  const [openAddUserSnackBar, setOpenAddUserSnackBar] = useState(false);
+  const [message, setMessage] = useState("");
+
+  const connection = new HubConnectionBuilder()
+    .withUrl(
+      `https://localhost:44334/hubs/notifications?userName=${userInfo.userName}`
+    ) // Replace with your API URL
+    .withAutomaticReconnect()
+    .build();
+
+  useEffect(() => {
+    connection.start().catch((error) => console.error(error));
+
+    connection.on("SendNotification", (message) => {
+      console.log({ message });
+
+      if (message.type === "AddUserWorkspace") {
+        setMessage(message.content);
+        setOpenAddUserSnackBar(true);
+
+        getWorkspaces();
+      }
+    });
+
+    connection.on("Notify", (message) => {
+      console.log({ message, method: "Notify" });
+    });
+
+    connection.onreconnected(() => {
+      console.log("Reconnected to SignalR hub.");
+
+      // setConnectionId(connection.connectionId);
+    });
+
+    connection.onclose(() => {
+      console.log("SignalR connection closed.");
+    });
+
+    console.log(connection._connectionState);
+
+    return () => {
+      connection.stop();
+    };
+  }, []);
+
+  console.log({ connectionState: connection._connectionState });
+
+  const handleCloseSnackBar = () => {
+    setOpenAddUserSnackBar(false);
+  };
+
+  const onOpenNotificationDialog = () => {
+    setOpenNotificationDialog(true);
+  };
+
+  const onCloseNotificationDialog = () => {
+    setOpenNotificationDialog(false);
+  };
 
   const handleOpenClick = () => {
     setOpenCreateCategoryPopup(true);
@@ -173,8 +242,6 @@ export default function Sidebar() {
 
     handleCloseWorkspaceDialog();
   };
-
-  console.log({ workspaces });
 
   const handleCloseWorkspaceDialog = () => {
     setOpenWorkspaceDialog(false);
@@ -234,6 +301,22 @@ export default function Sidebar() {
       .catch((err) => console.log(err));
   };
 
+  const getNotifications = async () => {
+    const token = getTokenFromLocalStorage();
+    const url = "https://localhost:44334/api/v1/user/notifications";
+
+    const response = await axios({
+      method: "GET",
+      url: url,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    setNotifications(response?.data?.data);
+    setNotificationNumber(response?.data.data.length);
+  };
+
   const getWorkspaces = () => {
     const token = getTokenFromLocalStorage();
     const url = "https://localhost:44334/api/v1/workspace-page/workspaces";
@@ -247,11 +330,7 @@ export default function Sidebar() {
     })
       .then((res) => {
         if (res?.data?.data != null) {
-          console.log("get workspace", res.data.data);
-
-          // setWorkspaces(res.data.data);
           setWorkspaces(res.data.data);
-          console.log(res.data.data);
         }
       })
       .catch((err) => console.log(err));
@@ -315,16 +394,24 @@ export default function Sidebar() {
   useEffect(() => {
     getCategories();
     getWorkspaces();
+    getNotifications();
   }, []);
 
   return (
     <Box className={classes.sideBar}>
+      {/* <MessageComponent email={userInfo.email} /> */}
       <Box disablePadding className={classes.listItemAvatar}>
         <Box className={classes.temp}>
           <Avatar className={{ width: 42, height: 42 }} src={img} />
           <Typography className={classes.displayName}>
             {userInfo.fullName}
           </Typography>
+          <Badge badgeContent={notificationNumber} color="primary">
+            <NotificationsIcon
+              onClick={() => onOpenNotificationDialog()}
+              sx={{ marginLeft: "10px", cursor: "pointer" }}
+            />
+          </Badge>
         </Box>
         <IconButton
           color="default"
@@ -501,6 +588,24 @@ export default function Sidebar() {
           handleWorkspaceTitleChange={handleWorkspaceTitleChange}
         />
       )}
+
+      <NotificationDialog
+        openNotificationPopup={openNotificationDialog}
+        onCloseNotificationDialog={onCloseNotificationDialog}
+        notifications={notifications}
+      />
+
+      <Snackbar
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+        open={openAddUserSnackBar}
+        onClose={handleCloseSnackBar}
+        key={"bottomright"}
+        // autoHideDuration={3000}
+      >
+        <MuiAlert elevation={6} variant="filled" severity="success">
+          {message}
+        </MuiAlert>
+      </Snackbar>
     </Box>
   );
 }
