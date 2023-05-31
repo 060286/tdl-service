@@ -79,6 +79,7 @@ import { RadioButtonChecked } from "@mui/icons-material";
 import { searchTodoByKeyword } from "../../adapters/myDayPageAdapter";
 import { searchTodoByKeywordSlice } from "../../slices/todoSlice";
 import { useNavigate } from "react-router";
+import ChatComponent from "../../components/ChatComponent";
 
 const useStyle = makeStyles(() => ({
   list: {
