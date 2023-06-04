@@ -44,4 +44,47 @@ const addUserIntoWorkspaceAdapter = async (email, id) => {
   }
 };
 
-export { getTodoInWorkspaceById, addUserIntoWorkspaceAdapter };
+const getUserListAdapter = async (id) => {
+  try {
+    const url = `https://localhost:44334/api/v1/workspace-page/${id}/user-in-workspace`;
+    const token = getTokenFromLocalStorage();
+
+    const response = await axios({
+      method: "GET",
+      url: url,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    return response;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const searchUserAdapter = async (keyword) => {
+  try {
+    const url = `https://localhost:44334/api/v1/user/search-user?keyword=${keyword}`;
+    const token = getTokenFromLocalStorage();
+
+    const users = await axios({
+      method: "GET",
+      url: url,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    return users;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+export {
+  getTodoInWorkspaceById,
+  addUserIntoWorkspaceAdapter,
+  getUserListAdapter,
+  searchUserAdapter,
+};

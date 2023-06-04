@@ -31,12 +31,24 @@ import {
   updateTodoTitle,
 } from "../../adapters/allMyTaskAdapter";
 
-import { archiveTodoById } from "../../adapters/taskAdapter";
-import { getTaskById } from "../../adapters/taskAdapter";
+import {
+  archiveTodoById,
+  getTagListAdapter,
+  updateRemindAtAdapter,
+} from "../../adapters/taskAdapter";
+import { getTaskById, createSubTaskInTodo } from "../../adapters/taskAdapter";
 import {
   addUserIntoWorkspaceAdapter,
   getTodoInWorkspaceById,
+  getUserListAdapter,
+  searchUserAdapter,
 } from "../../adapters/workspaceAdapter";
+
+import {
+  updateSubTaskStatusAdapter,
+  removeSubTaskByIdAdapter,
+} from "../../adapters/myDayPageAdapter";
+import { updateTodoTagAdapter } from "../../adapters/tagAdapter";
 
 const useStyle = makeStyles(() => ({
   listItem: {
@@ -148,22 +160,34 @@ function WorkspacePage() {
   const [state, setState] = useState(null);
   const [selectedTodo, setSelectedTodo] = useState(undefined);
   const [openTodoDialog, setOpenTodoDialog] = useState(false);
+  const [openTag, setOpenTag] = useState(false);
+  const [selectedTag, setSelectedTag] = useState(undefined);
+  const [selectedTagDetail, setSelectedTagDetail] = useState(undefined);
+  const [openRemindMe, setOpenRemindMe] = useState(false);
 
   const handleCloseSearchDialog = () => {
     setOpenSearchUser(false);
   };
 
-  const searchUsers = async (keyword) => {
-    const url = `https://localhost:44334/api/v1/user/search-user?keyword=${keyword}`;
-    const token = getTokenFromLocalStorage();
+  const onOpenRemindMe = () => {
+    setOpenRemindMe(true);
+  };
 
-    const users = await axios({
-      method: "GET",
-      url: url,
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+  const onCloseRemindMe = () => {
+    setOpenRemindMe(false);
+  };
+
+  const onUpdateRemindAtHandler = async (data) => {
+    console.log(data);
+
+    await updateRemindAtAdapter({
+      todoId: data.todoId,
+      remindAt: data.remindAt,
     });
+  };
+
+  const searchUsers = async (keyword) => {
+    const users = await searchUserAdapter(keyword);
 
     const userData = users.data.data;
     const mapptedSuggestionUser = userData.map((user) => ({
@@ -175,16 +199,7 @@ function WorkspacePage() {
   };
 
   const getUserList = async () => {
-    const url = `https://localhost:44334/api/v1/workspace-page/${id}/user-in-workspace`;
-    const token = getTokenFromLocalStorage();
-
-    const response = await axios({
-      method: "GET",
-      url: url,
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const response = await getUserListAdapter(id);
 
     setGroupName(response.data.data.name);
     setUsers(response.data.data.users);
@@ -226,7 +241,16 @@ function WorkspacePage() {
     if (response) {
       setSelectedTodo(response.data);
       setOpenTodoDialog(true);
+      setSelectedTagDetail(response.data.tag);
     }
+  };
+
+  const onTagItemClick = async (tag, todoId) => {
+    setOpenTag(false);
+    setSelectedTagDetail(tag);
+
+    const data = { ...tag, todoId };
+    await updateTodoTagAdapter(data);
   };
 
   const handleArchivedTodo = async ({ id }) => {
@@ -303,6 +327,49 @@ function WorkspacePage() {
     }
   };
 
+  const onDeleteSubTask = async (subTask) => {
+    // TODO: send request to be to delete subtask
+    const response = await removeSubTaskByIdAdapter(subTask.id);
+
+    if (response) {
+      // * Remove from state
+      const newSelectedTodo = selectedTodo;
+      const newSubTask = newSelectedTodo.subTasks.filter((el) => {
+        return el.id !== subTask.id;
+      });
+
+      const result = { ...newSelectedTodo, subTasks: newSubTask };
+      setSelectedTodo(result);
+    }
+
+    //const data = { ...subTask, todoId: selectedTodo.id };
+  };
+
+  const handleCreateSubtask = async (e, id, subtask) => {
+    if (e.key === "Enter") {
+      const name = e.target.value;
+
+      console.log({ name, id });
+      const response = await createSubTaskInTodo({ name, todoId: id });
+
+      console.log({ response });
+
+      // update selectedTodo
+      let oldSubTasks = selectedTodo.subTasks;
+      const st = {
+        id: response.data.data.id,
+        name: response.data.data.title,
+        isCompleted: false,
+      };
+
+      const result = [...oldSubTasks, st];
+      const newSelectedTodo = { ...selectedTodo, subTasks: result };
+
+      setSelectedTodo(newSelectedTodo);
+      e.target.value = "";
+    }
+  };
+
   // ? Drag Drop Container
 
   const getListStyle = (isDraggingOver) => ({
@@ -327,6 +394,27 @@ function WorkspacePage() {
       backgroundColor: "#FFF",
       ...draggableStyle,
     };
+  };
+
+  const onSubTaskChange = async (e, subtask, todoId) => {
+    const title = e.target.value;
+    const { id } = subtask;
+  };
+
+  const onOpenSelectedTag = async () => {
+    const response = await getTagListAdapter();
+
+    setSelectedTag(response?.data?.data);
+    setOpenTag(true);
+  };
+
+  const onCloseSelectedTag = () => {
+    setSelectedTag(undefined);
+    setOpenTag(false);
+  };
+
+  const onSubTaskIsCompletedChange = async (subtask, e) => {
+    await updateSubTaskStatusAdapter(subtask.id);
   };
 
   const onCreateTodo = async ({
@@ -533,20 +621,20 @@ function WorkspacePage() {
             handleArchivedTodo={handleArchivedTodo}
             onTodoTitleChange={onTodoTitleChange}
             onTodoDescriptionChange={onTodoDescriptionChange}
-            // onSubTaskIsCompletedChange={onSubTaskIsCompletedChange}
-            // onSubTaskChange={onSubTaskChange}
-            // handleCreateSubtask={handleCreateSubtask}
-            // onDeleteSubTask={onDeleteSubTask}
-            // onOpenSelectedTag={onOpenSelectedTag}
-            // onCloseSelectedTag={onCloseSelectedTag}
-            // openTag={openTag}
-            // selectedTag={selectedTag}
-            // selectedTagDetail={selectedTagDetail}
-            // onTagItemClick={onTagItemClick}
-            // onOpenRemindMe={onOpenRemindMe}
-            // openRemindMe={openRemindMe}
-            // onUpdateRemindAtHandler={onUpdateRemindAtHandler}
-            // onCloseRemindMe={onCloseRemindMe}
+            handleCreateSubtask={handleCreateSubtask}
+            onDeleteSubTask={onDeleteSubTask}
+            onSubTaskIsCompletedChange={onSubTaskIsCompletedChange}
+            onSubTaskChange={onSubTaskChange}
+            onOpenSelectedTag={onOpenSelectedTag}
+            openTag={openTag}
+            onCloseSelectedTag={onCloseSelectedTag}
+            selectedTag={selectedTag}
+            selectedTagDetail={selectedTagDetail}
+            onTagItemClick={onTagItemClick}
+            onOpenRemindMe={onOpenRemindMe}
+            openRemindMe={openRemindMe}
+            onCloseRemindMe={onCloseRemindMe}
+            onUpdateRemindAtHandler={onUpdateRemindAtHandler}
           />
         </Dialog>
       )}
