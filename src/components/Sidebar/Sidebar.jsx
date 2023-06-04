@@ -146,49 +146,47 @@ export default function Sidebar() {
   const [openAddUserSnackBar, setOpenAddUserSnackBar] = useState(false);
   const [message, setMessage] = useState("");
 
-  const connection = new HubConnectionBuilder()
-    .withUrl(
-      `https://localhost:44334/hubs/notifications?userName=${userInfo.userName}`
-    ) // Replace with your API URL
-    .withAutomaticReconnect()
-    .build();
-
   useEffect(() => {
-    connection.start().catch((error) => console.error(error));
+    if (userInfo.userName) {
+      const connection = new HubConnectionBuilder()
+        .withUrl(
+          `https://localhost:44334/hubs/notifications?userName=${userInfo.userName}`
+        ) // Replace with your API URL
+        .withAutomaticReconnect()
+        .build();
 
-    connection.on("SendNotification", (message) => {
-      console.log({ message });
+      connection.start().catch((error) => console.error(error));
 
-      if (message.type === "AddUserWorkspace") {
-        setMessage(message.content);
-        setOpenAddUserSnackBar(true);
+      connection.on("SendNotification", (message) => {
+        console.log({ message });
 
-        getWorkspaces();
-      }
-    });
+        if (message.type === "AddUserWorkspace") {
+          setMessage(message.content);
+          setOpenAddUserSnackBar(true);
 
-    connection.on("Notify", (message) => {
-      console.log({ message, method: "Notify" });
-    });
+          getWorkspaces();
+        }
+      });
 
-    connection.onreconnected(() => {
-      console.log("Reconnected to SignalR hub.");
+      connection.on("Notify", (message) => {
+        console.log({ message, method: "Notify" });
+      });
 
-      // setConnectionId(connection.connectionId);
-    });
+      connection.onreconnected(() => {
+        console.log("Reconnected to SignalR hub.");
 
-    connection.onclose(() => {
-      console.log("SignalR connection closed.");
-    });
+        // setConnectionId(connection.connectionId);
+      });
 
-    console.log(connection._connectionState);
+      connection.onclose(() => {
+        console.log("SignalR connection closed.");
+      });
 
-    return () => {
-      connection.stop();
-    };
-  }, []);
-
-  console.log({ connectionState: connection._connectionState });
+      return () => {
+        connection.stop();
+      };
+    }
+  }, [userInfo]);
 
   const handleCloseSnackBar = () => {
     setOpenAddUserSnackBar(false);

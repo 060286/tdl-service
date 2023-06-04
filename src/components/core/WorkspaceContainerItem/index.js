@@ -103,7 +103,7 @@ function WorkspaceContainerItem({
                 <Draggable key={item.id} draggableId={item.id} index={index}>
                   {(provided, snapshot) => (
                     <Box
-                      //   onClick={handleClickOpen({ todo: item })}
+                      onClick={() => handleClickOpen({ todo: item })}
                       ref={provided.innerRef}
                       {...provided.draggableProps}
                       {...provided.dragHandleProps}
