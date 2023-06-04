@@ -1,12 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Box, Typography } from "@mui/material";
 import { useParams } from "react-router";
 import { makeStyles } from "@mui/styles/";
-
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import { getTokenFromLocalStorage } from "../../extensions/tokenExtension";
-
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
+import TodoDetail from "../../components/TodoDetail/TodoDetail";
 import { HubConnectionBuilder } from "@microsoft/signalr";
 
 import {
@@ -20,11 +19,24 @@ import {
   TextField,
   Autocomplete,
 } from "@mui/material";
-
+import { format, addDays } from "date-fns";
+import _ from "lodash";
 import axios from "axios";
 import "./style.css";
 import WorkspaceContainerItem from "../../components/core/WorkspaceContainerItem";
 import { DragDropContext } from "react-beautiful-dnd";
+
+import {
+  updateTodoDescription,
+  updateTodoTitle,
+} from "../../adapters/allMyTaskAdapter";
+
+import { archiveTodoById } from "../../adapters/taskAdapter";
+import { getTaskById } from "../../adapters/taskAdapter";
+import {
+  addUserIntoWorkspaceAdapter,
+  getTodoInWorkspaceById,
+} from "../../adapters/workspaceAdapter";
 
 const useStyle = makeStyles(() => ({
   listItem: {
@@ -134,6 +146,8 @@ function WorkspacePage() {
   const [isConnected, setIsConnected] = useState(false);
   const [connectionId, setConnectionId] = useState(null);
   const [state, setState] = useState(null);
+  const [selectedTodo, setSelectedTodo] = useState(undefined);
+  const [openTodoDialog, setOpenTodoDialog] = useState(false);
 
   const handleCloseSearchDialog = () => {
     setOpenSearchUser(false);
@@ -178,56 +192,116 @@ function WorkspacePage() {
 
   const handleAddUserToWorkspace = async (e) => {
     if (e.key === "Enter") {
-      const email = e.target.value;
-      const url = `https://localhost:44334/api/v1/workspace-page/add-user-workspace`;
-      const token = getTokenFromLocalStorage();
+      const response = addUserIntoWorkspaceAdapter(e.target.value, id);
 
-      const response = await axios({
-        url: url,
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        data: {
-          email: email,
-          workspaceId: id,
-        },
-      });
-
-      console.log("handleAddUserToWorkspace", response);
-
-      setOpenSearchUser(false);
+      if (response) {
+        setOpenSearchUser(false);
+      }
     }
   };
 
   const getTodoInWorkspace = async () => {
-    const token = getTokenFromLocalStorage();
-    const url = `https://localhost:44334/api/v1/workspace-page/${id}/todos`;
+    const response = await getTodoInWorkspaceById(id);
 
-    const response = await axios({
-      method: "GET",
-      url: url,
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    if (response) {
+      const newState = [
+        response.data.data.todoList || [],
+        response.data.data.inProgressList || [],
+        response.data.data.inReviewList || [],
+        response.data.data.completedList || [],
+      ];
 
-    const newState = [
-      response.data.data.todoList || [],
-      response.data.data.inProgressList || [],
-      response.data.data.inReviewList || [],
-      response.data.data.completedList || [],
-    ];
-
-    console.log({ newState });
-
-    setState(newState);
+      setState(newState);
+    }
   };
 
-  useEffect(() => {
-    getUserList();
-    getTodoInWorkspace();
-  }, [id]);
+  const handleClose = () => {
+    setSelectedTodo(undefined);
+    setOpenTodoDialog(false);
+  };
+
+  const handleClickOpen = async ({ todo }) => {
+    const response = await getTaskById(todo.id);
+
+    if (response) {
+      setSelectedTodo(response.data);
+      setOpenTodoDialog(true);
+    }
+  };
+
+  const handleArchivedTodo = async ({ id }) => {
+    const response = await archiveTodoById(id);
+
+    if (response) {
+      const newState = state.map((array) => {
+        return array.filter((item) => item.id !== id);
+      });
+
+      setState(newState);
+
+      setOpenTodoDialog(false);
+      setSelectedTodo(undefined);
+    }
+  };
+
+  // const debouncedTitle = useRef(
+  //   _.debounce(({ id, title, state }) => {
+  //     // Do not do any things.
+  //   }, 500)
+  // ).current;
+
+  const onTodoTitleChange = async ({ todo, e }) => {
+    setSelectedTodo((preSelectedTodo) => ({
+      ...preSelectedTodo,
+      title: e.target.value,
+    }));
+
+    // debouncedTitle({ id: todo.id, title: e.target.value });
+    const response = await updateTodoTitle({
+      id: todo.id,
+      title: e.target.value,
+    });
+
+    if (response) {
+      const updatedArray = state.map((array) => {
+        return array.map((item) => {
+          if (item.id === todo.id) {
+            return { ...item, title: e.target.value };
+          }
+          return item;
+        });
+      });
+
+      setState(updatedArray);
+    }
+  };
+
+  // ? Update todo description
+
+  const onTodoDescriptionChange = async ({ todo, e }) => {
+    setSelectedTodo((preSelectedTodo) => ({
+      ...preSelectedTodo,
+      description: e.target.value,
+    }));
+
+    const response = await updateTodoDescription({
+      id: todo.id,
+      description: e.target.value,
+    });
+
+    if (response.statusCode === 200) {
+      const updatedArray = state.map((array) => {
+        return array.map((item) => {
+          if (item.id === id) {
+            return { ...item, description: e.target.value };
+          }
+          return item;
+        });
+      });
+
+      setState(updatedArray);
+    }
+  };
 
   // ? Drag Drop Container
 
@@ -275,6 +349,7 @@ function WorkspacePage() {
         sectionName: sectionName,
         title: title,
         workspaceId: id,
+        position,
       },
     });
     setState((prevState) => {
@@ -284,6 +359,84 @@ function WorkspacePage() {
       return updatedArray;
     });
   };
+
+  async function onDragEnd(result) {
+    const { source, destination, draggableId } = result;
+
+    // dropped outside the list
+    if (!destination) {
+      return;
+    }
+    const sInd = +source.droppableId;
+    const dInd = +destination.droppableId;
+    const isNotRequest =
+      source.index === destination.index &&
+      source.droppableId === destination.droppableId;
+
+    if (!isNotRequest) {
+      axios({
+        method: "put",
+        url: "https://localhost:44334/api/v1/workspace-page/drag-drop-todo-workspace",
+        data: {
+          todoId: draggableId,
+          priority: destination.index,
+          droppableId: destination.droppableId,
+        },
+        headers: {
+          Authorization: `Bearer ${getTokenFromLocalStorage()}`,
+        },
+      });
+    }
+
+    if (sInd === dInd) {
+      // TODO: send request to be to update priority of todo from source.index to destination.index
+      const items = reorder(state[sInd], source.index, destination.index);
+      const newState = [...state];
+      newState[sInd] = items;
+      setState(newState);
+    } else {
+      // TODO: send request to be to update column and priority of todo
+      const result = move(state[sInd], state[dInd], source, destination);
+      const newState = [...state];
+      newState[sInd] = result[sInd];
+      newState[dInd] = result[dInd];
+
+      setState(newState);
+    }
+  }
+
+  const reorder = (list, startIndex, endIndex) => {
+    const result = Array.from(list);
+    const [removed] = result.splice(startIndex, 1);
+    result.splice(endIndex, 0, removed);
+
+    return result;
+  };
+
+  /**
+   * Moves an item from one list to another list.
+   */
+  const move = (source, destination, droppableSource, droppableDestination) => {
+    const sourceClone = Array.from(source);
+    const destClone = Array.from(destination);
+    const [removed] = sourceClone.splice(droppableSource.index, 1);
+    // const sourceClone = Array.from(source);
+    // const destClone = Array.from(destination);
+    // const [removed] = sourceClone.splice(droppableSource.index, 1);
+
+    destClone.splice(droppableDestination.index, 0, removed);
+
+    const result = {};
+    result[droppableSource.droppableId] = sourceClone;
+    result[droppableDestination.droppableId] = destClone;
+
+    return result;
+  };
+
+  useEffect(() => {
+    getUserList();
+    getTodoInWorkspace();
+  }, [id]);
 
   return (
     <Box className={classes.container}>
@@ -323,12 +476,12 @@ function WorkspacePage() {
       </Box>
 
       <Box className={classes.workspaceContainer}>
-        <DragDropContext>
+        <DragDropContext onDragEnd={onDragEnd}>
           {state?.map((el, ind) => (
             <WorkspaceContainerItem
               ind={ind}
               el={el}
-              // handleClickOpen={handleClickOpen}
+              handleClickOpen={handleClickOpen}
               getItemStyle={getItemStyle}
               getListStyle={getListStyle}
               onCreateTodo={onCreateTodo}
@@ -364,6 +517,39 @@ function WorkspacePage() {
           ></Autocomplete>
         </DialogContent>
       </Dialog>
+
+      {selectedTodo && (
+        <Dialog
+          onClose={handleClose}
+          open={openTodoDialog}
+          fullWidth={true}
+          maxWidth="md"
+          className={classes.dialogTodo}
+        >
+          <TodoDetail
+            selectedTodo={selectedTodo}
+            handleClose={handleClose}
+            setSelectedTodo={setSelectedTodo}
+            handleArchivedTodo={handleArchivedTodo}
+            onTodoTitleChange={onTodoTitleChange}
+            onTodoDescriptionChange={onTodoDescriptionChange}
+            // onSubTaskIsCompletedChange={onSubTaskIsCompletedChange}
+            // onSubTaskChange={onSubTaskChange}
+            // handleCreateSubtask={handleCreateSubtask}
+            // onDeleteSubTask={onDeleteSubTask}
+            // onOpenSelectedTag={onOpenSelectedTag}
+            // onCloseSelectedTag={onCloseSelectedTag}
+            // openTag={openTag}
+            // selectedTag={selectedTag}
+            // selectedTagDetail={selectedTagDetail}
+            // onTagItemClick={onTagItemClick}
+            // onOpenRemindMe={onOpenRemindMe}
+            // openRemindMe={openRemindMe}
+            // onUpdateRemindAtHandler={onUpdateRemindAtHandler}
+            // onCloseRemindMe={onCloseRemindMe}
+          />
+        </Dialog>
+      )}
     </Box>
   );
 }
