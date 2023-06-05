@@ -39,9 +39,11 @@ import {
 import { getTaskById, createSubTaskInTodo } from "../../adapters/taskAdapter";
 import {
   addUserIntoWorkspaceAdapter,
+  assignUserInWorkspace,
   getTodoInWorkspaceById,
   getUserListAdapter,
   searchUserAdapter,
+  searchUserInWorkspaceAdapter,
 } from "../../adapters/workspaceAdapter";
 
 import {
@@ -164,6 +166,8 @@ function WorkspacePage() {
   const [selectedTag, setSelectedTag] = useState(undefined);
   const [selectedTagDetail, setSelectedTagDetail] = useState(undefined);
   const [openRemindMe, setOpenRemindMe] = useState(false);
+  const [openSearchUserWorkspace, setOpenSearchUserWorkspace] = useState(false);
+  const [suggestionUserList, setSuggestionUserList] = useState([]);
 
   const handleCloseSearchDialog = () => {
     setOpenSearchUser(false);
@@ -175,6 +179,33 @@ function WorkspacePage() {
 
   const onCloseRemindMe = () => {
     setOpenRemindMe(false);
+  };
+
+  const onOpenSearchUserWorkspace = () => {
+    setOpenSearchUserWorkspace(true);
+  };
+
+  const onGetSuggestionUserList = async (keyword) => {
+    const response = await searchUserInWorkspaceAdapter(id, keyword);
+
+    return response;
+  };
+
+  const onAssignUserWorkspace = async (email, todoId) => {
+    const response = await assignUserInWorkspace(email, todoId);
+
+    const newSelectedTodo = {
+      selectedTodo,
+      assignUserInfo: response.data.data,
+    };
+
+    setSelectedTodo(newSelectedTodo);
+
+    return response;
+  };
+
+  const onCloseSearchUserWorkspace = () => {
+    setOpenSearchUserWorkspace(false);
   };
 
   const onUpdateRemindAtHandler = async (data) => {
@@ -635,6 +666,13 @@ function WorkspacePage() {
             openRemindMe={openRemindMe}
             onCloseRemindMe={onCloseRemindMe}
             onUpdateRemindAtHandler={onUpdateRemindAtHandler}
+            isWorkspace={true}
+            onOpenSearchUserWorkspace={onOpenSearchUserWorkspace}
+            openSearchUserWorkspace={openSearchUserWorkspace}
+            onCloseSearchUserWorkspace={onCloseSearchUserWorkspace}
+            suggestionUserList={suggestionUserList}
+            onGetSuggestionUserList={onGetSuggestionUserList}
+            onAssignUserWorkspace={onAssignUserWorkspace}
           />
         </Dialog>
       )}
