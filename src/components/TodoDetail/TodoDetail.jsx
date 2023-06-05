@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Button,
   Dialog,
@@ -11,10 +11,18 @@ import {
   ListItemText,
   Radio,
   Typography,
+  Autocomplete,
+  TextField,
+  Slide,
+  DialogContent,
+  Snackbar,
+  Alert,
+  Avatar,
 } from "@mui/material";
 import { Box } from "@mui/system";
 import { makeStyles } from "@mui/styles/";
 import DeleteIcon from "@mui/icons-material/Delete";
+import AssignmentIndIcon from "@mui/icons-material/AssignmentInd";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CloseIcon from "@mui/icons-material/Close";
 
@@ -30,6 +38,8 @@ import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { StaticDatePicker } from "@mui/x-date-pickers";
 import CategoryIcon from "@mui/icons-material/Category";
+import finalPropsSelectorFactory from "react-redux/es/connect/selectorFactory";
+
 const useStyle = makeStyles(() => ({
   list: {
     overflowY: "scroll",
@@ -142,6 +152,7 @@ const useStyle = makeStyles(() => ({
   },
   dialogButton: {
     borderRadius: "8px",
+    marginLeft: "10px",
   },
   todoDialogContainer: {
     display: "flex",
@@ -154,6 +165,10 @@ const useStyle = makeStyles(() => ({
     fontSize: "14px",
   },
 }));
+
+const Transition = React.forwardRef(function Transition(props, ref) {
+  return <Slide direction="right" ref={ref} {...props} />;
+});
 
 export default function TodoDetail({
   selectedTodo,
@@ -177,15 +192,56 @@ export default function TodoDetail({
   openRemindMe,
   onUpdateRemindAtHandler,
   onCloseRemindMe,
+  isWorkspace,
+  openSearchUserWorkspace,
+  suggestionUserList,
+  onOpenSearchUserWorkspace,
+  onCloseSearchUserWorkspace,
+  onGetSuggestionUserList,
+  onAssignUserWorkspace,
 }) {
   const [titleHelperText, setTitleHelperText] = useState("");
   const [selectedRemindAt, setSelectedRemindAt] = useState(null);
+  const [suggestionUser, setSuggestionUser] = useState([]);
+  const [openSnackbar, setOpenSnackbar] = useState(false);
 
   useEffect(() => {
     if (selectedTodo) {
       setSelectedRemindAt(selectedTodo.remindedAt);
     }
   }, [selectedTodo]);
+
+  const handleOpenSearchUserWorkspace = () => {
+    setSuggestionUser([]);
+    onOpenSearchUserWorkspace();
+  };
+
+  const handleCloseSearchUserWorkspace = () => {
+    setSuggestionUser([]);
+    onCloseSearchUserWorkspace();
+  };
+
+  const handleAssignUserWorkspace = async (e) => {
+    if (e.key === "Enter") {
+      const email = e.target.value;
+
+      const response = await onAssignUserWorkspace(email, selectedTodo.id);
+
+      if (response) {
+        setOpenSnackbar(true);
+        handleCloseSearchUserWorkspace();
+      }
+
+      e.target.value = "";
+    }
+  };
+
+  const handleSearchUserWorkspace = async (e) => {
+    const keyword = e.target.value;
+
+    const response = await onGetSuggestionUserList(keyword);
+    setSuggestionUser(response.data.data);
+  };
 
   const isValidTitle = (title) => {
     if (title.length > 200) {
@@ -197,6 +253,7 @@ export default function TodoDetail({
   };
 
   const classes = useStyle();
+
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
       <Box className={className}>
@@ -317,6 +374,42 @@ export default function TodoDetail({
             </Button>
           </Tooltip>
 
+          {isWorkspace && (
+            <Tooltip title="Priority" placement="bottom">
+              <Button
+                size="small"
+                variant="contained"
+                className={classes.dialogButton}
+                startIcon={<AssignmentIndIcon />}
+                onClick={() => handleOpenSearchUserWorkspace()}
+              >
+                Assign User
+              </Button>
+            </Tooltip>
+          )}
+
+          {isWorkspace && (
+            <Tooltip title="tool tip" placement="bottom">
+              <Box display="flex" sx={{ alignItems: "center", gap: "10px" }}>
+                <Avatar
+                  sx={{
+                    marginTop: "10px",
+                    marginLeft: "10px",
+                  }}
+                  // alt={selectedTodo?.assignUserInfo?.userName}
+                  src={selectedTodo?.assignUserInfo?.img}
+                />
+                <Typography
+                  variant="h6"
+                  component="h2"
+                  sx={{ fontWeight: 500 }}
+                >
+                  Assign : {selectedTodo?.assignUserInfo?.userName}
+                </Typography>
+              </Box>
+            </Tooltip>
+          )}
+
           <Dialog open={openTag} onClose={onCloseSelectedTag}>
             <DialogTitle>Choose Tags</DialogTitle>
             <List sx={{ pt: 0 }}>
@@ -352,13 +445,13 @@ export default function TodoDetail({
             onChange={(e) => {
               onTodoDescriptionChange({ todo: selectedTodo, e });
             }}
-          // value={selectedTodo?.description}
-          // onChange={(e) =>
-          //   setSelectedTodo((preSelectedTodo) => ({
-          //     ...preSelectedTodo,
-          //     description: e.target.value,
-          //   }))
-          // }
+            // value={selectedTodo?.description}
+            // onChange={(e) =>
+            //   setSelectedTodo((preSelectedTodo) => ({
+            //     ...preSelectedTodo,
+            //     description: e.target.value,
+            //   }))
+            // }
           />
         </Box>
         <Box className={classes.dialogContainer}>
@@ -393,7 +486,6 @@ export default function TodoDetail({
             );
           })}
         </Box>
-
         {/* // ! Remind Me Dialog */}
         <Dialog open={openRemindMe} onClose={onOpenRemindMe}>
           <DialogTitle>Remind Me At</DialogTitle>
@@ -425,6 +517,50 @@ export default function TodoDetail({
             />
           </Box>
         </Dialog>
+        {/* Search User Dialog */}
+        <Dialog
+          open={openSearchUserWorkspace}
+          TransitionComponent={Transition}
+          keepMounted
+          onClose={() => handleCloseSearchUserWorkspace()}
+          aria-describedby="alert-dialog-slide-description"
+        >
+          <DialogContent style={{ height: "100px", width: "600px" }}>
+            <Autocomplete
+              options={suggestionUser}
+              getOptionLabel={(option) => option.email}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Search user"
+                  InputProps={{
+                    ...params.InputProps,
+                    type: "search",
+                  }}
+                  // onChange={(e) => searchUsers(e.target.value)}
+                  onChange={(e) => handleSearchUserWorkspace(e)}
+                  onKeyDown={(e) => handleAssignUserWorkspace(e)}
+                />
+              )}
+            ></Autocomplete>
+          </DialogContent>
+        </Dialog>
+        <Snackbar
+          security="success"
+          open={openSnackbar}
+          onClose={handleClose}
+          autoHideDuration={6000}
+          anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+          key={{ vertical: "bottom", horizontal: "right" }}
+        >
+          <Alert
+            onClose={handleClose}
+            severity="success"
+            sx={{ width: "100%" }}
+          >
+            Assign user success!
+          </Alert>
+        </Snackbar>
       </Box>
     </LocalizationProvider>
   );
