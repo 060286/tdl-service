@@ -1,6 +1,7 @@
 import axios from "axios";
 
 import { getTokenFromLocalStorage } from "../extensions/tokenExtension";
+import { CREATE_WORKSPACE_URL, PATH_API } from "../constants/pathApiConstant";
 
 const getTodoInWorkspaceById = async (id) => {
   try {
@@ -130,6 +131,157 @@ const assignUserInWorkspace = async (email, todoId) => {
   }
 };
 
+const createTodoInWorkspace = async (
+  title,
+  description,
+  sectionName,
+  position,
+  id
+) => {
+  try {
+    const token = getTokenFromLocalStorage();
+    const url =
+      "https://localhost:44334/api/v1/workspace-page/add-todo-workspace";
+
+    const response = await axios({
+      url: url,
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      data: {
+        sectionName: sectionName,
+        title: title,
+        workspaceId: id,
+        position,
+      },
+    });
+
+    return response;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const getNotificationsAdapter = async () => {
+  try {
+    const token = getTokenFromLocalStorage();
+    const url = "https://localhost:44334/api/v1/user/notifications";
+
+    const response = await axios({
+      method: "GET",
+      url: url,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    return response;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const getWorkspacesAdapter = async () => {
+  try {
+    const token = getTokenFromLocalStorage();
+    const url = "https://localhost:44334/api/v1/workspace-page/workspaces";
+
+    const response = axios({
+      method: "GET",
+      url: url,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    return response;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const createCategoryByTitleAdapter = async (categoryTitle) => {
+  try {
+    const token = getTokenFromLocalStorage();
+    const url = `https://localhost:44334/api/v1/all-list-page/create-todo-category`;
+
+    const response = await axios({
+      url: url,
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      data: {
+        title: categoryTitle,
+        description: `description of ${categoryTitle}`,
+      },
+    });
+
+    return response;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const getCategoryAdapter = async () => {
+  try {
+    const url = "https://localhost:44334/api/v1/todos/todo-categories";
+    const token = getTokenFromLocalStorage();
+
+    const response = axios({
+      method: "GET",
+      url: url,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    return response;
+  } catch (error) {}
+};
+
+const createWorkspaceAdapter = async (workspaceTitle, workspaceDesc) => {
+  try {
+    // TODO Create Workspace
+    const url = `${PATH_API}${CREATE_WORKSPACE_URL}`;
+    const token = getTokenFromLocalStorage();
+
+    const response = await axios({
+      method: "POST",
+      url: url,
+      data: {
+        name: workspaceTitle,
+        description: workspaceDesc,
+      },
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    return response;
+  } catch (error) {}
+};
+
+const updateNotifyByIdAdapter = async (id) => {
+  try {
+    const url = `https://localhost:44334/api/v1/user/${id}/update-notify-status`;
+    const token = getTokenFromLocalStorage();
+
+    const response = await axios({
+      method: "PUT",
+      url: url,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    return response;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 export {
   getTodoInWorkspaceById,
   addUserIntoWorkspaceAdapter,
@@ -137,4 +289,11 @@ export {
   searchUserAdapter,
   searchUserInWorkspaceAdapter,
   assignUserInWorkspace,
+  createTodoInWorkspace,
+  getWorkspacesAdapter,
+  getNotificationsAdapter,
+  createCategoryByTitleAdapter,
+  getCategoryAdapter,
+  createWorkspaceAdapter,
+  updateNotifyByIdAdapter,
 };

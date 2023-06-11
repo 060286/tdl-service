@@ -21,6 +21,22 @@ const useStyles = makeStyles({
     position: "absolute",
     left: 131,
     top: 16,
+    width: "350px",
+    heigth: "500px",
+  },
+  dialogTitle: {
+    width: "100%",
+    height: "50px",
+  },
+  itemBlock: {
+    width: "100%",
+    height: "75px",
+  },
+  itemText: {
+    fontSize: "13px",
+  },
+  notViewedBtn: {
+    background: "#e6e7e8",
   },
 });
 
@@ -28,11 +44,24 @@ function NotificationDialog({
   onCloseNotificationDialog,
   openNotificationPopup,
   notifications,
+  onViewNotify,
 }) {
   const classes = useStyles();
 
   const handleClose = () => {
     onCloseNotificationDialog();
+  };
+
+  const handleViewedNotify = (id) => {
+    onViewNotify(id);
+  };
+
+  const renderNotFoundNotifications = () => {
+    if (notifications.length === 0) {
+      return (
+        <h5 style={{ margin: "auto", overflow: "hidden" }}>No notifications</h5>
+      );
+    }
   };
 
   return (
@@ -43,24 +72,39 @@ function NotificationDialog({
       onClose={handleClose}
       open={openNotificationPopup}
     >
-      <DialogTitle>Set backup account</DialogTitle>
+      <DialogTitle className={classes.dialogTitle}>Notifications</DialogTitle>
       <List sx={{ pt: 0 }}>
         {notifications.map((notification) => (
-          <ListItem disableGutters>
+          <ListItem disableGutters className={classes.itemBlock}>
             <ListItemButton
-              //   onClick={() => handleListItemClick(email)}
               key={notification.id}
+              className={!notification.isRead ? classes.notViewedBtn : ""}
+              onClick={() => handleViewedNotify(notification.id)}
             >
               <ListItemAvatar>
-                <Avatar sx={{ bgcolor: blue[100], color: blue[600] }}>
+                <Avatar
+                  sx={{
+                    bgcolor: blue[100],
+                    color: blue[600],
+                    width: "25px",
+                    height: "25px",
+                  }}
+                >
                   <PersonIcon />
                 </Avatar>
               </ListItemAvatar>
-              <ListItemText primary={notification.content} />
+              {/* <ListItemText
+                className={classes.itemText}
+                primary={notification.content}
+              /> */}
+              <Typography variant="body1" className={classes.itemText}>
+                {notification?.content}
+              </Typography>
             </ListItemButton>
           </ListItem>
         ))}
       </List>
+      {renderNotFoundNotifications()}
     </Dialog>
   );
 }
