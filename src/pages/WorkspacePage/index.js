@@ -40,6 +40,7 @@ import { getTaskById, createSubTaskInTodo } from "../../adapters/taskAdapter";
 import {
   addUserIntoWorkspaceAdapter,
   assignUserInWorkspace,
+  createTodoInWorkspace,
   getTodoInWorkspaceById,
   getUserListAdapter,
   searchUserAdapter,
@@ -195,12 +196,12 @@ function WorkspacePage() {
     const response = await assignUserInWorkspace(email, todoId);
 
     const newSelectedTodo = {
-      selectedTodo,
+      ...selectedTodo,
       assignUserInfo: response.data.data,
     };
 
     setSelectedTodo(newSelectedTodo);
-
+    setOpenSearchUserWorkspace(false);
     return response;
   };
 
@@ -238,7 +239,7 @@ function WorkspacePage() {
 
   const handleAddUserToWorkspace = async (e) => {
     if (e.key === "Enter") {
-      const response = addUserIntoWorkspaceAdapter(e.target.value, id);
+      const response = await addUserIntoWorkspaceAdapter(e.target.value, id);
 
       if (response) {
         setOpenSearchUser(false);
@@ -380,10 +381,7 @@ function WorkspacePage() {
     if (e.key === "Enter") {
       const name = e.target.value;
 
-      console.log({ name, id });
       const response = await createSubTaskInTodo({ name, todoId: id });
-
-      console.log({ response });
 
       // update selectedTodo
       let oldSubTasks = selectedTodo.subTasks;
@@ -454,23 +452,14 @@ function WorkspacePage() {
     sectionName,
     position,
   }) => {
-    const token = getTokenFromLocalStorage();
-    const url =
-      "https://localhost:44334/api/v1/workspace-page/add-todo-workspace";
+    const response = await createTodoInWorkspace(
+      title,
+      description,
+      sectionName,
+      position,
+      id
+    );
 
-    const response = await axios({
-      url: url,
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      data: {
-        sectionName: sectionName,
-        title: title,
-        workspaceId: id,
-        position,
-      },
-    });
     setState((prevState) => {
       const updatedArray = [...prevState];
 

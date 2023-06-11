@@ -29,7 +29,7 @@ import { useState, useEffect } from "react";
 import { makeStyles } from "@mui/styles/";
 import { useSelector, useDispatch } from "react-redux";
 import { Box } from "@mui/system";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import CloseIcon from "@mui/icons-material/Close";
 import { VARIABLE_STATUS } from "../../constants/appStatusConstant";
 import { getUserInfo } from "../../slices/accountSlice";
@@ -51,6 +51,14 @@ import NotificationDialog from "../core/NotificationDialog";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
 import { HubConnectionBuilder } from "@microsoft/signalr";
+import {
+  createCategoryByTitleAdapter,
+  createWorkspaceAdapter,
+  getCategoryAdapter,
+  getNotificationsAdapter,
+  getWorkspacesAdapter,
+  updateNotifyByIdAdapter,
+} from "../../adapters/workspaceAdapter";
 
 const items = [
   {
@@ -145,48 +153,14 @@ export default function Sidebar() {
   const [openNotificationDialog, setOpenNotificationDialog] = useState(false);
   const [openAddUserSnackBar, setOpenAddUserSnackBar] = useState(false);
   const [message, setMessage] = useState("");
+  const [currentUrl, setCurrentUrl] = useState(window.location.href);
+  const location = useLocation();
 
-  useEffect(() => {
-    if (userInfo.userName) {
-      const connection = new HubConnectionBuilder()
-        .withUrl(
-          `https://localhost:44334/hubs/notifications?userName=${userInfo.userName}`
-        ) // Replace with your API URL
-        .withAutomaticReconnect()
-        .build();
-
-      connection.start().catch((error) => console.error(error));
-
-      connection.on("SendNotification", (message) => {
-        console.log({ message });
-
-        if (message.type === "AddUserWorkspace") {
-          setMessage(message.content);
-          setOpenAddUserSnackBar(true);
-
-          getWorkspaces();
-        }
-      });
-
-      connection.on("Notify", (message) => {
-        console.log({ message, method: "Notify" });
-      });
-
-      connection.onreconnected(() => {
-        console.log("Reconnected to SignalR hub.");
-
-        // setConnectionId(connection.connectionId);
-      });
-
-      connection.onclose(() => {
-        console.log("SignalR connection closed.");
-      });
-
-      return () => {
-        connection.stop();
-      };
-    }
-  }, [userInfo]);
+  const getWorkspaceId = (url) => {
+    const parts = url.split("/"); // Split the URL string by '/'
+    const guid = parts[parts.length - 1]; // Get the last part of the URL which should be the GUID ID
+    return guid;
+  };
 
   const handleCloseSnackBar = () => {
     setOpenAddUserSnackBar(false);
@@ -216,28 +190,23 @@ export default function Sidebar() {
     setWorkspaceDesc(desc);
   };
 
-  const handleCreateWorkspace = async (e) => {
-    // TODO Create Workspace
-    const url = `${PATH_API}${CREATE_WORKSPACE_URL}`;
-    const token = getTokenFromLocalStorage();
+  const onViewNotify = async (notifyId) => {
+    const response = await updateNotifyByIdAdapter(notifyId);
 
-    const response = await axios({
-      method: "POST",
-      url: url,
-      data: {
-        name: workspaceTitle,
-        description: workspaceDesc,
-      },
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    if (response.data.statusCode === 200) {
+      await getNotifications();
+    }
+  };
+
+  const handleCreateWorkspace = async (e) => {
+    const response = await createWorkspaceAdapter(
+      workspaceTitle,
+      workspaceDesc
+    );
 
     // Update Workspaces
     const newWorkspaces = [...workspaces, response.data.data];
-
     setWorkspaces(newWorkspaces);
-
     handleCloseWorkspaceDialog();
   };
 
@@ -280,78 +249,28 @@ export default function Sidebar() {
   };
 
   const getCategories = async () => {
-    const url = "https://localhost:44334/api/v1/todos/todo-categories";
-    const token = getTokenFromLocalStorage();
+    const response = await getCategoryAdapter();
 
-    axios({
-      method: "GET",
-      url: url,
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-      .then((res) => {
-        if (res?.data?.data != null) {
-          setCategories(res.data.data);
-          setIsExpanded(true);
-        }
-      })
-      .catch((err) => console.log(err));
+    setCategories(response.data.data);
+    setIsExpanded(true);
   };
 
   const getNotifications = async () => {
-    const token = getTokenFromLocalStorage();
-    const url = "https://localhost:44334/api/v1/user/notifications";
+    const response = await getNotificationsAdapter();
 
-    const response = await axios({
-      method: "GET",
-      url: url,
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    setNotifications(response?.data?.data);
-    setNotificationNumber(response?.data.data.length);
+    setNotifications(response?.data?.data.notifications);
+    setNotificationNumber(response?.data.data.notViewedCount);
   };
 
-  const getWorkspaces = () => {
-    const token = getTokenFromLocalStorage();
-    const url = "https://localhost:44334/api/v1/workspace-page/workspaces";
+  const getWorkspaces = async () => {
+    const reponse = await getWorkspacesAdapter();
 
-    axios({
-      method: "GET",
-      url: url,
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-      .then((res) => {
-        if (res?.data?.data != null) {
-          setWorkspaces(res.data.data);
-        }
-      })
-      .catch((err) => console.log(err));
+    setWorkspaces(reponse.data.data);
   };
 
   const handleSaveCategoryTitle = async () => {
-    // Close popup
     setOpenCreateCategoryPopup(false);
-
-    const token = getTokenFromLocalStorage();
-    const url = `https://localhost:44334/api/v1/all-list-page/create-todo-category`;
-
-    const response = await axios({
-      url: url,
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      data: {
-        title: categoryTitle,
-        description: `description of ${categoryTitle}`,
-      },
-    });
+    const response = createCategoryByTitleAdapter(categoryTitle);
 
     if (response?.status === 200) {
       // Reload page
@@ -395,6 +314,60 @@ export default function Sidebar() {
     getNotifications();
   }, []);
 
+  useEffect(() => {
+    if (userInfo.userName) {
+      let connectionUrl = `https://localhost:44334/hubs/notifications?userName=${userInfo.userName}`;
+      let workspaceId;
+
+      if (currentUrl.includes("workspace")) {
+        const newWorkspaceId = getWorkspaceId(currentUrl);
+        workspaceId = newWorkspaceId;
+      }
+
+      if (workspaceId) {
+        const newUrl = `${connectionUrl}&workspaceId=${workspaceId}`;
+        connectionUrl = newUrl;
+      }
+
+      const connection = new HubConnectionBuilder()
+        .withUrl(connectionUrl) // Replace with your API URL
+        .withAutomaticReconnect()
+        .build();
+
+      connection.start().catch((error) => console.error(error));
+
+      connection.on("SendNotification", (message) => {
+        if (message.type === "AddUserWorkspace") {
+          setMessage(message.content);
+          setOpenAddUserSnackBar(true);
+          getWorkspaces();
+        }
+      });
+
+      // SendNotificationWorkspace
+      connection.on("SendNotificationWorkspace", (message) => {
+        if (message.type === "AssignNotify") {
+          setMessage(message.content);
+          getNotifications();
+        }
+      });
+
+      connection.on("Notify", (message) => {});
+
+      connection.onreconnected(() => {
+        console.log("Reconnected to SignalR hub.");
+      });
+
+      connection.onclose(() => {
+        console.log("SignalR connection closed.");
+      });
+
+      return () => {
+        connection.stop();
+      };
+    }
+  }, [userInfo, location.pathname]);
+
   return (
     <Box className={classes.sideBar}>
       {/* <MessageComponent email={userInfo.email} /> */}
@@ -424,22 +397,22 @@ export default function Sidebar() {
       </Box>
       <Box disablePadding className={classes.listItemAvatar}>
         <Button
-          onClick={() => handleLogout()}
-          variant="contained"
-          color="error"
-          size="small"
-        >
-          Logout
-        </Button>
-      </Box>
-      <Box disablePadding className={classes.listItemAvatar}>
-        <Button
           onClick={() => onOpenArchivedTaskReportDialog()}
           variant="contained"
           color="primary"
           size="small"
         >
           View Report
+        </Button>
+      </Box>
+      <Box disablePadding className={classes.listItemAvatar}>
+        <Button
+          onClick={() => handleLogout()}
+          variant="contained"
+          color="error"
+          size="small"
+        >
+          Logout
         </Button>
       </Box>
       <Drawer
@@ -591,6 +564,7 @@ export default function Sidebar() {
         openNotificationPopup={openNotificationDialog}
         onCloseNotificationDialog={onCloseNotificationDialog}
         notifications={notifications}
+        onViewNotify={onViewNotify}
       />
 
       <Snackbar

@@ -395,6 +395,8 @@ export default function TodoDetail({
                   sx={{
                     marginTop: "10px",
                     marginLeft: "10px",
+                    width: "30px",
+                    height: "30px",
                   }}
                   // alt={selectedTodo?.assignUserInfo?.userName}
                   src={selectedTodo?.assignUserInfo?.img}
@@ -404,7 +406,22 @@ export default function TodoDetail({
                   component="h2"
                   sx={{ fontWeight: 500 }}
                 >
-                  Assign : {selectedTodo?.assignUserInfo?.userName}
+                  Assigned by : {selectedTodo?.assignUserInfo?.userName}
+                </Typography>
+                <Typography
+                  variant="h6"
+                  sx={{ marginLeft: "430px", fontSize: "13px" }}
+                >
+                  Created at:{" "}
+                  {new Date(selectedTodo?.todoDate).toLocaleDateString(
+                    "en-US",
+                    {
+                      weekday: "long",
+                      day: "2-digit",
+                      month: "2-digit",
+                      year: "2-digit",
+                    }
+                  )}
                 </Typography>
               </Box>
             </Tooltip>
