@@ -60,6 +60,7 @@ const useStyle = makeStyles(() => ({
   },
   container: {
     marginTop: "16px",
+    marginLeft: '30px',
     height: "calc(100vh - 64px)",
   },
   gridContainer: {
@@ -142,7 +143,7 @@ const useStyle = makeStyles(() => ({
     display: "flex",
     marginTop: "48px",
     // width: "175%",
-    height: "calc(100% - 88px)",
+    height: "calc(100% - 150px)",
   },
 }));
 
@@ -404,13 +405,14 @@ function WorkspacePage() {
   const getListStyle = (isDraggingOver) => ({
     width: "100%",
     margin: "0 16px",
-    border: "1px solid #CCC",
+    border: "1px solid #0083ff",
     padding: "16px",
-    paddingRight: "4px",
+    paddingRight: "16px",
     borderRadius: "8px",
     backgroundColor: "#fafbfc",
     display: "flex",
     flexDirection: "column",
+    boxShadow: '10px 4px 4px rgba(0, 0, 0, 0.25)'
   });
 
   const getItemStyle = (isDragging, draggableStyle) => {

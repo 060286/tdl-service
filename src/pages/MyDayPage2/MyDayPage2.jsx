@@ -108,11 +108,14 @@ const useStyle = makeStyles(() => ({
     width: "25%",
   },
   input: {
-    marginTop: "16px",
+    marginTop: "350px",
+    boxShadow: '0 4px 4px rgba(0, 0, 0, 0.25)'
   },
   conatiner: {
     display: "flex",
     marginBottom: "24px",
+    width: '100%',
+    height: '80%'
   },
   suggestionItem: {
     border: "1px solid #ccc",
@@ -128,6 +131,10 @@ const useStyle = makeStyles(() => ({
     alignItems: "center",
     fontSize: "12px",
     color: "#aaa",
+  },
+  suggestionItemDay: {
+    color: '#0d6efd',
+    fontSize: "12px",
   },
   suggestionItemBoxTitle: {
     display: "flex",
@@ -203,6 +210,12 @@ const useStyle = makeStyles(() => ({
   },
   todoTitle: {
     wordBreak: "break-all",
+  },
+  childContainer: {
+    padding: '10px',
+    display: "flex",
+    marginBottom: "24px",
+    width: '100%'
   },
 }));
 
@@ -284,7 +297,7 @@ export default function MyDayPage2() {
       dispatch(removeSuggestion(id));
 
       await dispatch(addNewTodo({ title: title })).unwrap();
-    } catch (error) {}
+    } catch (error) { }
   };
 
   const handleQuotes = () => {
@@ -347,11 +360,11 @@ export default function MyDayPage2() {
 
   const handleClickOpen =
     ({ todo }) =>
-    () => {
-      setOpen(true);
-      setSelectedTodo(todo);
-      setSelectedTagDetail(todo.tag);
-    };
+      () => {
+        setOpen(true);
+        setSelectedTodo(todo);
+        setSelectedTagDetail(todo.tag);
+      };
 
   const handleClose = () => {
     setOpen(false);
@@ -443,7 +456,7 @@ export default function MyDayPage2() {
     dispatch(updateSubTaskIsCompleted({ id, todoId: selectedTodo.id }));
   };
 
-  const onHandleChangeDescription = () => {};
+  const onHandleChangeDescription = () => { };
 
   const onDeleteSubTask = async ({ id }) => {
     // TODO: send request to be to delete subtask
@@ -526,188 +539,190 @@ export default function MyDayPage2() {
 
   return (
     <Box className={classes.conatiner}>
-      <Box className={classes.mydayPage} spacing={2}>
-        <MyDayWelcomeName
-          username={userInfo.fullName}
-          qoutes={quotes}
-          author={author}
-        />
-        <MyDayCalendar
-          weekday={dayOfWeek}
-          day={dayOfMonth}
-          month={monthOfYear}
-        />
-        <List className={classes.list}>
-          {todos?.todos.map((todo) => {
-            return (
-              <ListItem
-                disablePadding
-                className={classes.todoItem}
-                secondaryAction={
-                  <Tooltip title="Open todo">
-                    <IconButton
-                      edge="end"
-                      aria-label="delete"
-                      onClick={handleClickOpen({ todo })}
-                    >
-                      <ArticleIcon />
-                    </IconButton>
-                  </Tooltip>
-                }
-              >
-                <ListItemButton className={classes.todoItemButton}>
-                  {todo.todoCategory && (
-                    <Box className={classes.suggestionItemBoxTodoIcon}>
-                      <LockIcon className={classes.LockIcon} />
-                      {" > "}
-                      {todo.todoCategory}
-                    </Box>
-                  )}
-                  <Box className={classes.suggestionItemBoxTitle}>
-                    <ListItemIcon>
-                      <Tooltip
-                        title={
-                          todo.isCompleted
-                            ? "Uncompleted task"
-                            : "Completed task"
-                        }
+      <div className={classes.childContainer}>
+        <Box className={classes.mydayPage} spacing={2}>
+          <MyDayWelcomeName
+            username={userInfo.fullName}
+            qoutes={quotes}
+            author={author}
+          />
+          <MyDayCalendar
+            weekday={dayOfWeek}
+            day={dayOfMonth}
+            month={monthOfYear}
+          />
+          <List className={classes.list}>
+            {todos?.todos.map((todo) => {
+              return (
+                <ListItem
+                  disablePadding
+                  className={classes.todoItem}
+                  secondaryAction={
+                    <Tooltip title="Open todo">
+                      <IconButton
+                        edge="end"
+                        aria-label="delete"
+                        onClick={handleClickOpen({ todo })}
                       >
-                        <Checkbox
-                          checked={todo.isCompleted}
-                          name={todo.id}
-                          onChange={() => onRadioButtonChange(todo)}
-                          icon={<RadioButtonUncheckedIcon />}
-                          checkedIcon={<RadioButtonChecked />}
-                        ></Checkbox>
-                      </Tooltip>
-                    </ListItemIcon>
-                    <ListItemText
-                      id={todo.id}
-                      primary={todo.title}
-                      className={classes.todoTitle}
-                    />
-                  </Box>
-                </ListItemButton>
-              </ListItem>
-            );
-          })}
-        </List>
-        <Box className={classes.input}>
-          <TextField
-            multiline
-            label="Enter todo content"
-            placeholder="Enter todo content"
-            color="primary"
-            fullWidth
-            focused
-            value={taskTitle}
-            onKeyUp={(e) => onKeyPressHandler(e)}
-            onChange={(e) => {
-              if (e.target.value.length > 200) {
-                setTaskTitleHelperText(
-                  "Max character of title must be less than 200"
-                );
-                return;
-              }
-              setTaskTitleHelperText("");
-              setTaskTitle(e.target.value);
-            }}
-            helperText={taskTitleHelperText}
-            error={taskTitleHelperText}
-          />
-        </Box>
-      </Box>
-      <Box className={classes.suggestionListPage}>
-        <List className={classes.suggestionList}>
-          <TextField
-            id="search-bar"
-            className="text"
-            // onInput={(e) => {
-            //   setSearchQuery(e.target.value);
-            // }}
-            onKeyDown={(e) => searchTodoAndSubTask(e)}
-            label="Search todo & subtask"
-            variant="outlined"
-            placeholder="Search..."
-            size="small"
-            style={{ width: "100%" }}
-          />
-          {suggestionTodos?.todos.map((todo) => {
-            return (
-              <ListItem disablePadding className={classes.suggestionItem}>
-                <ListItemButton
-                  onClick={() => {
-                    handleSuggestionItemClick(todo);
-                  }}
-                  dense
-                >
-                  <ListItemIcon>
-                    <Tooltip title="Add todo">
-                      <IconButton>
-                        <AddIcon />
+                        <ArticleIcon />
                       </IconButton>
                     </Tooltip>
-                  </ListItemIcon>
-                  <Box>
-                    <Box className={classes.suggestionItemBox}>
-                      <LockIcon className={classes.LockIcon} />
-                      {" > "}
-                      {todo.categoryName}
-                    </Box>
+                  }
+                >
+                  <ListItemButton className={classes.todoItemButton}>
+                    {todo.todoCategory && (
+                      <Box className={classes.suggestionItemBoxTodoIcon}>
+                        <LockIcon className={classes.LockIcon} />
+                        {" > "}
+                        {todo.todoCategory}
+                      </Box>
+                    )}
                     <Box className={classes.suggestionItemBoxTitle}>
-                      {todo.title}
+                      <ListItemIcon>
+                        <Tooltip
+                          title={
+                            todo.isCompleted
+                              ? "Uncompleted task"
+                              : "Completed task"
+                          }
+                        >
+                          <Checkbox
+                            checked={todo.isCompleted}
+                            name={todo.id}
+                            onChange={() => onRadioButtonChange(todo)}
+                            icon={<RadioButtonUncheckedIcon />}
+                            checkedIcon={<RadioButtonChecked />}
+                          ></Checkbox>
+                        </Tooltip>
+                      </ListItemIcon>
+                      <ListItemText
+                        id={todo.id}
+                        primary={todo.title}
+                        className={classes.todoTitle}
+                      />
                     </Box>
-                    <Box className={classes.suggestionItemBox}>
-                      {todo.dateRemind}
+                  </ListItemButton>
+                </ListItem>
+              );
+            })}
+          </List>
+          <Box className={classes.input}>
+            <TextField
+              multiline
+              label="Enter todo content"
+              placeholder="Enter todo content"
+              color="primary"
+              fullWidth
+              value={taskTitle}
+              onKeyUp={(e) => onKeyPressHandler(e)}
+              onChange={(e) => {
+                if (e.target.value.length > 200) {
+                  setTaskTitleHelperText(
+                    "Max character of title must be less than 200"
+                  );
+                  return;
+                }
+                setTaskTitleHelperText("");
+                setTaskTitle(e.target.value);
+              }}
+              helperText={taskTitleHelperText}
+              error={taskTitleHelperText}
+            />
+          </Box>
+        </Box>
+        <Box className={classes.suggestionListPage}>
+          <List className={classes.suggestionList}>
+            <TextField
+              id="search-bar"
+              className="text"
+              // onInput={(e) => {
+              //   setSearchQuery(e.target.value);
+              // }}
+              onKeyDown={(e) => searchTodoAndSubTask(e)}
+              label="Search todo & subtask"
+              variant="outlined"
+              placeholder="Search..."
+              size="small"
+              style={{ width: "100%" }}
+            />
+            {suggestionTodos?.todos.map((todo) => {
+              return (
+                <ListItem disablePadding className={classes.suggestionItem}>
+                  <ListItemButton
+                    onClick={() => {
+                      handleSuggestionItemClick(todo);
+                    }}
+                    dense
+                  >
+                    <ListItemIcon>
+                      <Tooltip title="Add todo">
+                        <IconButton sx={{ color: '#0d6efd'}}>
+                          <AddIcon />
+                        </IconButton>
+                      </Tooltip>
+                    </ListItemIcon>
+                    <Box>
+                      <Box className={classes.suggestionItemBox}>
+                        <LockIcon className={classes.LockIcon} />
+                        {" > "}
+                        {todo.categoryName}
+                      </Box>
+                      <Box className={classes.suggestionItemBoxTitle}>
+                        {todo.title}
+                      </Box>
+                      <Box className={classes.suggestionItemDay}>
+                        {todo.dateRemind}
+                      </Box>
                     </Box>
-                  </Box>
-                </ListItemButton>
-              </ListItem>
-            );
-          })}
-        </List>
-      </Box>
-      {selectedTodo && (
-        <Dialog
-          onClose={handleClose}
-          open={open}
-          fullWidth={true}
-          maxWidth="md"
-          className={classes.dialogTodo}
-        >
-          <TodoDetail
-            selectedTodo={selectedTodo}
-            handleClose={handleClose}
-            setSelectedTodo={setSelectedTodo}
-            handleArchivedTodo={handleArchivedTodo}
-            onSubTaskIsCompletedChange={onSubTaskIsCompletedChange}
-            onSubTaskChange={onSubTaskChange}
-            handleCreateSubtask={handleCreateSubtask}
-            onTodoTitleChange={onTodoTitleChange}
-            onTodoDescriptionChange={onTodoDescriptionChange}
-            onDeleteSubTask={onDeleteSubTask}
-            onOpenSelectedTag={onOpenSelectedTag}
-            onCloseSelectedTag={onCloseSelectedTag}
-            openTag={openTag}
-            selectedTag={selectedTag}
-            selectedTagDetail={selectedTagDetail}
-            onTagItemClick={onTagItemClick}
-            onOpenRemindMe={onOpenRemindMe}
-            openRemindMe={openRemindMe}
-            onUpdateRemindAtHandler={onUpdateRemindAtHandler}
-            onCloseRemindMe={onCloseRemindMe}
+                  </ListItemButton>
+                </ListItem>
+              );
+            })}
+          </List>
+        </Box>
+        {selectedTodo && (
+          <Dialog
+            onClose={handleClose}
+            open={open}
+            fullWidth={true}
+            maxWidth="md"
+            className={classes.dialogTodo}
+          >
+            <TodoDetail
+              selectedTodo={selectedTodo}
+              handleClose={handleClose}
+              setSelectedTodo={setSelectedTodo}
+              handleArchivedTodo={handleArchivedTodo}
+              onSubTaskIsCompletedChange={onSubTaskIsCompletedChange}
+              onSubTaskChange={onSubTaskChange}
+              handleCreateSubtask={handleCreateSubtask}
+              onTodoTitleChange={onTodoTitleChange}
+              onTodoDescriptionChange={onTodoDescriptionChange}
+              onDeleteSubTask={onDeleteSubTask}
+              onOpenSelectedTag={onOpenSelectedTag}
+              onCloseSelectedTag={onCloseSelectedTag}
+              openTag={openTag}
+              selectedTag={selectedTag}
+              selectedTagDetail={selectedTagDetail}
+              onTagItemClick={onTagItemClick}
+              onOpenRemindMe={onOpenRemindMe}
+              openRemindMe={openRemindMe}
+              onUpdateRemindAtHandler={onUpdateRemindAtHandler}
+              onCloseRemindMe={onCloseRemindMe}
+            />
+          </Dialog>
+        )}
+        {openSearchResult && (
+          <SearchResultDialog
+            handleCloseSearchResultDialog={handleCloseSearchResultDialog}
+            tasks={tasks}
+            subTasks={subTasks}
+            openSearchResult={openSearchResult}
+            onSearchResultClick={onSearchResultClick}
           />
-        </Dialog>
-      )}
-      {openSearchResult && (
-        <SearchResultDialog
-          handleCloseSearchResultDialog={handleCloseSearchResultDialog}
-          tasks={tasks}
-          subTasks={subTasks}
-          openSearchResult={openSearchResult}
-          onSearchResultClick={onSearchResultClick}
-        />
-      )}
+        )}
+      </div>
+
     </Box>
   );
 }

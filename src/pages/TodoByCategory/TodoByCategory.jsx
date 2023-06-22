@@ -33,6 +33,7 @@ const useStyle = makeStyles(() => ({
   },
   container: {
     marginTop: "16px",
+    marginLeft: '50px',
     height: "calc(100vh - 64px)",
   },
   gridContainer: {
@@ -347,7 +348,7 @@ const TodoByCategory = () => {
 
   return (
     <Box className={classes.container}>
-      <Typography variant="h5">Manage todo by category</Typography>
+      <Typography variant="h5" sx={{ fontWeight: 800 }}>Manage todo by category</Typography>
       <Grid container spacing={2} className={classes.gridContainer}>
         <Grid item className={clsx(classes.item, classes.containerAcc)} xs={6}>
           <Box className={classes.accordition}>

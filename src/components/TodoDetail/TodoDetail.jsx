@@ -45,6 +45,9 @@ const useStyle = makeStyles(() => ({
     overflowY: "scroll",
     maxHeight: "100%",
   },
+  container: {
+    padding: '20px'
+  },
   suggestionList: {
     overflowY: "scroll",
     maxHeight: "100%",
@@ -256,7 +259,7 @@ export default function TodoDetail({
 
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
-      <Box className={className}>
+      <Box className={classes.container}>
         <Box className={classes.titleContainer}>
           <Box className={classes.suggestionItemBoxDialog}>
             <LockIcon className={classes.LockIconDialog} />

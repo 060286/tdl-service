@@ -51,7 +51,7 @@ export default function Accordition({
     <>
       <Accordion expanded={true}>
         <AccordionSummary expandIcon={<ExpandMoreIcon />} id="allTaskUpComming">
-          <Typography component={"subtitle1"}>{title}</Typography>
+          <Typography variant="subtitle1" sx={{fontWeight: 600, color: '#0b52d0'}}>{title}</Typography>
         </AccordionSummary>
         <AccordionDetails>
           <List className={classes.rightContainer}>

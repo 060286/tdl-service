@@ -21,10 +21,11 @@ const MyDayWelcomeName = ({ username, qoutes, author }) => {
           fontSize: "28px",
           fontWeight: "700",
           color: "#767474",
-          marginTop: "-3%",
+          opacity: '0.5',
+          marginTop: "-2%",
         }}
       >
-        {qoutes} {author}
+        {qoutes}
       </div>
     </div>
   );

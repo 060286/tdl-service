@@ -57,7 +57,7 @@ function NotificationDialog({
   };
 
   const renderNotFoundNotifications = () => {
-    if (notifications.length === 0) {
+    if (notifications?.length === 0) {
       return (
         <h5 style={{ margin: "auto", overflow: "hidden" }}>No notifications</h5>
       );
@@ -74,7 +74,7 @@ function NotificationDialog({
     >
       <DialogTitle className={classes.dialogTitle}>Notifications</DialogTitle>
       <List sx={{ pt: 0 }}>
-        {notifications.map((notification) => (
+        {notifications?.map((notification) => (
           <ListItem disableGutters className={classes.itemBlock}>
             <ListItemButton
               key={notification.id}
