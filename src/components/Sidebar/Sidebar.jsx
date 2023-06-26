@@ -171,7 +171,7 @@ export default function Sidebar() {
 
   const getWorkspaceId = (url) => {
     const parts = url.split("/"); // Split the URL string by '/'
-    const guid = parts[parts.length - 1]; // Get the last part of the URL which should be the GUID ID
+    const guid = parts[parts?.length - 1]; // Get the last part of the URL which should be the GUID ID
     return guid;
   };
 
@@ -309,6 +309,11 @@ export default function Sidebar() {
       items[2].number = response.data.data.oneMonthAnalytic.percentage;
     };
 
+    const currentUrl = window.location.pathname;
+
+    if (currentUrl === "/") {
+      navigate("/myday");
+    }
     getDataAnalytic();
   }, []);
 
@@ -455,7 +460,7 @@ export default function Sidebar() {
             </IconButton>
           </ListItem>
           <Divider />
-          {items.map(({ text, Icon, href, number }) => {
+          {items?.map(({ text, Icon, href, number }) => {
             return (
               <ListItem
                 key={text}
@@ -516,7 +521,7 @@ export default function Sidebar() {
           Create Workspace
         </Button>
         <>
-          {workspaces.map((workspace) => {
+          {workspaces?.map((workspace) => {
             return (
               <ListItem
                 key={workspace.name}

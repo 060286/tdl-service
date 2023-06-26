@@ -194,8 +194,8 @@ const MyDayPage = () => {
                   height: "100%",
                 }}
               >
-                {todos.todos.length !== 0 ? (
-                  todos.todos.map((task) => {
+                {todos.todos?.length !== 0 ? (
+                  todos.todos?.map((task) => {
                     return (
                       <MyDayTodoItem
                         title={task.title}
@@ -233,7 +233,7 @@ const MyDayPage = () => {
               boxSizing: "border-box",
             }}
           >
-            {suggestionTodos.todos.map((suggestion) => {
+            {suggestionTodos.todos?.map((suggestion) => {
               return <SuggestionItem key={suggestion.id} data={suggestion} />;
             })}
           </div>

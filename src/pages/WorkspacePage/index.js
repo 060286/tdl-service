@@ -223,7 +223,7 @@ function WorkspacePage() {
     const users = await searchUserAdapter(keyword);
 
     const userData = users.data.data;
-    const mapptedSuggestionUser = userData.map((user) => ({
+    const mapptedSuggestionUser = userData?.map((user) => ({
       label: user.email,
       value: user.id,
     }));
@@ -290,7 +290,7 @@ function WorkspacePage() {
     const response = await archiveTodoById(id);
 
     if (response) {
-      const newState = state.map((array) => {
+      const newState = state?.map((array) => {
         return array.filter((item) => item.id !== id);
       });
 
@@ -320,8 +320,8 @@ function WorkspacePage() {
     });
 
     if (response) {
-      const updatedArray = state.map((array) => {
-        return array.map((item) => {
+      const updatedArray = state?.map((array) => {
+        return array?.map((item) => {
           if (item.id === todo.id) {
             return { ...item, title: e.target.value };
           }
@@ -347,8 +347,8 @@ function WorkspacePage() {
     });
 
     if (response.statusCode === 200) {
-      const updatedArray = state.map((array) => {
-        return array.map((item) => {
+      const updatedArray = state?.map((array) => {
+        return array?.map((item) => {
           if (item.id === id) {
             return { ...item, description: e.target.value };
           }
@@ -569,7 +569,7 @@ function WorkspacePage() {
           style={{ height: "50px", width: "2px" }}
         />
         <Box className={classes.userList}>
-          {users.map((user) => {
+          {users?.map((user) => {
             return (
               <Box>
                 <Tooltip title={user.userName} placement="bottom">

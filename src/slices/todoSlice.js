@@ -55,8 +55,8 @@ const initialState = {
   selectedTodoId: {
     id: null,
     status: VARIABLE_STATUS.IDLE,
-    error: null
-  }
+    error: null,
+  },
 };
 
 export const createSubTodo = createAsyncThunk(
@@ -79,12 +79,11 @@ export const searchTodoByKeywordSlice = createAsyncThunk(
       const response = await searchTodoByKeyword(keyword);
 
       return response;
-    }
-    catch(error) {
+    } catch (error) {
       // dosth
     }
   }
-)
+);
 
 export const updateRemindAtSlice = createAsyncThunk(
   "todo/updateRemindAtSlice",
@@ -175,7 +174,7 @@ export const getSuggestionTodo = createAsyncThunk(
 
 export const changeStatusOfSubtaskById = createAsyncThunk(
   "todo/changeStatusOfSubtaskById",
-  async () => { }
+  async () => {}
 );
 
 export const addSuggestionToCurrentTodoList = createAsyncThunk(
@@ -238,7 +237,7 @@ const todoSlice = createSlice({
       state.selectedTodoId.id = action.payload;
       state.selectedTodoId.status = VARIABLE_STATUS.SUCCEEDED;
     },
-    removeSelectedTodoId(state){
+    removeSelectedTodoId(state) {
       state.selectedTodoId.id = null;
       state.selectedTodoId.status = VARIABLE_STATUS.IDLEl;
       state.selectedTodoId.error = null;
@@ -321,7 +320,7 @@ const todoSlice = createSlice({
     },
     updateTagSlice(state, action) {
       const { tag, todoId } = action.payload;
-      const newTodos = state.getCurrentTodo.todos.map((todo) => {
+      const newTodos = state.getCurrentTodo.todos?.map((todo) => {
         if (todo.id === todoId) {
           todo.tag = tag;
 
@@ -332,14 +331,14 @@ const todoSlice = createSlice({
       });
 
       state.getCurrentTodo.todos = newTodos;
-    }
+    },
   },
   extraReducers: (builder) => {
     builder
       .addCase(createSubTodo.fulfilled, (state, action) => {
         const { data } = action.payload.response.data;
         const { todoId } = action.payload.subtask;
-        const newTodos = state.getCurrentTodo.todos.map((todo) => {
+        const newTodos = state.getCurrentTodo.todos?.map((todo) => {
           if (todo === todoId) {
             const newSubtasks = [
               ...todo.subTasks,
@@ -359,7 +358,7 @@ const todoSlice = createSlice({
       .addCase(archiveTodo.fulfilled, (state, action) => {
         console.log("archived completed");
       })
-      .addCase(createSubTodo.rejected, (state, action) => { })
+      .addCase(createSubTodo.rejected, (state, action) => {})
       .addCase(addNewTodo.fulfilled, (state, action) => {
         state.getCurrentTodo.todos.push(action.payload);
       })
@@ -380,8 +379,8 @@ const todoSlice = createSlice({
         state.getSuggestionTodo.status = VARIABLE_STATUS.SUCCEEDED;
         state.getSuggestionTodo.todos = action.payload;
       })
-      .addCase(getSuggestionTodo.rejected, (state, action) => { })
-      .addCase(addSuggestionToCurrentTodoList.fulfilled, (state, action) => { })
+      .addCase(getSuggestionTodo.rejected, (state, action) => {})
+      .addCase(addSuggestionToCurrentTodoList.fulfilled, (state, action) => {})
       .addCase(getTodoById.pending, (state, action) => {
         state.getDetailTodo.status = VARIABLE_STATUS.LOADING;
       })
@@ -397,7 +396,7 @@ const todoSlice = createSlice({
         const todos = state.getDetailTodo?.todo;
         const { id } = action.payload;
 
-        if (todos?.subTasks && todos?.subTasks.length > 0) {
+        if (todos?.subTasks && todos?.subTasks?.length > 0) {
           todos.subTasks.forEach((item) => {
             if (item.id === id) {
               item.isCompleted = !item.isCompleted;
@@ -411,7 +410,7 @@ const todoSlice = createSlice({
       .addCase(updateRemindAtSlice.fulfilled, (state, action) => {
         const { remindAt, todoId } = action.payload;
 
-        const newTodos = state.getCurrentTodo.todos.map((todo) => {
+        const newTodos = state.getCurrentTodo.todos?.map((todo) => {
           if (todo.id === todoId) {
             const dateFormat = formatDateTime(remindAt);
 
@@ -437,7 +436,7 @@ const todoSlice = createSlice({
       })
       .addCase(updateTodoTitleSlice.fulfilled, (state, action) => {
         state.getCurrentTodo.status = VARIABLE_STATUS.SUCCEEDED;
-        state.getCurrentTodo.todos = current(state.getCurrentTodo.todos).map(
+        state.getCurrentTodo.todos = current(state.getCurrentTodo.todos)?.map(
           (item) => {
             if (item.id === action.payload.data.id) {
               return action.payload.data;
@@ -448,7 +447,7 @@ const todoSlice = createSlice({
       })
       .addCase(updateTodoDescriptionSlice.fulfilled, (state, action) => {
         state.getCurrentTodo.status = VARIABLE_STATUS.SUCCEEDED;
-        state.getCurrentTodo.todos = current(state.getCurrentTodo.todos).map(
+        state.getCurrentTodo.todos = current(state.getCurrentTodo.todos)?.map(
           (item) => {
             if (item.id === action.payload.data.id) {
               return action.payload.data;
@@ -491,7 +490,7 @@ export const {
     updateTagSlice,
     updateRemindAtTodoSlice,
     setSelectedTodoId,
-    removeSelectedTodoId
+    removeSelectedTodoId,
   },
   reducer: todoReducer,
 } = todoSlice;

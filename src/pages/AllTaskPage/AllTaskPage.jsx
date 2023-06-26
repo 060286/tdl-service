@@ -247,7 +247,7 @@ const AllTaskPage = () => {
     const enterKey = "Enter";
     const cansave =
       addRequestStatus === VARIABLE_STATUS.IDLE &&
-      taskTitle.length > 0 &&
+      taskTitle?.length > 0 &&
       taskTitle !== "Add Task";
     if (e.key === enterKey) {
       try {

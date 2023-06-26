@@ -247,7 +247,7 @@ export default function TodoDetail({
   };
 
   const isValidTitle = (title) => {
-    if (title.length > 200) {
+    if (title?.length > 200) {
       setTitleHelperText("Max character of title must be less than 200");
       return false;
     }

@@ -30,7 +30,7 @@ const useStyle = makeStyles(() => ({
     display: "flex",
     marginTop: "48px",
     width: "175%",
-    height: "50%",
+    height: "600px",
   },
   hello: {
     fontSize: "14px",
@@ -176,15 +176,15 @@ const NextSevenDay = ({ now = new Date() }) => {
     backgroundColor: "#fafbfc",
     display: "flex",
     flexDirection: "column",
-    boxShadow: '10px 4px 4px rgba(0, 0, 0, 0.25)'
+    boxShadow: "10px 4px 4px rgba(0, 0, 0, 0.25)",
   });
 
   const handleClickOpen =
     ({ todo }) =>
-      () => {
-        setOpen(true);
-        setSelectedTodo(todo);
-      };
+    () => {
+      setOpen(true);
+      setSelectedTodo(todo);
+    };
 
   const handleClose = () => {
     setOpen(false);
@@ -232,7 +232,7 @@ const NextSevenDay = ({ now = new Date() }) => {
   };
 
   const onCreateTodo = (todo, ind, e) => {
-    const newState = state.map((item, index) => {
+    const newState = state?.map((item, index) => {
       if (index === ind) {
         return [...item, todo];
       }
@@ -259,7 +259,10 @@ const NextSevenDay = ({ now = new Date() }) => {
     }
   }, [dispatch]);
   return (
-    <Box className="NextSevenDay_Page_Block" style={{ padding: "20px 0 0 20px", width: '100%', marginLeft: '10px' }}>
+    <Box
+      className="NextSevenDay_Page_Block"
+      style={{ padding: "20px 0 0 20px", width: "100%", marginLeft: "10px" }}
+    >
       <Row className="NextSevenDay_Header_Block">
         <Col>
           <HeaderRouteItem />
@@ -295,9 +298,9 @@ const NextSevenDay = ({ now = new Date() }) => {
             setSelectedTodo={setSelectedTodo}
             onTodoTitleChange={onTodoTitleChange}
             onTodoDescriptionChange={onTodoDescriptionChange}
-          // onSubTaskIsCompletedChange={onSubTaskIsCompletedChange}
-          // onSubTaskChange={onSubTaskChange}
-          // handleCreateSubtask={handleCreateSubtask}
+            // onSubTaskIsCompletedChange={onSubTaskIsCompletedChange}
+            // onSubTaskChange={onSubTaskChange}
+            // handleCreateSubtask={handleCreateSubtask}
           />
         </Dialog>
       )}

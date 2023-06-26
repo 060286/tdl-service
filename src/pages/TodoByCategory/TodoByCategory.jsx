@@ -172,7 +172,7 @@ const TodoByCategory = () => {
 
   const debouncedTitle = useRef(
     _.debounce(({ todoId, title, currentTodos }) => {
-      const newTodos = currentTodos.map((todo) => {
+      const newTodos = currentTodos?.map((todo) => {
         if (todo.id === todoId) {
           return { ...todo, title: title };
         }
@@ -210,7 +210,7 @@ const TodoByCategory = () => {
   const onUpdateRemindAtHandler = async (data) => {
     const { todoId, remindAt } = data;
 
-    const newTodos = todos.map((todo) => {
+    const newTodos = todos?.map((todo) => {
       if (todo.id === todoId) {
         return { ...todo, remindedAt: remindAt.toLocaleString() };
       }
@@ -227,7 +227,7 @@ const TodoByCategory = () => {
 
     await updateSubTaskStatusAdapter(subTask.id);
 
-    const newTodos = todos.map((todo) => {
+    const newTodos = todos?.map((todo) => {
       if (todo.id === selectedTodo.id) {
         const newSubTasks = todo?.subTasks?.map((st) => {
           if (st.id === subTask.id) {
@@ -251,7 +251,7 @@ const TodoByCategory = () => {
 
     await removeSubTaskByIdAdapter(subTask.id);
 
-    const newsTodo = todos.map((todo) => {
+    const newsTodo = todos?.map((todo) => {
       if (todo.id === selectedTodo.id) {
         const newSubTasks = todo?.subTasks?.filter(
           (obj) => obj.id !== subTaskId
@@ -300,7 +300,7 @@ const TodoByCategory = () => {
     _.debounce(async ({ id, description, todos }) => {
       updateTodoDescription({ id, description });
 
-      const newTodos = todos.map((todo) => {
+      const newTodos = todos?.map((todo) => {
         if (todo.id === id) {
           return { ...todo, description: description };
         }

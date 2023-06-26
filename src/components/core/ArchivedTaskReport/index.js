@@ -65,7 +65,7 @@ export default function ArchivedTaskReport({
           }}
           subheader={<li />}
         >
-          {archivedTaskList.map(archivedTask => (
+          {archivedTaskList?.map(archivedTask => (
             <li key={`section-${archivedTask.archivedDate}`}>
             <ul>
               <ListSubheader>{`Archived At: ${archivedTask.archivedDate}`}</ListSubheader>

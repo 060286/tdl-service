@@ -20,14 +20,14 @@ const router = createBrowserRouter(
     <>
       <Route path="/register" element={<RegisterPage />}></Route>
       <Route path="/login" element={<LoginPage />} />
-      <Route path="/reset" element={<ResetPasswordPage/>} />
+      <Route path="/reset" element={<ResetPasswordPage />} />
       <Route element={<ProtectedRoute />}>
         <Route path="/" element={<LayoutPage />}>
           <Route path="/myday" element={<MyDayPage />}></Route>
           <Route path="/tasks" element={<AllTaskPage />}></Route>
           <Route path="/nextsevenday" element={<NextSevenDay />}></Route>
           <Route path="/category/:id" element={<TodoByCategory />}></Route>
-          <Route path="/workspace/:id" element={<WorkspacePage/>}></Route>
+          <Route path="/workspace/:id" element={<WorkspacePage />}></Route>
         </Route>
       </Route>
     </>
