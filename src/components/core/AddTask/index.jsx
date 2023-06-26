@@ -20,7 +20,7 @@ export default function AddTask() {
 
   const cansave =
     addRequestStatus === VARIABLE_STATUS.IDLE &&
-    taskTitle.length > 0 &&
+    taskTitle?.length > 0 &&
     taskTitle !== "Add Task";
 
   const onKeyPressHandler = async (e) => {

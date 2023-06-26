@@ -2,12 +2,10 @@ import React from "react";
 
 import { useForm } from "react-hook-form";
 
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 
 import { loginAccount, getUserInfo } from "../../../slices/accountSlice";
-import { setToken, setUserInfo } from "../../../slices/accountSlice";
 import { useNavigate } from "react-router";
-import { timeout } from "../../../extensions/delayExtension";
 
 export default function LoginForm() {
   const { register, handleSubmit } = useForm();
@@ -23,6 +21,8 @@ export default function LoginForm() {
       const userInfo = await dispath(getUserInfo(res.data.token)).unwrap();
 
       localStorage.setItem("token", JSON.stringify(token));
+
+      console.log("run here");
 
       navigate("/myday");
     } else {

@@ -46,6 +46,7 @@ import {
 } from "../../constants/pathApiConstant";
 
 import NotificationsIcon from "@mui/icons-material/Notifications";
+import AddTaskIcon from '@mui/icons-material/AddTask';
 // import MessageComponent from "../MessageComponent";
 import NotificationDialog from "../core/NotificationDialog";
 import Snackbar from "@mui/material/Snackbar";
@@ -83,7 +84,15 @@ const items = [
 const useStyle = makeStyles(() => {
   return {
     sideBar: {
-      width: "240px",
+      width: "255px",
+      height: '100%',
+      borderRight: '1px solid grey',
+      backgroundColor: "lightgrey"
+    },
+    sideBarDrawer: {
+      width: "260px",
+      height: '100%',
+      display: 'flex',
     },
     list: {
       padding: "16px 0",
@@ -93,10 +102,11 @@ const useStyle = makeStyles(() => {
       alignItems: "center",
       paddingLeft: "16px",
       marginBottom: "8px",
-      justifyContent: "space-between",
+      justifyContent: "space-between"
     },
     displayName: {
       marginLeft: "16px",
+      fontWeight: '600'
     },
     iconButton: {
       margin: "8px",
@@ -113,17 +123,20 @@ const useStyle = makeStyles(() => {
       justifyContent: "flex-end",
     },
     numberAnalytic: {
-      backgroundColor: "#D3D3D3",
+      backgroundColor: "#0083ff",
       borderRadius: "50%",
-      width: "30px",
-      height: "30px",
+      width: "10px",
+      height: "35px",
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
-      color: "black",
-      fontSize: "24px",
-      fontWeight: "bold",
+      color: '#FFFFFF',
+      margin: '5px',
     },
+    wrapItemInfo: {
+      display: 'flex',
+      flexDirection: 'column',
+    }
   };
 });
 
@@ -138,7 +151,7 @@ export default function Sidebar() {
     userInfo !== null
       ? userInfo.img
       : // ? userInfo.img
-        "https://www.w3schools.com/howto/img_avatar.png";
+      "https://www.w3schools.com/howto/img_avatar.png";
   const [categories, setCategories] = useState([]);
   const [isExpanded, setIsExpanded] = useState(false);
   const [openCreateCategoryPopup, setOpenCreateCategoryPopup] = useState(false);
@@ -158,7 +171,7 @@ export default function Sidebar() {
 
   const getWorkspaceId = (url) => {
     const parts = url.split("/"); // Split the URL string by '/'
-    const guid = parts[parts.length - 1]; // Get the last part of the URL which should be the GUID ID
+    const guid = parts[parts?.length - 1]; // Get the last part of the URL which should be the GUID ID
     return guid;
   };
 
@@ -230,9 +243,9 @@ export default function Sidebar() {
 
   const onNavigate =
     ({ href }) =>
-    () => {
-      navigate(href);
-    };
+      () => {
+        navigate(href);
+      };
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -296,6 +309,11 @@ export default function Sidebar() {
       items[2].number = response.data.data.oneMonthAnalytic.percentage;
     };
 
+    const currentUrl = window.location.pathname;
+
+    if (currentUrl === "/") {
+      navigate("/myday");
+    }
     getDataAnalytic();
   }, []);
 
@@ -352,7 +370,7 @@ export default function Sidebar() {
         }
       });
 
-      connection.on("Notify", (message) => {});
+      connection.on("Notify", (message) => { });
 
       connection.onreconnected(() => {
         console.log("Reconnected to SignalR hub.");
@@ -371,52 +389,55 @@ export default function Sidebar() {
   return (
     <Box className={classes.sideBar}>
       {/* <MessageComponent email={userInfo.email} /> */}
-      <Box disablePadding className={classes.listItemAvatar}>
-        <Box className={classes.temp}>
-          <Avatar className={{ width: 42, height: 42 }} src={img} />
-          <Typography className={classes.displayName}>
-            {userInfo.fullName}
-          </Typography>
-          <Badge badgeContent={notificationNumber} color="primary">
-            <NotificationsIcon
-              onClick={() => onOpenNotificationDialog()}
-              sx={{ marginLeft: "10px", cursor: "pointer" }}
-            />
-          </Badge>
+      <Box className={classes.wrapItemInfo}>
+        <Box disablePadding className={classes.listItemAvatar}>
+          <Box className={classes.temp}>
+            <Avatar className={{ width: 42, height: 42 }} src={img} />
+            <Typography className={classes.displayName}>
+              {userInfo.fullName}
+            </Typography>
+            <Badge badgeContent={notificationNumber} color="primary">
+              <NotificationsIcon
+                onClick={() => onOpenNotificationDialog()}
+                sx={{ marginLeft: "10px", cursor: "pointer" }}
+              />
+            </Badge>
+          </Box>
+          <IconButton
+            color="default"
+            size="large"
+            onClick={() => {
+              setIsOpen(true);
+            }}
+            className={classes.iconButton}
+          >
+            <SettingsIcon className={classes.icon} />
+          </IconButton>
         </Box>
-        <IconButton
-          color="default"
-          size="large"
-          onClick={() => {
-            setIsOpen(true);
-          }}
-          className={classes.iconButton}
-        >
-          <SettingsIcon className={classes.icon} />
-        </IconButton>
+        <Box disablePadding className={classes.listItemAvatar}>
+          <Button
+            onClick={() => onOpenArchivedTaskReportDialog()}
+            variant="contained"
+            color="primary"
+            size="small"
+          >
+            View Report
+          </Button>
+        </Box>
+        <Box disablePadding className={classes.listItemAvatar}>
+          <Button
+            onClick={() => handleLogout()}
+            variant="contained"
+            color="error"
+            size="small"
+          >
+            Logout
+          </Button>
+        </Box>
       </Box>
-      <Box disablePadding className={classes.listItemAvatar}>
-        <Button
-          onClick={() => onOpenArchivedTaskReportDialog()}
-          variant="contained"
-          color="primary"
-          size="small"
-        >
-          View Report
-        </Button>
-      </Box>
-      <Box disablePadding className={classes.listItemAvatar}>
-        <Button
-          onClick={() => handleLogout()}
-          variant="contained"
-          color="error"
-          size="small"
-        >
-          Logout
-        </Button>
-      </Box>
+
       <Drawer
-        SlideProps={{ className: classes.sideBar }}
+        SlideProps={{ className: classes.sideBarDrawer }}
         anchor="left"
         open={isOpen}
         onClose={() => setIsOpen((preIsOpen) => !preIsOpen)}
@@ -433,13 +454,13 @@ export default function Sidebar() {
               onClick={() => {
                 setIsOpen(false);
               }}
-              className={classes.closeIcon}
+              sx={{color: '#cc0018', border: '1px solid #cc0018', borderRadius: '50%', padding: '1px', marginRight:'15px'}}
             >
               <CloseIcon />
             </IconButton>
           </ListItem>
           <Divider />
-          {items.map(({ text, Icon, href, number }) => {
+          {items?.map(({ text, Icon, href, number }) => {
             return (
               <ListItem
                 key={text}
@@ -450,7 +471,7 @@ export default function Sidebar() {
                   <ListItemIcon>
                     <Icon />
                   </ListItemIcon>
-                  <ListItemText primary={text} />
+                  <ListItemText primary={text} sx={{}}/>
                   {text !== "My Day" && (
                     <ListItemText
                       className={classes.numberAnalytic}
@@ -462,7 +483,7 @@ export default function Sidebar() {
             );
           })}
         </List>
-        <Button outlined="true" onClick={handleOpenClick}>
+        <Button variant="outlined" sx={{width:'80%', ml: '20px'}} onClick={handleOpenClick}>
           Create Category
         </Button>
         <Accordion expanded={isExpanded}>
@@ -473,9 +494,9 @@ export default function Sidebar() {
               <ExpandMoreSharp onClick={() => setIsExpanded(!isExpanded)} />
             }
           >
-            <Typography>My Lists</Typography>
+            <Typography sx={{fontWeight: 600}}>My Lists</Typography>
           </AccordionSummary>
-          <AccordionDetails>
+          <AccordionDetails sx={{ padding: 0, border: 'none'}}>
             {categories?.map(({ id, title }) => {
               return (
                 <List>
@@ -496,11 +517,11 @@ export default function Sidebar() {
             })}
           </AccordionDetails>
         </Accordion>
-        <Button outlined="true" onClick={handleOpenWorkspaceClick}>
+        <Button variant="outlined" sx={{width:'80%', m: '10px 0 0 20px'}} onClick={handleOpenWorkspaceClick}>
           Create Workspace
         </Button>
         <>
-          {workspaces.map((workspace) => {
+          {workspaces?.map((workspace) => {
             return (
               <ListItem
                 key={workspace.name}
@@ -509,7 +530,7 @@ export default function Sidebar() {
               >
                 <ListItemButton>
                   <ListItemIcon>
-                    <Icon />
+                    <AddTaskIcon />
                   </ListItemIcon>
                   <ListItemText primary={workspace.name} />
                 </ListItemButton>
@@ -572,7 +593,7 @@ export default function Sidebar() {
         open={openAddUserSnackBar}
         onClose={handleCloseSnackBar}
         key={"bottomright"}
-        // autoHideDuration={3000}
+      // autoHideDuration={3000}
       >
         <MuiAlert elevation={6} variant="filled" severity="success">
           {message}

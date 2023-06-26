@@ -79,7 +79,7 @@ export default function NextSevenDayItem({
           style={getListStyle(snapshot.isDraggingOver)}
           {...provided.droppableProps}
         >
-          <Typography variant="h5">
+          <Typography variant="h5" sx={{fontWeight: 800}}>
             {format(addDays(now, ind), "EEEE")}
           </Typography>
           <Box className={classes.scroll}>
@@ -106,7 +106,7 @@ export default function NextSevenDayItem({
                         <Radio
                           checked={item.isCompleted}
                           // TODO: send request to be to toggle checked button
-                          onChange={() => {}}
+                          onChange={() => { }}
                         />
                         <Box>
                           <Box className={classes.hello}>
@@ -125,8 +125,9 @@ export default function NextSevenDayItem({
               ))}
             </Box>
           </Box>
-          <Box className={classes.input}>
+          <Box >
             <TextField
+              sx={{ boxShadow: '0 4px 4px rgba(0, 0, 0, 0.25)', marginRight: '20px', opacity: 0.5 }}
               label="Enter todo content"
               placeholder="Enter todo content"
               color="primary"

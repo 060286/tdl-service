@@ -46,7 +46,8 @@ const useStyle = makeStyles(() => ({
   },
   container: {
     marginTop: "16px",
-    height: "calc(100vh - 64px)",
+    marginLeft: '50px',
+    height: "calc(100% - 100px)"
   },
   gridContainer: {
     marginTop: "16px",
@@ -56,7 +57,7 @@ const useStyle = makeStyles(() => ({
     overflow: "scroll",
   },
   item: {
-    height: "calc(100% - 32px)",
+    height: "100%",
     overflow: "scroll",
   },
   todoDetail: {
@@ -66,6 +67,7 @@ const useStyle = makeStyles(() => ({
   },
   containerAcc: {
     border: "1px solid #ccc",
+    boxShadow: '10px 4px 4px rgba(0, 0, 0, 0.25)',
     borderRadius: "16px",
     padding: "16px",
     display: "flex",
@@ -245,7 +247,7 @@ const AllTaskPage = () => {
     const enterKey = "Enter";
     const cansave =
       addRequestStatus === VARIABLE_STATUS.IDLE &&
-      taskTitle.length > 0 &&
+      taskTitle?.length > 0 &&
       taskTitle !== "Add Task";
     if (e.key === enterKey) {
       try {
@@ -312,7 +314,7 @@ const AllTaskPage = () => {
 
   return (
     <Box className={classes.container}>
-      <Typography variant="h5">All My Tasks</Typography>
+      <Typography variant="h5" sx={{ fontWeight: 800 }}>All My Tasks</Typography>
       <Grid container spacing={2} className={classes.gridContainer}>
         <Grid item className={clsx(classes.item, classes.containerAcc)} xs={6}>
           <Box className={classes.accordition}>
@@ -337,6 +339,7 @@ const AllTaskPage = () => {
           </Box>
           <Box className={classes.input}>
             <TextField
+              sx={{ boxShadow: '0 4px 4px rgba(0, 0, 0, 0.25)' }}
               label="Enter todo content"
               placeholder="Enter todo content"
               color="primary"

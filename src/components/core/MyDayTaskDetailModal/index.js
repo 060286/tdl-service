@@ -123,7 +123,7 @@ const MyDayTaskDetailModal = (props) => {
         </Row>
         <Row className="MDT_SubTaskItemBlock">
           {todo.status === VARIABLE_STATUS.SUCCEEDED ? (
-            todo.todo.subTasks.map((todo) => (
+            todo.todo.subTasks?.map((todo) => (
               <div key={todo.id} className="MDT_SubTaskItem">
                 <Row>
                   <Col xs={2}>

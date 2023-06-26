@@ -60,6 +60,7 @@ const useStyle = makeStyles(() => ({
   },
   container: {
     marginTop: "16px",
+    marginLeft: '30px',
     height: "calc(100vh - 64px)",
   },
   gridContainer: {
@@ -142,7 +143,7 @@ const useStyle = makeStyles(() => ({
     display: "flex",
     marginTop: "48px",
     // width: "175%",
-    height: "calc(100% - 88px)",
+    height: "calc(100% - 150px)",
   },
 }));
 
@@ -222,7 +223,7 @@ function WorkspacePage() {
     const users = await searchUserAdapter(keyword);
 
     const userData = users.data.data;
-    const mapptedSuggestionUser = userData.map((user) => ({
+    const mapptedSuggestionUser = userData?.map((user) => ({
       label: user.email,
       value: user.id,
     }));
@@ -289,7 +290,7 @@ function WorkspacePage() {
     const response = await archiveTodoById(id);
 
     if (response) {
-      const newState = state.map((array) => {
+      const newState = state?.map((array) => {
         return array.filter((item) => item.id !== id);
       });
 
@@ -319,8 +320,8 @@ function WorkspacePage() {
     });
 
     if (response) {
-      const updatedArray = state.map((array) => {
-        return array.map((item) => {
+      const updatedArray = state?.map((array) => {
+        return array?.map((item) => {
           if (item.id === todo.id) {
             return { ...item, title: e.target.value };
           }
@@ -346,8 +347,8 @@ function WorkspacePage() {
     });
 
     if (response.statusCode === 200) {
-      const updatedArray = state.map((array) => {
-        return array.map((item) => {
+      const updatedArray = state?.map((array) => {
+        return array?.map((item) => {
           if (item.id === id) {
             return { ...item, description: e.target.value };
           }
@@ -404,13 +405,14 @@ function WorkspacePage() {
   const getListStyle = (isDraggingOver) => ({
     width: "100%",
     margin: "0 16px",
-    border: "1px solid #CCC",
+    border: "1px solid #0083ff",
     padding: "16px",
-    paddingRight: "4px",
+    paddingRight: "16px",
     borderRadius: "8px",
     backgroundColor: "#fafbfc",
     display: "flex",
     flexDirection: "column",
+    boxShadow: '10px 4px 4px rgba(0, 0, 0, 0.25)'
   });
 
   const getItemStyle = (isDragging, draggableStyle) => {
@@ -567,7 +569,7 @@ function WorkspacePage() {
           style={{ height: "50px", width: "2px" }}
         />
         <Box className={classes.userList}>
-          {users.map((user) => {
+          {users?.map((user) => {
             return (
               <Box>
                 <Tooltip title={user.userName} placement="bottom">

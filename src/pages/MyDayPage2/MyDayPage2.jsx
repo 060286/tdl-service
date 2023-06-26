@@ -108,11 +108,14 @@ const useStyle = makeStyles(() => ({
     width: "25%",
   },
   input: {
-    marginTop: "16px",
+    // marginTop: "350px",
+    boxShadow: "0 4px 4px rgba(0, 0, 0, 0.25)",
   },
   conatiner: {
     display: "flex",
     marginBottom: "24px",
+    width: "100%",
+    height: "80%",
   },
   suggestionItem: {
     border: "1px solid #ccc",
@@ -128,6 +131,10 @@ const useStyle = makeStyles(() => ({
     alignItems: "center",
     fontSize: "12px",
     color: "#aaa",
+  },
+  suggestionItemDay: {
+    color: "#0d6efd",
+    fontSize: "12px",
   },
   suggestionItemBoxTitle: {
     display: "flex",
@@ -204,6 +211,12 @@ const useStyle = makeStyles(() => ({
   todoTitle: {
     wordBreak: "break-all",
   },
+  childContainer: {
+    padding: "10px",
+    display: "flex",
+    marginBottom: "24px",
+    width: "100%",
+  },
 }));
 
 export default function MyDayPage2() {
@@ -240,7 +253,7 @@ export default function MyDayPage2() {
 
   const cansave =
     addRequestStatus === VARIABLE_STATUS.IDLE &&
-    taskTitle.length > 0 &&
+    taskTitle?.length > 0 &&
     taskTitle !== "Add Task";
 
   const onOpenRemindMe = () => {
@@ -433,7 +446,7 @@ export default function MyDayPage2() {
     // TODO: send request to BE to update isCompleted subtask
     const { id, isCompleted } = subtask;
     const newTodo = { ...selectedTodo };
-    newTodo.subTasks = newTodo.subTasks.map((ele) =>
+    newTodo.subTasks = newTodo.subTasks?.map((ele) =>
       ele.id === id ? { ...ele, isCompleted: !isCompleted } : ele
     );
     setSelectedTodo(newTodo);
@@ -538,7 +551,7 @@ export default function MyDayPage2() {
           month={monthOfYear}
         />
         <List className={classes.list}>
-          {todos?.todos.map((todo) => {
+          {todos?.todos?.map((todo) => {
             return (
               <ListItem
                 disablePadding
@@ -603,7 +616,7 @@ export default function MyDayPage2() {
             value={taskTitle}
             onKeyUp={(e) => onKeyPressHandler(e)}
             onChange={(e) => {
-              if (e.target.value.length > 200) {
+              if (e.target.value?.length > 200) {
                 setTaskTitleHelperText(
                   "Max character of title must be less than 200"
                 );
@@ -632,7 +645,7 @@ export default function MyDayPage2() {
             size="small"
             style={{ width: "100%" }}
           />
-          {suggestionTodos?.todos.map((todo) => {
+          {suggestionTodos?.todos?.map((todo) => {
             return (
               <ListItem disablePadding className={classes.suggestionItem}>
                 <ListItemButton

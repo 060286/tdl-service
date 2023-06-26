@@ -275,7 +275,7 @@ const tasksSlice = createSlice({
         // TODO: calculate field by todoDate by this function differenceInBusinessDays
         state.allTasks.data = {
           ...state.allTasks.data,
-          [field]: state.allTasks.data[field].map((item) => {
+          [field]: state.allTasks.data[field]?.map((item) => {
             if (item.id === action.payload.data.id) {
               return action.payload.data;
             }
@@ -298,7 +298,7 @@ const tasksSlice = createSlice({
         // TODO: calculate field by todoDate by this function differenceInBusinessDays
         state.allTasks.data = {
           ...state.allTasks.data,
-          [field]: current(state.allTasks.data[field]).map((item) => {
+          [field]: current(state.allTasks.data[field])?.map((item) => {
             if (item.id === action.payload.data.id) {
               return action.payload.data;
             }

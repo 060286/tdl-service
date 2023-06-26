@@ -95,7 +95,7 @@ const nextSevenDaySlice = createSlice({
         // TODO: waiting be add todoDate field
         state.getMyListNextSevenDay.data = {
           ...current(state.getMyListNextSevenDay.data),
-          [field]: current(state.getMyListNextSevenDay.data[field]).map(
+          [field]: current(state.getMyListNextSevenDay.data[field])?.map(
             (item) => {
               if (item.id === action.payload.data.id) {
                 return action.payload.data;
@@ -129,7 +129,7 @@ const nextSevenDaySlice = createSlice({
         // TODO: waiting be add todoDate field
         state.getMyListNextSevenDay.data = {
           ...current(state.getMyListNextSevenDay.data),
-          [field]: current(state.getMyListNextSevenDay.data[field]).map(
+          [field]: current(state.getMyListNextSevenDay.data[field])?.map(
             (item) => {
               if (item.id === action.payload.data.id) {
                 return action.payload.data;
@@ -191,7 +191,7 @@ export { getMyListNextSevenDay };
 
 export const {
   reducer: nextSevenDayReducer,
-  actions: { },
+  actions: {},
 } = nextSevenDaySlice;
 
 export default nextSevenDaySlice;

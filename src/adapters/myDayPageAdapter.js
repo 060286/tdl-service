@@ -29,6 +29,8 @@ const getTodayJobList = async () => {
   const url = `${PATH_API}${MY_DAY_PAGE_CONTROLLER}/${TODAY_TODO_LIST}`;
 
   const today = new Date().toLocaleDateString();
+
+  console.log({ today });
   const token = getTokenFromLocalStorage();
 
   const response = await axios({
@@ -143,10 +145,10 @@ const searchTodoByKeyword = async (keyword) => {
     headers: {
       Authorization: `Bearer ${token}`,
     },
-  })
+  });
 
-  return response.data.data
-}
+  return response.data.data;
+};
 
 export {
   getTodo,
@@ -156,5 +158,5 @@ export {
   updateSubTaskStatusAdapter,
   removeSubTaskByIdAdapter,
   updateStatusOfTodoAdapter,
-  searchTodoByKeyword
+  searchTodoByKeyword,
 };

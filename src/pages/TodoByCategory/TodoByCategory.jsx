@@ -33,6 +33,7 @@ const useStyle = makeStyles(() => ({
   },
   container: {
     marginTop: "16px",
+    marginLeft: '50px',
     height: "calc(100vh - 64px)",
   },
   gridContainer: {
@@ -171,7 +172,7 @@ const TodoByCategory = () => {
 
   const debouncedTitle = useRef(
     _.debounce(({ todoId, title, currentTodos }) => {
-      const newTodos = currentTodos.map((todo) => {
+      const newTodos = currentTodos?.map((todo) => {
         if (todo.id === todoId) {
           return { ...todo, title: title };
         }
@@ -209,7 +210,7 @@ const TodoByCategory = () => {
   const onUpdateRemindAtHandler = async (data) => {
     const { todoId, remindAt } = data;
 
-    const newTodos = todos.map((todo) => {
+    const newTodos = todos?.map((todo) => {
       if (todo.id === todoId) {
         return { ...todo, remindedAt: remindAt.toLocaleString() };
       }
@@ -226,7 +227,7 @@ const TodoByCategory = () => {
 
     await updateSubTaskStatusAdapter(subTask.id);
 
-    const newTodos = todos.map((todo) => {
+    const newTodos = todos?.map((todo) => {
       if (todo.id === selectedTodo.id) {
         const newSubTasks = todo?.subTasks?.map((st) => {
           if (st.id === subTask.id) {
@@ -250,7 +251,7 @@ const TodoByCategory = () => {
 
     await removeSubTaskByIdAdapter(subTask.id);
 
-    const newsTodo = todos.map((todo) => {
+    const newsTodo = todos?.map((todo) => {
       if (todo.id === selectedTodo.id) {
         const newSubTasks = todo?.subTasks?.filter(
           (obj) => obj.id !== subTaskId
@@ -299,7 +300,7 @@ const TodoByCategory = () => {
     _.debounce(async ({ id, description, todos }) => {
       updateTodoDescription({ id, description });
 
-      const newTodos = todos.map((todo) => {
+      const newTodos = todos?.map((todo) => {
         if (todo.id === id) {
           return { ...todo, description: description };
         }
@@ -347,7 +348,7 @@ const TodoByCategory = () => {
 
   return (
     <Box className={classes.container}>
-      <Typography variant="h5">Manage todo by category</Typography>
+      <Typography variant="h5" sx={{ fontWeight: 800 }}>Manage todo by category</Typography>
       <Grid container spacing={2} className={classes.gridContainer}>
         <Grid item className={clsx(classes.item, classes.containerAcc)} xs={6}>
           <Box className={classes.accordition}>

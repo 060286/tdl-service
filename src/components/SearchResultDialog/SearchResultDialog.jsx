@@ -55,7 +55,7 @@ function SearchResultDialog({
       <hr></hr>
       <DialogContent>
         Tasks
-        {tasks.map((task) => {
+        {tasks?.map((task) => {
           return (
             <DialogContentText id="alert-dialog-slide-description">
               <Button variant="text" onClick={() => onSearchResultClick(task)}>
@@ -83,7 +83,7 @@ function SearchResultDialog({
         })}
         {/* SubTasks */}
         Sub Tasks
-        {subTasks.map((subTask) => {
+        {subTasks?.map((subTask) => {
           return (
             <DialogContentText id="alert-dialog-slide-description">
               <Button

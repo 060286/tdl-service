@@ -129,7 +129,7 @@ export default function MyDayRoute(props) {
             </Col>
           </Row>
           <Row className="MyDayEntries">
-            {todos.map((todo) => {
+            {todos?.map((todo) => {
               return (
                 <TaskItem
                   key={todo.id}
@@ -153,7 +153,7 @@ export default function MyDayRoute(props) {
           </div>
           <div>Filter</div>
           <div className="AppSuggestionList">
-            {suggestionTodos.todos.map((suggestion) => {
+            {suggestionTodos.todos?.map((suggestion) => {
               return <SuggestionItem key={suggestion.id} data={suggestion} />;
             })}
           </div>

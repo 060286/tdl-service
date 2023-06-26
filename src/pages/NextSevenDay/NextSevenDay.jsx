@@ -30,7 +30,7 @@ const useStyle = makeStyles(() => ({
     display: "flex",
     marginTop: "48px",
     width: "175%",
-    height: "calc(100% - 88px)",
+    height: "600px",
   },
   hello: {
     fontSize: "14px",
@@ -169,13 +169,14 @@ const NextSevenDay = ({ now = new Date() }) => {
   const getListStyle = (isDraggingOver) => ({
     width: "100%",
     margin: "0 16px",
-    border: "1px solid #CCC",
+    border: "1px solid #0083ff",
     padding: "16px",
-    paddingRight: "4px",
+    paddingRight: "16px",
     borderRadius: "8px",
     backgroundColor: "#fafbfc",
     display: "flex",
     flexDirection: "column",
+    boxShadow: "10px 4px 4px rgba(0, 0, 0, 0.25)",
   });
 
   const handleClickOpen =
@@ -231,7 +232,7 @@ const NextSevenDay = ({ now = new Date() }) => {
   };
 
   const onCreateTodo = (todo, ind, e) => {
-    const newState = state.map((item, index) => {
+    const newState = state?.map((item, index) => {
       if (index === ind) {
         return [...item, todo];
       }
@@ -258,7 +259,10 @@ const NextSevenDay = ({ now = new Date() }) => {
     }
   }, [dispatch]);
   return (
-    <Box className="NextSevenDay_Page_Block" style={{ paddingTop: "20px" }}>
+    <Box
+      className="NextSevenDay_Page_Block"
+      style={{ padding: "20px 0 0 20px", width: "100%", marginLeft: "10px" }}
+    >
       <Row className="NextSevenDay_Header_Block">
         <Col>
           <HeaderRouteItem />
