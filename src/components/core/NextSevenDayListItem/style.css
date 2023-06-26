@@ -1,0 +1,31 @@
+.NextSevenDayItemListBlock {
+    width: 281px;
+    height: 600px;
+    display: inline-block;
+    margin: 50px;
+    overflow: hidden;
+    border-radius: 15px;
+}
+
+.DayOfWeek {
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.NextSevenDayItemTitle {
+    height: 60px;
+    width: 100%;
+    display: flex;
+    justify-content: space-around;
+    padding: 20px;
+}
+
+.NextSevenDayItemList {
+    margin-top: 20px;
+    overflow: hidden;
+    height: 500px;
+}
+
+.NextSevenDayItemList:hover {
+    overflow: scroll;
+}
